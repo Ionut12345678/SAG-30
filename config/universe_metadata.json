@@ -1,0 +1,74 @@
+{
+  "alpaca_tradability_verified": false,
+  "as_of": "2026-10-05",
+  "as_of_semantics": "UTC retrieval date; Nasdaq screener supplies no valuation SOURCE_TS",
+  "cap_band_counts": {
+    "micro_50m_to_300m": 922,
+    "nano_below_50m": 925,
+    "small_300m_to_2b": 1338
+  },
+  "exchange_counts": {
+    "NASDAQ": 2350,
+    "NYSE": 615,
+    "NYSE AMERICAN": 220
+  },
+  "exclusion_counts": {
+    "ambiguous_or_pooled_beneficial_interest": 18,
+    "fund_or_income_trust": 96,
+    "missing_or_invalid_market_cap": 387,
+    "non_common_instrument": 299,
+    "outside_positive_below_2b_market_cap": 2988,
+    "unclassified_security_type": 28
+  },
+  "listing_record_counts": {
+    "NASDAQ": 5636,
+    "other": 7653
+  },
+  "policy": {
+    "domicile_filter": null,
+    "exchanges": [
+      "NASDAQ",
+      "NYSE",
+      "NYSE AMERICAN"
+    ],
+    "market_cap_usd_max_exclusive": 2000000000,
+    "market_cap_usd_min_exclusive": 0,
+    "model_rules_changed": false,
+    "types": "positively identified common equities/ADRs including REITs/BDCs/common partnership units; ambiguous types excluded"
+  },
+  "schema_version": 1,
+  "screener_record_count": 7001,
+  "sources": {
+    "nasdaqlisted": {
+      "archive": "config/universe_sources/nasdaqlisted.gz",
+      "http_date": "Mon, 05 Oct 2026 20:05:28 GMT",
+      "request_started_ts": "2026-10-05T20:05:28.209988+00:00",
+      "retrieval_ts": "2026-10-05T20:05:28.710491+00:00",
+      "sha256_uncompressed": "550316214d458409b1796f040c70267defbbcc8051d465b7b2d8e4b10b6335e1",
+      "source_timestamp_raw": "File Creation Time: 1005202615:41",
+      "source_ts": null,
+      "url": "https://www.nasdaqtrader.com/dynamic/SymDir/nasdaqlisted.txt"
+    },
+    "otherlisted": {
+      "archive": "config/universe_sources/otherlisted.gz",
+      "http_date": "Mon, 05 Oct 2026 20:05:28 GMT",
+      "request_started_ts": "2026-10-05T20:05:28.727756+00:00",
+      "retrieval_ts": "2026-10-05T20:05:28.967987+00:00",
+      "sha256_uncompressed": "79617217650b9db2ad819e898b5e5b3b55b6dcc794bcd0bcbfc373c9a91d35a7",
+      "source_timestamp_raw": "File Creation Time: 1005202615:41",
+      "source_ts": null,
+      "url": "https://www.nasdaqtrader.com/dynamic/SymDir/otherlisted.txt"
+    },
+    "screener": {
+      "archive": "config/universe_sources/screener.gz",
+      "http_date": "Mon, 05 Oct 2026 20:05:27 GMT",
+      "request_started_ts": "2026-10-05T20:05:27.026042+00:00",
+      "retrieval_ts": "2026-10-05T20:05:28.067648+00:00",
+      "sha256_uncompressed": "5ac7064845a1ad947d921df1f478782e0b0ab94bec5f57d3f78b96dd94e86267",
+      "source_ts": null,
+      "url": "https://api.nasdaq.com/api/screener/stocks?tableonly=true&limit=25000&download=true"
+    }
+  },
+  "symbol_count": 3185,
+  "universe_csv_sha256": "cd627f79ad8c0a264ab150a89323e1760aa20a3cf264319f3da487defc195bc9"
+}

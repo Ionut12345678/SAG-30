@@ -1,4 +1,6 @@
 import unittest
+import tempfile
+from pathlib import Path
 from datetime import datetime, timezone
 from unittest.mock import patch
 from radar.core import analyze, early_band, open_db, record, LABEL
@@ -36,8 +38,11 @@ class RadarTests(unittest.TestCase):
         self.assertFalse(session_window(datetime(2026,10,4,14,tzinfo=timezone.utc)))
 
     def test_empty_universe_blocks(self):
-        with self.assertRaises(ValueError):
-            load_universe('config/universe.csv')
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'empty.csv'
+            path.write_text('symbol,market_cap_usd,as_of\n')
+            with self.assertRaises(ValueError):
+                load_universe(path)
 
     @patch.dict('os.environ', {'TELEGRAM_BOT_TOKEN':'test', 'TELEGRAM_CHAT_ID':'test'})
     @patch('radar.runner.request', return_value=({'ok': True}, 'now'))
