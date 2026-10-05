@@ -1,0 +1,152 @@
+Use these as the authoritative SAG-30 Early Radar v0.3.3 FROZEN SHADOW rules. Freeze them exactly; do not optimize thresholds from observed outcomes.
+
+PURPOSE
+Discovery/routing only. This is NOT BUY. Objective: identify potential +30%/+50% U.S. small-cap moves as early as possible.
+
+EARLY BANDS
+< +5% = EXCELLENT
++5% to < +10% = IDEAL
++10% to < +15% = EARLY VALID
++15% to < +20% = SALVAGE
+>= +20% = LATE, zero early credit.
+
+CORE PRINCIPLE
+Activity discovers.
+Price acceptance filters.
+Expansion decides.
+Catalyst is an amplifier/context, not mandatory.
+Extreme RVOL alone is never a signal.
+
+GLOBAL ARCHITECTURE
+DISCOVERY -> CLASSIFY LANE -> ACTIVITY CONFIRMED -> PRICE CONVERSION -> ACCEPTANCE/RECLAIM -> EXPANSION PROOF -> EARLY-HOT
+
+LANE A — FRESH
+NEW ACTIVITY -> PRICE CONVERSION -> ACCEPTANCE -> EXPANSION PROOF -> EARLY-HOT.
+
+Discovery can come from:
+- new activity appearance
+- rank acceleration into Top 20 / Top 10
+- verified abnormal RVOL or turnover
+- early price response
+- catalyst + activity
+
+Activity-only, catalyst-only or rank-only cannot promote EARLY-HOT.
+
+LANE B — SECOND IMPULSE / ENERGY MEMORY
+Energy Memory = prior winner >= +30% OR extreme activity/repeated appearance within the previous 5 sessions.
+Energy Memory is routing/context ONLY.
+
+Required:
+ENERGY MEMORY -> RESET/COOLING -> RE-WAKE -> RECLAIM/ACCEPTANCE -> EXPANSION PROOF -> EARLY-HOT-B
+
+For early credit, Re-Wake should occur < +15%; ideally < +10%.
+
+RESET/COOLING = meaningful retracement/consolidation and/or activity contraction.
+
+FAST RE-WAKE requires:
+- prior winner
+- reset
+- renewed abnormal activity
+- price reclaim/reacceleration
+- no absorption
+- no major source conflict
+
+Prior winner alone is never a signal.
+
+LANE C — OVERNIGHT / PRE-CLOSE
+PRE-CLOSE/AH event/activity -> PRICE RESPONSE -> HOLD -> PREMARKET CONTINUATION/EXPANSION.
+
+First qualification +15% to <+20% = SALVAGE.
+First qualification >=+20% = LATE and zero early credit.
+
+ACTIVITY
+RVOL, turnover and volume acceleration are ONE evidence family.
+Raw volume without a valid baseline = interest only.
+Routing interpretation:
+RVOL 3x-5x = confirmed
+5x-10x = strong
+>10x = extreme
+Above approximately 10x, treat RVOL as saturated; do not increase confidence linearly.
+
+PRICE CONVERSION
+Price Conversion means confirmed activity begins producing directional price progress before excessive extension.
+Do not invent a fixed numerical threshold beyond the frozen rules. It must be evidenced chronologically from observations.
+
+ACCEPTANCE / RECLAIM
+Acceptance means price holds the conversion instead of immediately giving it back.
+For Lane B, use credible reclaim after the reset.
+Acceptance/Reclaim alone cannot produce EARLY-HOT.
+
+EXPANSION PROOF — DECISIVE GATE
+Only after Acceptance/Reclaim, require at least ONE of:
+1. a real new high after acceptance;
+2. reacceleration of approximately >= 2 percentage points;
+3. two consecutive positive observation intervals with rising highs;
+4. breakout from a micro-consolidation while activity remains confirmed.
+
+If Expansion Proof is first observed at >= +20%, the structure may be correct but receives zero early credit.
+
+BLOCK / KILL CONDITIONS
+ABSORPTION:
+Activity/reclaim exists but price makes minimal progress.
+Two observations without a new high -> WAIT, not HOT.
+
+FAILED ACCEPTANCE:
+Material giveback or loss of reclaim -> do not promote HOT.
+
+LATE:
+Confirmation first occurs >= +20% -> zero early credit.
+
+DATA_QUALITY:
+Conflicting, delayed, stale, missing or unsynchronized sources -> UNKNOWN/DATA_QUALITY.
+Never force a classification.
+
+STATES
+RADAR-LOW
+RADAR/WATCH
+EARLY-HOT / RADAR-HOT only after all required lane gates including Expansion Proof
+LATE-RADAR
+CLOSED-NOISE/FAIL
+UNKNOWN/DATA_QUALITY
+
+TIMESTAMPS / ANTI-HINDSIGHT
+FIRST_SEEN and FIRST_RADAR_SEEN are immutable.
+Store RETRIEVAL_TS and SOURCE_TS separately.
+Never retrospectively choose a favorable snapshot.
+Never backdate EARLY-HOT.
+Historical replay can explain the path but earns zero prospective credit.
+A later day high may prove expansion occurred between observations, but cannot backdate the signal.
+
+CATALYST
+An official/material catalyst can increase priority.
+Catalyst alone is context and cannot trigger EARLY-HOT.
+Missing catalyst does not eliminate a valid momentum candidate.
+
+CADENCE
+The new infrastructure should target approximately 5-minute observations.
+Record actual RETRIEVAL_TS; never claim a 5-minute observation if scheduler delay means otherwise.
+
+METRICS TO PRESERVE
+TrueEarlyRadar10
+EarlyRadar15
+Salvage15-20
+EARLY-HOT -> +30%
+EARLY-HOT -> +50%
+false-HOT
+median FIRST_RADAR_SEEN %
+lead time EARLY-HOT -> +30/+50
+SOURCE/DISCOVERY misses
+CADENCE misses
+MODEL misses
+Fresh / Second Impulse / Overnight separately
+
+FREEZE
+Version = SAG-30 Early Radar v0.3.3 FROZEN SHADOW.
+Do not change thresholds or rules after individual winners or misses.
+Any material rule change requires a new version and a new prospective validation start.
+
+ALERT LABEL
+Every alert must say:
+"SAG-30 EARLY RADAR v0.3.3 FROZEN SHADOW - NOT BUY"
+
+Implement these rules as immutable versioned configuration/specification and build the infrastructure around them. If a rule cannot be operationalized without inventing a threshold, preserve UNKNOWN/WAIT rather than inventing one

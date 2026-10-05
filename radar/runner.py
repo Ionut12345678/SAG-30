@@ -1,0 +1,140 @@
+import csv
+import json
+import logging
+import os
+import sys
+import time
+from datetime import datetime, timedelta
+from pathlib import Path
+from urllib.error import HTTPError
+from urllib.parse import urlencode
+from urllib.request import Request, urlopen
+from zoneinfo import ZoneInfo
+from .core import LABEL, open_db, record, utcnow
+from .model import evaluate, verify_spec
+
+log = logging.getLogger('radar')
+
+def request(url, headers=None, data=None):
+    for attempt in range(3):
+        try:
+            with urlopen(Request(url, headers=headers or {}, data=data), timeout=30) as response:
+                body = response.read()
+                retrieved = utcnow()
+            return json.loads(body), retrieved
+        except HTTPError as exc:
+            if exc.code not in (429, 500, 502, 503, 504) or attempt == 2:
+                raise RuntimeError(f'Provider HTTP {exc.code}') from None
+            time.sleep(min(int(exc.headers.get('Retry-After', '2')), 30))
+    raise RuntimeError('Request retries exhausted')
+
+def session_window(now):
+    local = now.astimezone(ZoneInfo('America/New_York'))
+    return local.weekday() < 5 and 4 <= local.hour < 20
+
+def load_universe(path):
+    with open(path, newline='') as file:
+        rows = list(csv.DictReader(file))
+    if not rows:
+        raise ValueError('Configure a dated U.S. small-cap universe; sample file is intentionally empty')
+    symbols = []
+    for row in rows:
+        symbol = row['symbol'].strip().upper()
+        if not symbol or not all(c.isalnum() or c in '.-' for c in symbol):
+            raise ValueError('Invalid symbol in universe')
+        if float(row['market_cap_usd']) <= 0 or not row['as_of']:
+            raise ValueError('Universe requires positive market cap and as_of provenance')
+        symbols.append(symbol)
+    return sorted(set(symbols))
+
+def flush_alerts(db):
+    token, chat = os.getenv('TELEGRAM_BOT_TOKEN'), os.getenv('TELEGRAM_CHAT_ID')
+    if not token or not chat:
+        return
+    for event_id, message in db.execute('SELECT id,message FROM outbox WHERE delivered_ts IS NULL ORDER BY id LIMIT 10').fetchall():
+        db.execute('UPDATE outbox SET attempts=attempts+1 WHERE id=?', (event_id,))
+        db.commit()
+        try:
+            answer, _ = request('https://api.telegram.org/bot' + token + '/sendMessage',
+                {'Content-Type': 'application/json'}, json.dumps({'chat_id': chat, 'text': message}).encode())
+            if not answer.get('ok'):
+                raise RuntimeError('Telegram rejected message')
+            db.execute('UPDATE outbox SET delivered_ts=? WHERE id=?', (utcnow(), event_id))
+            db.commit()
+        except Exception:
+            log.error('Notification delivery failed; retained for retry')
+
+def run():
+    verify_spec()
+    config = json.loads(Path(os.getenv('RADAR_CONFIG', 'config/radar.json')).read_text())
+    path = Path(os.getenv('RADAR_DB', 'state/radar.sqlite3'))
+    path.parent.mkdir(parents=True, exist_ok=True)
+    db = open_db(path)
+    now = datetime.fromisoformat(utcnow())
+    if not session_window(now):
+        log.info('Outside configured U.S. observation window')
+        return
+    run_id = db.execute('INSERT INTO runs(started,status) VALUES(?,?)', (now.isoformat(), 'RUNNING')).lastrowid
+    db.commit()
+    try:
+        keys = [os.getenv('ALPACA_API_KEY'), os.getenv('ALPACA_SECRET_KEY')]
+        if not all(keys):
+            raise ValueError('Missing ALPACA_API_KEY / ALPACA_SECRET_KEY secrets')
+        headers = {'APCA-API-KEY-ID': keys[0], 'APCA-API-SECRET-KEY': keys[1]}
+        day = now.astimezone(ZoneInfo('America/New_York')).date().isoformat()
+        calendar, _ = request('https://paper-api.alpaca.markets/v2/calendar?' + urlencode({'start':day,'end':day}), headers)
+        if not calendar:
+            db.execute('UPDATE runs SET finished=?,status=? WHERE id=?', (utcnow(), 'CLOSED', run_id))
+            db.commit()
+            return
+        last = db.execute("SELECT started FROM runs WHERE status='DISCOVERY_OK' ORDER BY id DESC LIMIT 1").fetchone()
+        broad = last is None or (now - datetime.fromisoformat(last[0])).total_seconds() >= config['discovery_interval_seconds']
+        universe = load_universe(config['universe_file'])
+        db.execute('DELETE FROM candidates WHERE expires < ?', (now.isoformat(),))
+        candidates = [r[0] for r in db.execute('SELECT symbol FROM candidates ORDER BY symbol')]
+        symbols = universe if broad else candidates
+        snapshots = {}
+        evidence_path = Path(config.get('evidence_file', 'config/evidence.json'))
+        evidence = json.loads(evidence_path.read_text()) if evidence_path.exists() else {}
+        for offset in range(0, len(symbols), 100):
+            batch = symbols[offset:offset + 100]
+            started = utcnow()
+            url = 'https://data.alpaca.markets/v2/stocks/snapshots?' + urlencode({'symbols': ','.join(batch), 'feed': config['feed']})
+            result, retrieved = request(url, headers)
+            for symbol in batch:
+                snapshot = result.get(symbol, {})
+                quality = record(db, run_id, symbol, snapshot, started, retrieved, config['max_source_age_seconds'])
+                observation_id = db.execute('SELECT MAX(id) FROM observations WHERE run_id=? AND symbol=?', (run_id,symbol)).fetchone()[0]
+                evaluate(db, observation_id, evidence.get(symbol))
+                if quality == 'OK':
+                    snapshots[symbol] = snapshot
+            db.commit()
+            time.sleep(0.4)
+        if broad:
+            # Operational shortlist ranking only; activity is never a model gate.
+            ranked = sorted(snapshots, key=lambda s: (snapshots[s].get('dailyBar') or {}).get('v', 0), reverse=True)
+            selected = ranked[:config['shortlist_limit']]
+            if selected:
+                marks = ','.join('?' for _ in selected)
+                db.execute('DELETE FROM candidates WHERE symbol NOT IN (' + marks + ')', selected)
+            for symbol in selected:
+                db.execute('INSERT INTO candidates VALUES(?,?,?,?) ON CONFLICT(symbol) DO UPDATE SET last_seen=excluded.last_seen,expires=excluded.expires',
+                    (symbol, now.isoformat(), now.isoformat(), (now + timedelta(hours=24)).isoformat()))
+        if symbols and not snapshots:
+            raise ValueError('No fresh valid snapshots; inspect recorded DATA_QUALITY reasons')
+        db.execute('UPDATE runs SET finished=?,status=?,detail=? WHERE id=?',
+            (utcnow(), 'DISCOVERY_OK' if broad else 'MONITOR_OK', f'{len(symbols)} observations; semantic gates require sourced evidence', run_id))
+        db.commit()
+        flush_alerts(db)
+        log.info('Run %s completed: %s observations; frozen rules evaluated conservatively', run_id, len(symbols))
+    except Exception as exc:
+        db.execute('UPDATE runs SET finished=?,status=?,detail=? WHERE id=?', (utcnow(), 'FAILED', str(exc) if isinstance(exc,(ValueError,RuntimeError)) else type(exc).__name__, run_id))
+        db.commit()
+        log.error('Run failed: %s', str(exc) if isinstance(exc,(ValueError,RuntimeError)) else type(exc).__name__)
+        raise SystemExit(1) from None
+    finally:
+        db.close()
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+    run()

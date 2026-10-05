@@ -1,0 +1,14 @@
+{
+  "EXAMPLE": {
+    "symbol": "EXAMPLE",
+    "source_ts": "REPLACE_WITH_EXACT_LIVE_SOURCE_TS",
+    "lane": "FRESH",
+    "rvol": null,
+    "valid_activity_baseline": {"value": false, "provenance": ""},
+    "lane_classification": {"value": false, "provenance": ""},
+    "price_conversion": {"value": false, "provenance": ""},
+    "acceptance_reclaim": {"value": false, "provenance": ""},
+    "acceptance_still_valid": {"value": false, "provenance": ""},
+    "no_absorption": {"value": false, "provenance": ""}
+  }
+}

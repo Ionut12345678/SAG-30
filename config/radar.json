@@ -1,0 +1,7 @@
+{
+  "feed": "iex",
+  "universe_file": "config/universe.csv",
+  "discovery_interval_seconds": 900,
+  "shortlist_limit": 30,
+  "max_source_age_seconds": 900
+}

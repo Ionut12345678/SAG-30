@@ -1,0 +1,66 @@
+name: SAG-30 radar
+on:
+  schedule:
+    - cron: '*/5 * * * 1-5'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: sag30-state
+  cancel-in-progress: false
+jobs:
+  observe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Tests
+        run: python -m unittest discover -s tests -v
+      - name: Restore durable state
+        id: restore
+        shell: bash
+        run: |
+          mkdir -p state
+          if git ls-remote --exit-code --heads origin radar-state; then
+            git fetch origin radar-state
+            git show FETCH_HEAD:radar.sqlite3 > state/radar.sqlite3
+          else
+            status=$?
+            if [ "$status" -ne 2 ]; then exit "$status"; fi
+          fi
+      - name: Observe
+        env:
+          ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python -m radar.runner
+      - name: Persist audit state even after scan failure
+        if: ${{ always() && steps.restore.outcome == 'success' }}
+        shell: bash
+        run: |
+          if [ ! -f state/radar.sqlite3 ]; then exit 0; fi
+          mkdir -p /tmp/radar-state
+          cp state/radar.sqlite3 /tmp/radar-state/radar.sqlite3
+          cd /tmp/radar-state
+          git init
+          git config user.name 'SAG-30 radar'
+          git config user.email 'radar@users.noreply.github.com'
+          git remote add origin "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git"
+          git config http.extraheader "$(git -C "$GITHUB_WORKSPACE" config --get http.https://github.com/.extraheader)"
+          if git ls-remote --exit-code --heads origin radar-state; then
+            git fetch origin radar-state
+            git reset --soft FETCH_HEAD
+          else
+            status=$?
+            if [ "$status" -ne 2 ]; then exit "$status"; fi
+          fi
+          git add radar.sqlite3
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'Append prospective radar audit'
+          git push origin HEAD:radar-state
