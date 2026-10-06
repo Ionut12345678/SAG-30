@@ -35,7 +35,15 @@ jobs:
           mkdir -p state
           if git ls-remote --exit-code --heads origin radar-state; then
             git fetch origin radar-state
-            git show FETCH_HEAD:radar.sqlite3 > state/radar.sqlite3
+            if git cat-file -e FETCH_HEAD:radar.sqlite3.gz 2>/dev/null; then
+              git show FETCH_HEAD:radar.sqlite3.gz | gzip -dc > state/radar.sqlite3
+            elif git cat-file -e FETCH_HEAD:radar.sqlite3 2>/dev/null; then
+              # One-time migration path from the legacy uncompressed state.
+              git show FETCH_HEAD:radar.sqlite3 > state/radar.sqlite3
+            else
+              echo "radar-state exists but contains no durable database"
+              exit 1
+            fi
           else
             status=$?
             if [ "$status" -ne 2 ]; then exit "$status"; fi
@@ -133,7 +141,12 @@ jobs:
           set -euo pipefail
           if [ ! -f state/radar.sqlite3 ]; then exit 1; fi
           mkdir -p /tmp/radar-state
-          cp state/radar.sqlite3 /tmp/radar-state/radar.sqlite3
+          gzip -9 -c state/radar.sqlite3 > /tmp/radar-state/radar.sqlite3.gz
+          compressed_bytes="$(stat -c%s /tmp/radar-state/radar.sqlite3.gz)"
+          if [ "$compressed_bytes" -ge $((95 * 1024 * 1024)) ]; then
+            echo "Compressed radar state is too large: ${compressed_bytes} bytes"
+            exit 1
+          fi
           cp state/health.json /tmp/radar-state/health.json
           cd /tmp/radar-state
           git init
@@ -148,7 +161,9 @@ jobs:
             status=$?
             if [ "$status" -ne 2 ]; then exit "$status"; fi
           fi
-          git add radar.sqlite3 health.json
+          git rm --cached --ignore-unmatch radar.sqlite3 >/dev/null 2>&1 || true
+          rm -f radar.sqlite3
+          git add radar.sqlite3.gz health.json
           if git diff --cached --quiet; then exit 0; fi
           git commit -m 'Append prospective radar audit and heartbeat'
           git push origin HEAD:radar-state
