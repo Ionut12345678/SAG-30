@@ -1,0 +1,36 @@
+name: SAG-30 v0.4.1 calibration replay
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile
+        run: |
+          python -m py_compile radar/fast_path_shadow.py
+          python -m py_compile research/fast_path_v041_replay.py
+      - name: Run balanced 1m calibration replay
+        env:
+          ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+        run: |
+          python research/fast_path_v041_replay.py \
+            --winners 300 \
+            --nonwinners 300 \
+            --lookback-days 240 \
+            --feed iex \
+            --workers 6 \
+            --out research/fast_path_v041_replay.json
+      - name: Upload calibration result
+        uses: actions/upload-artifact@v4
+        with:
+          name: sag30-v041-calibration-replay
+          path: research/fast_path_v041_replay.json
+          retention-days: 30
