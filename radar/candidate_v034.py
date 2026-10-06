@@ -154,10 +154,11 @@ def evaluate(db,observation_id,evaluated_ts):
 
             # A failed path may restart prospectively from a later conversion.
             failed_floor=memory.get("conversion_floor")
-            if failed_floor is not None and price is not None and price < failed_floor:
+            failed_now=failed_floor is not None and price is not None and price < failed_floor
+            if failed_now:
                 memory={}
                 state="C34-FAILED"; detail="price fell below pre-conversion floor"
-            if not memory.get("conversion_ts") and all(isinstance(v,(int,float)) for v in (price,pct,previous_price,previous_pct,price_delta,pct_delta)):
+            if not failed_now and not memory.get("conversion_ts") and all(isinstance(v,(int,float)) for v in (price,pct,previous_price,previous_pct,price_delta,pct_delta)):
                 if price_delta>0 and pct_delta>0 and pct<20:
                     memory={
                       "conversion_ts":retrieval,
