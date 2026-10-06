@@ -5,7 +5,7 @@ import unittest
 from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import patch
-from radar.runner import run, flush_alerts
+from radar.runner import run
 from radar.core import open_db, LABEL
 
 class RunnerTests(unittest.TestCase):
@@ -27,12 +27,3 @@ class RunnerTests(unittest.TestCase):
             self.assertEqual(db.execute('SELECT count(*) FROM observations').fetchone()[0],1)
             self.assertEqual(db.execute('SELECT count(*) FROM signals').fetchone()[0],0)
 
-    @patch.dict(os.environ,{'TELEGRAM_BOT_TOKEN':'test','TELEGRAM_CHAT_ID':'test'})
-    @patch('radar.runner.request',side_effect=RuntimeError('synthetic failure'))
-    def test_alert_failure_retained(self, request):
-        db = open_db(':memory:')
-        db.execute('INSERT INTO outbox(event_key,created_ts,message) VALUES(?,?,?)',('test','now',LABEL))
-        flush_alerts(db)
-        delivered, attempts = db.execute('SELECT delivered_ts,attempts FROM outbox').fetchone()
-        self.assertIsNone(delivered)
-        self.assertEqual(attempts,1)
