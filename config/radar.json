@@ -11,6 +11,11 @@
   "multi_engine_retained_limit": 15,
   "multi_engine_watch_rank_limit": 80,
   "multi_engine_min_seen": 2,
-  "multi_engine_min_change_pct": -10.0,
-  "multi_engine_max_change_pct": 10.0
+  "multi_engine_min_change_pct": -10,
+  "multi_engine_max_change_pct": 10,
+  "fast_path_enabled": true,
+  "fast_path_watch_limit": 80,
+  "fast_path_news_minutes": 3,
+  "fast_path_iterations": 3,
+  "fast_path_sleep_seconds": 55
 }
