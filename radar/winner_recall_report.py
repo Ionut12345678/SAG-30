@@ -33,9 +33,9 @@ def _deep_r2(db,symbol,session,before_ts):
       for r in rows
     ]
 
-def _classify(db,symbol,session,rows,target_row):
+def _classify(db,symbol,session,rows,target_row,early_limit):
     before=[r for r in rows if r["retrieval_ts"]<target_row["retrieval_ts"]]
-    early=[r for r in before if float(r["change_pct"])<20]
+    early=[r for r in before if float(r["change_pct"])<early_limit]
     if not early:
         return "SCOUT_MISS",None,[]
     selected_early=[r for r in early if int(r["selected"])==1]
@@ -43,7 +43,7 @@ def _classify(db,symbol,session,rows,target_row):
     if not selected_early:
         return "SHORTLIST_MISS",first_early,[]
     deep=_deep_r2(db,symbol,session,target_row["retrieval_ts"])
-    hot=[r for r in deep if r["state"]=="C34R2-HOT-SHADOW" and isinstance(r["change_pct"],(int,float)) and r["change_pct"]<20]
+    hot=[r for r in deep if r["state"]=="C34R2-HOT-SHADOW" and isinstance(r["change_pct"],(int,float)) and r["change_pct"]<early_limit]
     if hot:
         return "EARLY_HOT_SUCCESS",first_early,deep
     selected_ts=min(r["retrieval_ts"] for r in selected_early)
@@ -81,12 +81,13 @@ def build(db_path):
             if not t30:
                 continue
             t50=_first_target(rows,50)
-            cls,first_early,deep=_classify(db,symbol,session,rows,t30)
+            cls,first_early,deep=_classify(db,symbol,session,rows,t30,10)
             counts[cls]=counts.get(cls,0)+1
-            early=[r for r in rows if r["retrieval_ts"]<t30["retrieval_ts"] and float(r["change_pct"])<20]
+            early=[r for r in rows if r["retrieval_ts"]<t30["retrieval_ts"] and float(r["change_pct"])<10]
             selected_early=[r for r in early if int(r["selected"])==1]
             first_selected=selected_early[0] if selected_early else None
-            hot=next((r for r in deep if r["state"]=="C34R2-HOT-SHADOW" and isinstance(r["change_pct"],(int,float)) and r["change_pct"]<20),None)
+            hot=next((r for r in deep if r["state"]=="C34R2-HOT-SHADOW" and isinstance(r["change_pct"],(int,float)) and r["change_pct"]<10),None)
+            cls20,first20,deep20=_classify(db,symbol,session,rows,t30,20)
             winners.append({
               "session":session,
               "symbol":symbol,
@@ -94,7 +95,8 @@ def build(db_path):
               "first_30_ts":t30["retrieval_ts"],
               "first_30_pct":t30["change_pct"],
               "first_50_ts":t50["retrieval_ts"] if t50 else None,
-              "classification":cls,
+              "classification_under_10":cls,
+              "classification_under_20":cls20,
               "first_early_scout_ts":first_early["retrieval_ts"] if first_early else None,
               "first_early_scout_pct":first_early["change_pct"] if first_early else None,
               "first_selected_ts":first_selected["retrieval_ts"] if first_selected else None,
@@ -115,10 +117,11 @@ def build(db_path):
           "scope":"Only sessions recorded in scout_history; earlier sessions are not reconstructable from full-universe data.",
           "winner_sessions":total,
           "winner_50_sessions":sum(1 for r in winners if r["reached_50"]),
-          "classification_counts":counts,
-          "early_scout_recall":sum(1 for r in winners if r["first_early_scout_ts"] is not None)/total if total else None,
-          "early_shortlist_recall":sum(1 for r in winners if r["first_selected_ts"] is not None)/total if total else None,
-          "early_r2_hot_recall":sum(1 for r in winners if r["r2_hot_ts"] is not None)/total if total else None,
+          "primary_entry_ceiling_pct":10,
+          "classification_counts_under_10":counts,
+          "under_10_scout_recall":sum(1 for r in winners if r["first_early_scout_ts"] is not None)/total if total else None,
+          "under_10_shortlist_recall":sum(1 for r in winners if r["first_selected_ts"] is not None)/total if total else None,
+          "under_10_r2_hot_recall":sum(1 for r in winners if r["r2_hot_ts"] is not None)/total if total else None,
           "winners":winners[:200],
         }
     finally:
