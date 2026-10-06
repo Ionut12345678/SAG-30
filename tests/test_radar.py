@@ -15,6 +15,7 @@ from radar.volume_baseline_shadow import ingest as baseline_ingest, fields as ba
 from radar.candidate_v034 import evaluate as candidate_v034_evaluate
 from radar.candidate_v034r2 import evaluate as candidate_v034r2_evaluate
 from radar.candidate_v034_report import build as candidate_v034_report_build
+from radar.multi_engine_shadow import evaluate as multi_engine_evaluate, record as multi_engine_record, init as multi_engine_init
 from radar.scout import init as scout_init
 from radar.winner_recall_report import build as winner_recall_build
 
@@ -361,9 +362,33 @@ class RadarTests(unittest.TestCase):
             db.commit(); db.close()
             report=winner_recall_build(db_path)
             by_symbol={x['symbol']:x for x in report['winners']}
-            self.assertEqual(by_symbol['A']['classification'],'SHORTLIST_MISS')
-            self.assertEqual(by_symbol['B']['classification'],'MODEL_MISS')
+            self.assertEqual(by_symbol['A']['classification_under_10'],'SHORTLIST_MISS')
+            self.assertEqual(by_symbol['B']['classification_under_10'],'MODEL_MISS')
             self.assertEqual(report['winner_sessions'],2)
+
+    def test_multi_engine_ranker_adds_sub10_precursor_without_changing_base(self):
+        features={
+          'BASE': {'retrieval_ts':'2026-10-05T14:00:00+00:00','change_pct':5.0,'acceleration':0.1,'impulse':0.001,'turnover':0.01,'route_source':'latestTrade'},
+          'FAST': {'retrieval_ts':'2026-10-05T14:00:00+00:00','change_pct':4.0,'acceleration':2.0,'impulse':0.020,'turnover':0.05,'route_source':'latestTrade'},
+          'LATE': {'retrieval_ts':'2026-10-05T14:00:00+00:00','change_pct':12.0,'acceleration':5.0,'impulse':0.050,'turnover':0.10,'route_source':'latestTrade'},
+          'QUIET': {'retrieval_ts':'2026-10-05T14:00:00+00:00','change_pct':1.0,'acceleration':0.0,'impulse':0.0,'turnover':0.0001,'route_source':'latestTrade'},
+        }
+        scores,high_recall,extras=multi_engine_evaluate(features,['BASE'],extra_limit=1,watch_rank_limit=80)
+        self.assertIn('FAST',scores)
+        self.assertNotIn('LATE',scores)
+        self.assertEqual(extras,['FAST'])
+        self.assertTrue(scores['FAST']['dual_selected'])
+
+    def test_multi_engine_watchpool_persists_repeated_precursor(self):
+        db=open_db(':memory:'); multi_engine_init(db)
+        features={'FAST':{'retrieval_ts':'2026-10-05T14:00:00+00:00','change_pct':4.0,'acceleration':2.0,'impulse':0.02,'turnover':0.05,'route_source':'latestTrade'}}
+        scores,_,extras=multi_engine_evaluate(features,[],extra_limit=1)
+        multi_engine_record(db,1,'2026-10-05',features,scores,[],extras)
+        features['FAST']['retrieval_ts']='2026-10-05T14:05:00+00:00'
+        multi_engine_record(db,2,'2026-10-05',features,scores,[],extras)
+        row=db.execute("SELECT seen_count,peak_score FROM multi_engine_watchpool WHERE session='2026-10-05' AND symbol='FAST'").fetchone()
+        self.assertEqual(row[0],2)
+        self.assertGreaterEqual(row[1],0)
 
     def test_health_reports_cycle_and_pending_bridge(self):
         with tempfile.TemporaryDirectory() as directory:

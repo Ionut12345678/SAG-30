@@ -158,6 +158,14 @@ jobs:
             --db state/radar.sqlite3 \
             --out state/winner_recall_report.json
 
+      - name: Build multi-engine SHADOW report
+        if: ${{ always() && steps.restore.outcome == 'success' }}
+        shell: bash
+        run: |
+          python -m radar.multi_engine_report \
+            --db state/radar.sqlite3 \
+            --out state/multi_engine_report.json
+
       - name: Persist audit state and heartbeat
         if: ${{ always() && steps.restore.outcome == 'success' }}
         shell: bash
@@ -175,6 +183,7 @@ jobs:
           cp state/semantic_shadow_report.json /tmp/radar-state/semantic_shadow_report.json
           cp state/candidate_v034_report.json /tmp/radar-state/candidate_v034_report.json
           cp state/winner_recall_report.json /tmp/radar-state/winner_recall_report.json
+          cp state/multi_engine_report.json /tmp/radar-state/multi_engine_report.json
           cd /tmp/radar-state
           git init
           git config user.name 'SAG-30 radar'
@@ -190,7 +199,7 @@ jobs:
           fi
           git rm --cached --ignore-unmatch radar.sqlite3 >/dev/null 2>&1 || true
           rm -f radar.sqlite3
-          git add radar.sqlite3.gz health.json semantic_shadow_report.json candidate_v034_report.json winner_recall_report.json
+          git add radar.sqlite3.gz health.json semantic_shadow_report.json candidate_v034_report.json winner_recall_report.json multi_engine_report.json
           if git diff --cached --quiet; then exit 0; fi
           git commit -m 'Append prospective radar audit and heartbeat'
           git push origin HEAD:radar-state
