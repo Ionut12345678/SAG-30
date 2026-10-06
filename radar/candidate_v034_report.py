@@ -47,6 +47,54 @@ def _outcome_windows(db, rows):
         result[state]=stats
     return result
 
+def _winner_path_audit(db, rows):
+    """Identify WATCH events that subsequently reached +30/+50 and reconstruct their prospective path."""
+    winners=[]
+    by_symbol_session={}
+    for r in rows:
+        by_symbol_session.setdefault((r["symbol"],r["session"]),[]).append(r)
+    for r in rows:
+        if r["state"]!="C34-WATCH":
+            continue
+        start=datetime.fromisoformat(r["retrieval_ts"].replace("Z","+00:00"))
+        end=start+timedelta(minutes=60)
+        follow=[
+            (x[0],x[1]) for x in db.execute(
+                "SELECT retrieval_ts,change_pct FROM observations WHERE symbol=? AND retrieval_ts>? AND retrieval_ts<=? "
+                "AND quality='OK' AND change_pct IS NOT NULL ORDER BY retrieval_ts",
+                (r["symbol"],r["retrieval_ts"],end.isoformat())
+            ).fetchall()
+        ]
+        if not follow:
+            continue
+        max_pct=max(float(x[1]) for x in follow)
+        if max_pct < 30:
+            continue
+        path=[
+            {
+              "state":p["state"],"retrieval_ts":p["retrieval_ts"],"change_pct":p["change_pct"],
+              "rvol":p["rvol"],"baseline_samples":p["baseline_samples"],"detail":p["detail"]
+            }
+            for p in by_symbol_session.get((r["symbol"],r["session"]),[])
+            if p["retrieval_ts"]>=r["retrieval_ts"]
+        ]
+        first30=next((ts for ts,pct in follow if float(pct)>=30),None)
+        first50=next((ts for ts,pct in follow if float(pct)>=50),None)
+        winners.append({
+          "symbol":r["symbol"],
+          "watch_retrieval_ts":r["retrieval_ts"],
+          "watch_change_pct":r["change_pct"],
+          "watch_rvol":r["rvol"],
+          "watch_baseline_samples":r["baseline_samples"],
+          "max_change_pct_next_60m":max_pct,
+          "first_30_ts":first30,
+          "first_50_ts":first50,
+          "reached_50":first50 is not None,
+          "path_after_watch":path[:20]
+        })
+    winners.sort(key=lambda x:(not x["reached_50"],-x["max_change_pct_next_60m"]))
+    return winners[:50]
+
 def build(db_path):
     db=sqlite3.connect(db_path)
     try:
@@ -134,6 +182,7 @@ def build(db_path):
             "bands":first_watch_bands
           },
           "forward_outcomes":_outcome_windows(db,event_rows),
+          "winner_path_audit":_winner_path_audit(db,event_rows),
           "signals":{
             "total":len(signals),
             "plus_30_reached":milestone_counts[30],
