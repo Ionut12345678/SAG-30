@@ -70,18 +70,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          iterations="$(python - <<'PY'
-import json
-c=json.load(open('config/radar.json'))
-print(int(c.get('fast_path_iterations',3)))
-PY
-)"
-          sleep_seconds="$(python - <<'PY'
-import json
-c=json.load(open('config/radar.json'))
-print(int(c.get('fast_path_sleep_seconds',55)))
-PY
-)"
+          iterations="$(python -c "import json; c=json.load(open('config/radar.json')); print(int(c.get('fast_path_iterations',3)))")"
+          sleep_seconds="$(python -c "import json; c=json.load(open('config/radar.json')); print(int(c.get('fast_path_sleep_seconds',55)))")"
           for i in $(seq 1 "$iterations"); do
             sleep "$sleep_seconds"
             python -m radar.fast_path_shadow \
