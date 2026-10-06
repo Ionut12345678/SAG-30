@@ -6,5 +6,11 @@
   "max_source_age_seconds": 900,
   "snapshot_workers": 8,
   "sticky_active_limit": 15,
-  "deep_shortlist_limit": 45
+  "deep_shortlist_limit": 45,
+  "multi_engine_extra_limit": 20,
+  "multi_engine_retained_limit": 15,
+  "multi_engine_watch_rank_limit": 80,
+  "multi_engine_min_seen": 2,
+  "multi_engine_min_change_pct": -10.0,
+  "multi_engine_max_change_pct": 10.0
 }
