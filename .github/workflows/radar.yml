@@ -38,6 +38,19 @@ jobs:
             status=$?
             if [ "$status" -ne 2 ]; then exit "$status"; fi
           fi
+      - name: Diagnose latest DATA_QUALITY
+        shell: bash
+        run: |
+          python - <<'PY'
+          import sqlite3, collections
+          p='state/radar.sqlite3'
+          db=sqlite3.connect(p)
+          rows=db.execute("SELECT reason,COUNT(*) FROM observations WHERE run_id=(SELECT MAX(id) FROM runs) GROUP BY reason ORDER BY COUNT(*) DESC").fetchall()
+          print('SAG30_DQ_SUMMARY', rows)
+          samples=db.execute("SELECT symbol,source_ts,retrieval_ts,reason FROM observations WHERE run_id=(SELECT MAX(id) FROM runs) LIMIT 12").fetchall()
+          for x in samples: print('SAG30_DQ_SAMPLE', x)
+          db.close()
+          PY
       - name: Observe and publish at controlled five-minute cadence
         env:
           ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
