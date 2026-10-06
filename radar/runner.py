@@ -79,6 +79,31 @@ def route_shortlist(snapshots, market_caps, changes, limit):
                     return selected
     return selected
 
+def routing_view(snapshot, retrieved, max_age):
+    """Return a fresh routing-only price view; never changes model DATA_QUALITY."""
+    previous=snapshot.get('prevDailyBar') or {}
+    close=previous.get('c')
+    if not isinstance(close,(int,float)) or close <= 0:
+        return None
+    retrieval=datetime.fromisoformat(retrieved)
+    for key,price_key in (('latestTrade','p'),('minuteBar','c')):
+        item=snapshot.get(key) or {}
+        price=item.get(price_key)
+        stamp=item.get('t')
+        if not isinstance(price,(int,float)) or price <= 0 or not stamp:
+            continue
+        try:
+            source=datetime.fromisoformat(stamp.replace('Z','+00:00'))
+            age=(retrieval-source).total_seconds()
+        except (TypeError,ValueError,AttributeError):
+            continue
+        if 0 <= age <= max_age:
+            normalized=dict(snapshot)
+            normalized['latestTrade']={'p':float(price),'t':stamp}
+            return normalized, float((float(price)/float(close)-1)*100), key
+    return None
+
+
 def refresh_shadow_volume_baseline(db, symbols, headers, feed, now):
     """Best-effort research backfill for current shortlist; never blocks production."""
     if not symbols:
@@ -148,6 +173,9 @@ def run():
         symbols = universe if broad else candidates
         snapshots = {}
         changes = {}
+        routing_snapshots = {}
+        routing_changes = {}
+        routing_fallbacks = 0
         evidence_path = Path(config.get('evidence_file', 'config/evidence.json'))
         evidence = json.loads(evidence_path.read_text()) if evidence_path.exists() else {}
         if not broad and candidates:
@@ -185,6 +213,16 @@ def run():
                 if quality == 'OK':
                     snapshots[symbol] = snapshot
                     changes[symbol] = db.execute('SELECT change_pct FROM observations WHERE id=?', (observation_id,)).fetchone()[0]
+                    routing_snapshots[symbol] = snapshot
+                    routing_changes[symbol] = changes[symbol]
+                else:
+                    route = routing_view(snapshot, retrieved, config['max_source_age_seconds'])
+                    if route:
+                        normalized, route_change, route_source = route
+                        routing_snapshots[symbol] = normalized
+                        routing_changes[symbol] = route_change
+                        if route_source == 'minuteBar':
+                            routing_fallbacks += 1
             db.commit()
             quality_counts = db.execute(
                 'SELECT quality,reason,COUNT(*) FROM observations WHERE run_id=? AND symbol IN (' +
@@ -195,7 +233,9 @@ def run():
             time.sleep(0.4)
         if broad:
             # Multi-route operational discovery only; none of these rankings is a model gate.
-            selected = route_shortlist(snapshots, market_caps, changes, config['shortlist_limit'])
+            selected = route_shortlist(routing_snapshots, market_caps, routing_changes, config['shortlist_limit'])
+            log.info('SAG30_ROUTING eligible=%s model_ok=%s minute_fallbacks=%s selected=%s',
+                     len(routing_snapshots),len(snapshots),routing_fallbacks,len(selected))
             if selected:
                 marks = ','.join('?' for _ in selected)
                 db.execute('DELETE FROM candidates WHERE symbol NOT IN (' + marks + ')', selected)
