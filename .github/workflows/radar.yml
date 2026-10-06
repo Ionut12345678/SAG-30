@@ -1,7 +1,9 @@
 name: SAG-30 radar
 on:
   schedule:
-    - cron: '7 * * * 1-5'
+    # Covers 04:00-20:00 America/New_York across DST; runner remains authoritative.
+    - cron: '*/5 8-23 * * 1-5'
+    - cron: '*/5 0-1 * * 2-6'
   workflow_dispatch:
   push:
     branches: [main]
@@ -16,7 +18,7 @@ concurrency:
 jobs:
   observe:
     runs-on: ubuntu-latest
-    timeout-minutes: 65
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
         with:
@@ -24,12 +26,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Tests
-        run: python -m unittest discover -s tests -v
+
       - name: Restore durable state
         id: restore
         shell: bash
         run: |
+          set -euo pipefail
           mkdir -p state
           if git ls-remote --exit-code --heads origin radar-state; then
             git fetch origin radar-state
@@ -38,35 +40,46 @@ jobs:
             status=$?
             if [ "$status" -ne 2 ]; then exit "$status"; fi
           fi
-      - name: Diagnose latest DATA_QUALITY
-        shell: bash
-        run: |
-          python - <<'PY'
-          import sqlite3, collections
-          p='state/radar.sqlite3'
-          db=sqlite3.connect(p)
-          rows=db.execute("SELECT reason,COUNT(*) FROM observations WHERE run_id=(SELECT MAX(id) FROM runs) GROUP BY reason ORDER BY COUNT(*) DESC").fetchall()
-          print('SAG30_DQ_SUMMARY', rows)
-          samples=db.execute("SELECT symbol,source_ts,retrieval_ts,reason FROM observations WHERE run_id=(SELECT MAX(id) FROM runs) LIMIT 12").fetchall()
-          for x in samples: print('SAG30_DQ_SAMPLE', x)
-          db.close()
-          PY
-      - name: Observe and publish at controlled five-minute cadence
+
+      - name: Observe one prospective cycle
+        id: scan
         env:
           ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
           ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+        shell: bash
+        run: |
+          set +e
+          python -m radar.runner
+          rc=$?
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Publish pending signal batch to ChatGPT bridge
+        id: bridge
+        env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -u
-          prepare_signal_batch() {
-            python -m radar.bridge prepare --db state/radar.sqlite3 --out state/chatgpt_signal.json
-          }
+          BRANCH="chatgpt-signal-bridge"
+          set +e
+          EVENT_KEYS="$(python -m radar.bridge prepare --db state/radar.sqlite3 --out state/chatgpt_signal.json)"
+          prep_rc=$?
+          set -e
+          if [ "$prep_rc" -eq 1 ]; then
+            echo "rc=0" >> "$GITHUB_OUTPUT"
+            echo "pending=0" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ "$prep_rc" -ne 0 ]; then
+            echo "rc=$prep_rc" >> "$GITHUB_OUTPUT"
+            echo "pending=unknown" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
 
-
-          push_signal_pr() {
-            EVENT_ID="$1"
-            BRANCH="chatgpt-signal-bridge"
+          set +e
+          (
+            set -euo pipefail
             git fetch origin main
             if git ls-remote --exit-code --heads origin "$BRANCH"; then
               git fetch origin "$BRANCH"
@@ -78,45 +91,50 @@ jobs:
             mkdir -p alerts
             cp state/chatgpt_signal.json alerts/latest_signal.json
             if git diff --quiet -- alerts/latest_signal.json && git ls-files --error-unmatch alerts/latest_signal.json >/dev/null 2>&1; then
-              PUBLISHED_COMMIT="$(git rev-parse HEAD)"
-              python -m radar.bridge ack --db state/radar.sqlite3 --payload state/chatgpt_signal.json --commit "$PUBLISHED_COMMIT"
-              git checkout main >/dev/null 2>&1 || true
-              return 0
+              published_commit="$(git rev-parse HEAD)"
+              python -m radar.bridge ack --db state/radar.sqlite3 --payload state/chatgpt_signal.json --commit "$published_commit"
+              exit 0
             fi
             git config user.name 'SAG-30 radar'
             git config user.email 'radar@users.noreply.github.com'
             git add alerts/latest_signal.json
-            git commit -m "SAG-30 signal event $EVENT_ID"
+            git commit -m "SAG-30 signal event $EVENT_KEYS"
             git push --force-with-lease origin HEAD:"$BRANCH"
-            PUBLISHED_COMMIT="$(git rev-parse HEAD)"
-            python -m radar.bridge ack --db state/radar.sqlite3 --payload state/chatgpt_signal.json --commit "$PUBLISHED_COMMIT"
-            PR_NUMBER="$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$BRANCH" --base main --state open --json number --jq '.[0].number // empty')"
-            if [ -z "$PR_NUMBER" ]; then
+            published_commit="$(git rev-parse HEAD)"
+            python -m radar.bridge ack --db state/radar.sqlite3 --payload state/chatgpt_signal.json --commit "$published_commit"
+            pr_number="$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$BRANCH" --base main --state open --json number --jq '.[0].number // empty')"
+            if [ -z "$pr_number" ]; then
               gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "$BRANCH" \
                 --title "SAG-30 live signal bridge" \
                 --body "Automated prospective SAG-30 signal stream for ChatGPT Work. SHADOW / NOT BUY. Frozen v0.3.3 rules are not modified."
             fi
-            git checkout main >/dev/null 2>&1 || true
-          }
+          )
+          bridge_rc=$?
+          set -e
+          git checkout main >/dev/null 2>&1 || true
+          echo "rc=$bridge_rc" >> "$GITHUB_OUTPUT"
+          echo "pending=1" >> "$GITHUB_OUTPUT"
+          exit 0
 
-          for cycle in $(seq 1 12); do
-            started=$(date -u +%s)
-            echo "SAG30_CYCLE_START cycle=$cycle retrieval_wallclock=$(date -u --iso-8601=seconds)"
-            python -m radar.runner || echo "SAG30_CYCLE_ERROR cycle=$cycle"
-            EVENT_KEYS="$(prepare_signal_batch)" && push_signal_pr "$EVENT_KEYS" || true
-            if [ "$cycle" -lt 12 ]; then
-              elapsed=$(( $(date -u +%s) - started ))
-              sleep_for=$(( 300 - elapsed ))
-              if [ "$sleep_for" -gt 0 ]; then sleep "$sleep_for"; fi
-            fi
-          done
-      - name: Persist audit state even after scan failure
+      - name: Build machine-readable heartbeat
         if: ${{ always() && steps.restore.outcome == 'success' }}
         shell: bash
         run: |
-          if [ ! -f state/radar.sqlite3 ]; then exit 0; fi
+          python -m radar.health \
+            --db state/radar.sqlite3 \
+            --out state/health.json \
+            --scan-rc "${{ steps.scan.outputs.rc || '1' }}" \
+            --bridge-rc "${{ steps.bridge.outputs.rc || '1' }}"
+
+      - name: Persist audit state and heartbeat
+        if: ${{ always() && steps.restore.outcome == 'success' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -f state/radar.sqlite3 ]; then exit 1; fi
           mkdir -p /tmp/radar-state
           cp state/radar.sqlite3 /tmp/radar-state/radar.sqlite3
+          cp state/health.json /tmp/radar-state/health.json
           cd /tmp/radar-state
           git init
           git config user.name 'SAG-30 radar'
@@ -130,7 +148,23 @@ jobs:
             status=$?
             if [ "$status" -ne 2 ]; then exit "$status"; fi
           fi
-          git add radar.sqlite3
+          git add radar.sqlite3 health.json
           if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'Append prospective radar audit'
+          git commit -m 'Append prospective radar audit and heartbeat'
           git push origin HEAD:radar-state
+
+      - name: Enforce cycle result after persistence
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          scan_rc="${{ steps.scan.outputs.rc || '1' }}"
+          bridge_rc="${{ steps.bridge.outputs.rc || '1' }}"
+          if [ "$scan_rc" -ne 0 ]; then
+            echo "SAG30_SCAN_FAILED rc=$scan_rc"
+            exit "$scan_rc"
+          fi
+          if [ "$bridge_rc" -ne 0 ]; then
+            echo "SAG30_BRIDGE_FAILED rc=$bridge_rc"
+            exit "$bridge_rc"
+          fi
+          echo "SAG30_CYCLE_PASS"

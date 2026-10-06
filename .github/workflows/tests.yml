@@ -2,6 +2,7 @@ name: SAG-30 unit tests
 on:
   pull_request:
     branches: [main]
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:

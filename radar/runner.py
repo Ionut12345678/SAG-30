@@ -48,6 +48,35 @@ def load_universe(path):
         symbols.append(symbol)
     return sorted(set(symbols))
 
+def load_market_caps(path):
+    with open(path, newline='') as file:
+        return {row['symbol'].strip().upper(): float(row['market_cap_usd']) for row in csv.DictReader(file)}
+
+def route_shortlist(snapshots, market_caps, changes, limit):
+    """Diversified discovery routing only; these rankings are never frozen model gates."""
+    symbols=list(snapshots)
+    def volume(symbol):
+        return float((snapshots[symbol].get('dailyBar') or {}).get('v') or 0)
+    def turnover(symbol):
+        price=float((snapshots[symbol].get('latestTrade') or {}).get('p') or 0)
+        cap=float(market_caps.get(symbol) or 0)
+        return volume(symbol)*price/cap if cap > 0 else 0
+    routes=[
+        sorted(symbols,key=lambda s:(turnover(s),s),reverse=True),
+        sorted(symbols,key=lambda s:(float(changes.get(s) or 0),s),reverse=True),
+        sorted(symbols,key=lambda s:(volume(s),s),reverse=True),
+    ]
+    selected=[]
+    seen=set()
+    for index in range(max((len(route) for route in routes), default=0)):
+        for route in routes:
+            if index < len(route) and route[index] not in seen:
+                selected.append(route[index])
+                seen.add(route[index])
+                if len(selected) >= limit:
+                    return selected
+    return selected
+
 def run():
     verify_spec()
     config = json.loads(Path(os.getenv('RADAR_CONFIG', 'config/radar.json')).read_text())
@@ -74,12 +103,16 @@ def run():
         last = db.execute("SELECT started FROM runs WHERE status='DISCOVERY_OK' ORDER BY id DESC LIMIT 1").fetchone()
         broad = last is None or (now - datetime.fromisoformat(last[0])).total_seconds() >= config['discovery_interval_seconds']
         universe = load_universe(config['universe_file'])
+        market_caps = load_market_caps(config['universe_file'])
         db.execute('DELETE FROM candidates WHERE expires < ?', (now.isoformat(),))
         candidates = [r[0] for r in db.execute('SELECT symbol FROM candidates ORDER BY symbol')]
         symbols = universe if broad else candidates
         snapshots = {}
+        changes = {}
         evidence_path = Path(config.get('evidence_file', 'config/evidence.json'))
         evidence = json.loads(evidence_path.read_text()) if evidence_path.exists() else {}
+        if not evidence_path.exists():
+            log.warning('SAG30_SEMANTIC_EVIDENCE source=missing path=%s; undefined frozen gates remain WAIT/UNKNOWN', evidence_path)
         for offset in range(0, len(symbols), 100):
             batch = symbols[offset:offset + 100]
             started = utcnow()
@@ -109,6 +142,7 @@ def run():
                 evaluate(db, observation_id, packet)
                 if quality == 'OK':
                     snapshots[symbol] = snapshot
+                    changes[symbol] = db.execute('SELECT change_pct FROM observations WHERE id=?', (observation_id,)).fetchone()[0]
             db.commit()
             quality_counts = db.execute(
                 'SELECT quality,reason,COUNT(*) FROM observations WHERE run_id=? AND symbol IN (' +
@@ -118,9 +152,8 @@ def run():
             log.info('SAG30_DATA_QUALITY_SUMMARY batch=%s', quality_counts)
             time.sleep(0.4)
         if broad:
-            # Operational shortlist ranking only; activity is never a model gate.
-            ranked = sorted(snapshots, key=lambda s: (snapshots[s].get('dailyBar') or {}).get('v', 0), reverse=True)
-            selected = ranked[:config['shortlist_limit']]
+            # Multi-route operational discovery only; none of these rankings is a model gate.
+            selected = route_shortlist(snapshots, market_caps, changes, config['shortlist_limit'])
             if selected:
                 marks = ','.join('?' for _ in selected)
                 db.execute('DELETE FROM candidates WHERE symbol NOT IN (' + marks + ')', selected)
