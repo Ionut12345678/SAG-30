@@ -40,6 +40,71 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: python -m radar.runner
+      - name: Publish ChatGPT signal event
+        id: chatgpt_bridge
+        if: ${{ success() }}
+        shell: bash
+        run: |
+          mkdir -p state
+          python - <<'PY'
+          import json, sqlite3
+          from pathlib import Path
+
+          db_path = Path("state/radar.sqlite3")
+          out = Path("state/chatgpt_signal.json")
+          if not db_path.exists():
+              out.unlink(missing_ok=True)
+              raise SystemExit(0)
+
+          db = sqlite3.connect(db_path)
+          row = db.execute(
+              "SELECT id,event_key,created_ts,message FROM outbox "
+              "WHERE delivered_ts IS NULL ORDER BY id DESC LIMIT 1"
+          ).fetchone()
+          db.close()
+          if not row:
+              out.unlink(missing_ok=True)
+              raise SystemExit(0)
+
+          payload = {"id": row[0], "event_key": row[1], "created_ts": row[2], "message": row[3]}
+          out.write_text(json.dumps(payload, indent=2) + "\n")
+          with open("$GITHUB_OUTPUT", "a") as fh:
+              fh.write("has_signal=true\n")
+              fh.write(f"event_id={row[0]}\n")
+          PY
+      - name: Update ChatGPT signal PR
+        if: ${{ steps.chatgpt_bridge.outputs.has_signal == 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_ID: ${{ steps.chatgpt_bridge.outputs.event_id }}
+        shell: bash
+        run: |
+          BRANCH="chatgpt-signal-bridge"
+          git fetch origin main
+          if git ls-remote --exit-code --heads origin "$BRANCH"; then
+            git fetch origin "$BRANCH"
+            git checkout -B "$BRANCH" "origin/$BRANCH"
+            git rebase origin/main || { git rebase --abort; git reset --hard origin/main; }
+          else
+            git checkout -B "$BRANCH" origin/main
+          fi
+          mkdir -p alerts
+          cp state/chatgpt_signal.json alerts/latest_signal.json
+          if git diff --quiet -- alerts/latest_signal.json && git ls-files --error-unmatch alerts/latest_signal.json >/dev/null 2>&1; then
+            exit 0
+          fi
+          git config user.name 'SAG-30 radar'
+          git config user.email 'radar@users.noreply.github.com'
+          git add alerts/latest_signal.json
+          git commit -m "SAG-30 signal event $EVENT_ID"
+          git push --force-with-lease origin HEAD:"$BRANCH"
+
+          PR_NUMBER="$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$BRANCH" --base main --state open --json number --jq '.[0].number // empty')"
+          if [ -z "$PR_NUMBER" ]; then
+            gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "$BRANCH" \
+              --title "SAG-30 live signal bridge" \
+              --body "Automated prospective SAG-30 signal stream for ChatGPT Work. SHADOW / NOT BUY. Frozen v0.3.3 rules are not modified."
+          fi
       - name: Persist audit state even after scan failure
         if: ${{ always() && steps.restore.outcome == 'success' }}
         shell: bash
