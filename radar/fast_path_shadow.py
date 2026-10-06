@@ -79,6 +79,13 @@ def init(db):
       PRIMARY KEY(session,symbol)
     );
     """)
+    cols={r[1] for r in db.execute("PRAGMA table_info(fast_path_events)")}
+    for name,typ in [
+      ("bid","REAL"),("ask","REAL"),("spread_pct","REAL"),
+      ("minute_bar_present","INTEGER"),("consecutive_minute_bar","INTEGER")
+    ]:
+        if name not in cols:
+            db.execute(f"ALTER TABLE fast_path_events ADD COLUMN {name} {typ}")
 
 def candidate_pool(db, session, limit=80):
     pool=[]
@@ -137,8 +144,15 @@ def view(snap):
     price=mb.get("c")
     ts=mb.get("t")
     vol=mb.get("v")
+    quote=snap.get("latestQuote") or {}
+    bid=quote.get("bp"); ask=quote.get("ap")
+    spread_pct=None
+    if isinstance(bid,(int,float)) and isinstance(ask,(int,float)) and bid>0 and ask>=bid:
+        mid=(float(ask)+float(bid))/2.0
+        if mid>0:
+            spread_pct=(float(ask)-float(bid))/mid*100.0
     if isinstance(price,(int,float)) and price>0 and ts and isinstance(vol,(int,float)):
-        return float(price),float((price/prev-1)*100),float(vol),ts
+        return float(price),float((price/prev-1)*100),float(vol),ts,bid,ask,spread_pct,1
     # Price-only fallback is allowed for EVENT observation, but cannot create
     # FLOW persistence because volume is zero and source timestamp is trade time.
     trade=snap.get("latestTrade") or {}
@@ -146,10 +160,10 @@ def view(snap):
     ts=trade.get("t")
     if not isinstance(price,(int,float)) or price<=0 or not ts:
         return None
-    return float(price),float((price/prev-1)*100),0.0,ts
+    return float(price),float((price/prev-1)*100),0.0,ts,bid,ask,spread_pct,0
 
 def evaluate_one(db, session, symbol, source, catalyst, obs, now):
-    price,pct,vol,source_ts=obs
+    price,pct,vol,source_ts,bid,ask,spread_pct,minute_bar_present=obs
     row=db.execute(
       "SELECT first_seen_ts,last_seen_ts,seen_count,positive_flow_count,peak_change_pct,last_change_pct,last_volume,last_price,last_source_ts,last_state,last_catalyst "
       "FROM fast_path_state WHERE session=? AND symbol=?",(session,symbol)
@@ -157,6 +171,7 @@ def evaluate_one(db, session, symbol, source, catalyst, obs, now):
     accel=0.0; impulse=0.0; pos_count=0
     first=now.isoformat()
     new_source=True
+    consecutive_minute_bar=0
     if row:
         first=row[0]
         pos_count=int(row[3] or 0)
@@ -172,6 +187,7 @@ def evaluate_one(db, session, symbol, source, catalyst, obs, now):
             accel=(pct-float(row[5] or 0))/dt
             # minuteBar volume is already the fresh volume for the new interval.
             impulse=max(0.0,vol)/dt
+            consecutive_minute_bar=int(minute_bar_present and 0.5 <= dt <= 1.5)
     positive=(new_source and 0 < pct < 10 and accel>0 and impulse>0)
     if new_source:
         pos_count=pos_count+1 if positive else 0
@@ -193,9 +209,13 @@ def evaluate_one(db, session, symbol, source, catalyst, obs, now):
     peak=max(pct,float(row[4])) if row and row[4] is not None else pct
     cats=",".join(catalyst or [])
     db.execute(
-      "INSERT INTO fast_path_events(session,symbol,retrieval_ts,source,state,change_pct,acceleration,impulse,evidence,catalyst) "
-      "VALUES(?,?,?,?,?,?,?,?,?,?)",
-      (session,symbol,now.isoformat(),source,state,pct,accel,impulse,"; ".join(evidence),cats)
+      "INSERT INTO fast_path_events(session,symbol,retrieval_ts,source,state,change_pct,acceleration,impulse,evidence,catalyst,bid,ask,spread_pct,minute_bar_present,consecutive_minute_bar) "
+      "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+      (session,symbol,now.isoformat(),source,state,pct,accel,impulse,"; ".join(evidence),cats,
+       float(bid) if isinstance(bid,(int,float)) else None,
+       float(ask) if isinstance(ask,(int,float)) else None,
+       float(spread_pct) if isinstance(spread_pct,(int,float)) else None,
+       int(minute_bar_present),int(consecutive_minute_bar))
     )
     db.execute(
       "INSERT INTO fast_path_state(session,symbol,first_seen_ts,last_seen_ts,seen_count,positive_flow_count,peak_change_pct,last_change_pct,last_volume,last_price,last_source_ts,last_state,last_catalyst) "
@@ -206,7 +226,9 @@ def evaluate_one(db, session, symbol, source, catalyst, obs, now):
       "last_state=excluded.last_state,last_catalyst=CASE WHEN excluded.last_catalyst<>'' THEN excluded.last_catalyst ELSE fast_path_state.last_catalyst END",
       (session,symbol,first,now.isoformat(),1,pos_count,peak,pct,vol,price,source_ts,state,cats)
     )
-    return {"symbol":symbol,"state":state,"change_pct":pct,"acceleration":accel,"impulse":impulse,"source":source,"catalyst":catalyst or []}
+    return {"symbol":symbol,"state":state,"change_pct":pct,"acceleration":accel,"impulse":impulse,
+            "source":source,"catalyst":catalyst or [],"bid":bid,"ask":ask,"spread_pct":spread_pct,
+            "minute_bar_present":bool(minute_bar_present),"consecutive_minute_bar":bool(consecutive_minute_bar)}
 
 def build_report(db, session, out):
     states={}
@@ -219,10 +241,31 @@ def build_report(db, session, out):
       (session,)
     ):
         rows.append({"symbol":r[0],"state":r[1],"change_pct":r[2],"peak_change_pct":r[3],"seen_count":r[4],"positive_flow_count":r[5],"catalyst":r[6],"last_seen_ts":r[7]})
+    coverage=db.execute(
+      "SELECT COUNT(*),SUM(CASE WHEN minute_bar_present=1 THEN 1 ELSE 0 END),"
+      "SUM(CASE WHEN consecutive_minute_bar=1 THEN 1 ELSE 0 END) FROM fast_path_events WHERE session=?",(session,)
+    ).fetchone()
+    prearm_exec=db.execute(
+      "SELECT COUNT(*),SUM(CASE WHEN ask IS NOT NULL THEN 1 ELSE 0 END),"
+      "AVG(CASE WHEN state IN ('PREARM_EVENT','PREARM_FLOW','TRIGGER_SHADOW') THEN spread_pct END) "
+      "FROM fast_path_events WHERE session=?",(session,)
+    ).fetchone()
+    total=int(coverage[0] or 0)
+    minute_present=int(coverage[1] or 0)
+    consecutive=int(coverage[2] or 0)
     payload={
-      "status":"FAST_PATH_V0.4_SHADOW","authoritative":False,"buy":False,
+      "status":"FAST_PATH_V0.4.1_CALIBRATION_SHADOW","authoritative":False,"buy":False,
       "session":session,"generated_at":datetime.now(timezone.utc).isoformat(),
       "states":states,"candidates":rows,
+      "data_quality":{
+        "observations":total,
+        "minute_bar_present_rate":(minute_present/total if total else None),
+        "consecutive_1m_bar_rate":(consecutive/total if total else None),
+        "ask_available_count":int(prearm_exec[1] or 0)
+      },
+      "execution":{
+        "avg_prearm_trigger_spread_pct":prearm_exec[2]
+      },
       "note":"Research-only. v0.3.3 FROZEN and r2 gates unchanged. TRIGGER_SHADOW is not BUY."
     }
     Path(out).parent.mkdir(parents=True,exist_ok=True)
