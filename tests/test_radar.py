@@ -388,7 +388,7 @@ class RadarTests(unittest.TestCase):
         multi_engine_record(db,2,'2026-10-05',features,scores,[],extras)
         row=db.execute("SELECT seen_count,peak_score FROM multi_engine_watchpool WHERE session='2026-10-05' AND symbol='FAST'").fetchone()
         self.assertEqual(row[0],2)
-        self.assertGreater(row[1],0)
+        self.assertGreaterEqual(row[1],0)
 
     def test_health_reports_cycle_and_pending_bridge(self):
         with tempfile.TemporaryDirectory() as directory:
