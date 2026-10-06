@@ -7,6 +7,7 @@ from pathlib import Path
 from unittest.mock import patch
 from radar.runner import run
 from radar.core import open_db, LABEL
+# Telegram delivery removed; ChatGPT bridge is tested in test_radar.py.
 
 class RunnerTests(unittest.TestCase):
     @patch.dict(os.environ,{'ALPACA_API_KEY':'synthetic','ALPACA_SECRET_KEY':'synthetic'})
