@@ -1,55 +1,149 @@
 """Research report for SAG-30 v0.3.4 CANDIDATE SHADOW."""
 import argparse, json, sqlite3
+from datetime import datetime, timedelta
 from pathlib import Path
+from statistics import median
+
+INTERESTING_STATES=("C34-WATCH","C34-CONVERSION","C34-ACCEPTED","C34-WAIT-ABSORPTION","C34-HOT-SHADOW","C34-LATE-SHADOW")
+STATE_PRIORITY={"C34-HOT-SHADOW":0,"C34-ACCEPTED":1,"C34-CONVERSION":2,"C34-WATCH":3,"C34-WAIT-ABSORPTION":4,"C34-LATE-SHADOW":5}
 
 def _table_exists(db,name):
     return db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?",(name,)).fetchone() is not None
+
+def _band(pct):
+    if pct is None: return "UNKNOWN"
+    if pct < 5: return "EXCELLENT"
+    if pct < 10: return "IDEAL"
+    if pct < 15: return "EARLY_VALID"
+    if pct < 20: return "SALVAGE"
+    return "LATE"
+
+def _outcome_windows(db, rows):
+    result={}
+    for state in ("C34-WATCH","C34-CONVERSION","C34-ACCEPTED","C34-HOT-SHADOW"):
+        subset=[r for r in rows if r["state"]==state]
+        stats={}
+        for minutes in (15,30,60):
+            maxima=[]
+            hit30=hit50=0
+            for r in subset:
+                start=datetime.fromisoformat(r["retrieval_ts"].replace("Z","+00:00"))
+                end=start+timedelta(minutes=minutes)
+                vals=[x[0] for x in db.execute(
+                    "SELECT change_pct FROM observations WHERE symbol=? AND retrieval_ts>? AND retrieval_ts<=? AND quality='OK' AND change_pct IS NOT NULL",
+                    (r["symbol"],r["retrieval_ts"],end.isoformat())
+                ).fetchall()]
+                if vals:
+                    m=max(float(v) for v in vals)
+                    maxima.append(m)
+                    hit30 += int(m>=30)
+                    hit50 += int(m>=50)
+            stats[f"plus_{minutes}m"]={
+                "events_with_followup":len(maxima),
+                "median_max_change_pct":median(maxima) if maxima else None,
+                "hit_30":hit30,
+                "hit_50":hit50,
+            }
+        result[state]=stats
+    return result
 
 def build(db_path):
     db=sqlite3.connect(db_path)
     try:
         if not _table_exists(db,"candidate_v034_events"):
             return {"status":"NO_CANDIDATE_DATA","authoritative":False}
+
         states=dict(db.execute("SELECT state,COUNT(*) FROM candidate_v034_events GROUP BY state").fetchall())
         lanes=dict(db.execute("SELECT lane,COUNT(*) FROM candidate_v034_events GROUP BY lane").fetchall())
+        event_rows=[
+            {
+              "observation_id":r[0],"symbol":r[1],"session":r[2],"state":r[3],"lane":r[4],
+              "change_pct":r[5],"rvol":r[6],"baseline_samples":r[7],"detail":r[8],"retrieval_ts":r[9]
+            }
+            for r in db.execute(
+                "SELECT c.observation_id,c.symbol,c.session,c.state,c.lane,c.change_pct,c.rvol,c.baseline_samples,c.detail,o.retrieval_ts "
+                "FROM candidate_v034_events c JOIN observations o ON o.id=c.observation_id ORDER BY c.observation_id"
+            )
+        ]
+
+        latest_run=db.execute("SELECT id FROM runs ORDER BY id DESC LIMIT 1").fetchone()
+        latest_run_id=latest_run[0] if latest_run else None
+        frontier=[]
+        if latest_run_id is not None:
+            current=[
+                {
+                  "symbol":r[0],"state":r[1],"lane":r[2],"change_pct":r[3],"rvol":r[4],
+                  "baseline_samples":r[5],"detail":r[6],"retrieval_ts":r[7]
+                }
+                for r in db.execute(
+                    "SELECT c.symbol,c.state,c.lane,c.change_pct,c.rvol,c.baseline_samples,c.detail,o.retrieval_ts "
+                    "FROM candidate_v034_events c JOIN observations o ON o.id=c.observation_id "
+                    "WHERE o.run_id=? ORDER BY c.observation_id",(latest_run_id,)
+                )
+            ]
+            newest={}
+            for row in current:
+                newest[row["symbol"]]=row
+            frontier=[v for v in newest.values() if v["state"] in INTERESTING_STATES]
+            frontier.sort(key=lambda r:(STATE_PRIORITY.get(r["state"],99),-(r["change_pct"] if isinstance(r["change_pct"],(int,float)) else -999)))
+
         signals=db.execute("SELECT id,symbol,retrieval_ts,lane,state,change_pct,proof FROM candidate_v034_signals ORDER BY id").fetchall() if _table_exists(db,"candidate_v034_signals") else []
         milestone_counts={30:0,50:0}
         if _table_exists(db,"candidate_v034_milestones"):
             for target,count in db.execute("SELECT target,COUNT(DISTINCT signal_id) FROM candidate_v034_milestones GROUP BY target"):
                 milestone_counts[int(target)]=int(count)
-        signal_rows=[
-          {"id":r[0],"symbol":r[1],"retrieval_ts":r[2],"lane":r[3],"state":r[4],"change_pct":r[5],"proof":r[6]}
-          for r in signals[-50:]
-        ]
-        watch=db.execute("SELECT COUNT(*),AVG(first_watch_pct) FROM candidate_v034_state WHERE first_watch_ts IS NOT NULL").fetchone()
+
+        first_watch_rows=db.execute(
+            "SELECT symbol,first_watch_pct FROM candidate_v034_state WHERE first_watch_ts IS NOT NULL AND first_watch_pct IS NOT NULL"
+        ).fetchall()
+        first_watch_pcts=[float(r[1]) for r in first_watch_rows]
+        first_watch_bands={}
+        for pct in first_watch_pcts:
+            b=_band(pct); first_watch_bands[b]=first_watch_bands.get(b,0)+1
+
         baseline=db.execute(
           "SELECT COUNT(*),SUM(CASE WHEN baseline_samples>=5 THEN 1 ELSE 0 END),"
-          "SUM(CASE WHEN rvol>=3 THEN 1 ELSE 0 END),SUM(CASE WHEN rvol>=10 THEN 1 ELSE 0 END) "
+          "SUM(CASE WHEN rvol>=3 THEN 1 ELSE 0 END),SUM(CASE WHEN rvol>=10 THEN 1 ELSE 0 END),"
+          "SUM(CASE WHEN baseline_samples BETWEEN 5 AND 9 THEN 1 ELSE 0 END),"
+          "SUM(CASE WHEN baseline_samples BETWEEN 10 AND 19 THEN 1 ELSE 0 END),"
+          "SUM(CASE WHEN baseline_samples>=20 THEN 1 ELSE 0 END) "
           "FROM candidate_v034_events"
         ).fetchone()
+
         return {
           "status":"CANDIDATE_SHADOW_ONLY",
           "authoritative":False,
           "version":"SAG-30 v0.3.4 CANDIDATE SHADOW rev1",
+          "latest_run_id":latest_run_id,
           "events":sum(states.values()),
           "states":states,
           "lanes":lanes,
+          "current_frontier":frontier[:50],
           "baseline":{
             "events_with_candidate_valid_sample_count":int(baseline[1] or 0),
             "events_rvol_ge_3":int(baseline[2] or 0),
-            "events_rvol_ge_10_saturated":int(baseline[3] or 0)
+            "events_rvol_ge_10_saturated":int(baseline[3] or 0),
+            "sample_coverage_5_9":int(baseline[4] or 0),
+            "sample_coverage_10_19":int(baseline[5] or 0),
+            "sample_coverage_20_plus":int(baseline[6] or 0)
           },
           "first_watch":{
-            "symbols":int(watch[0] or 0),
-            "mean_pct":watch[1]
+            "symbols":len(first_watch_pcts),
+            "mean_pct":sum(first_watch_pcts)/len(first_watch_pcts) if first_watch_pcts else None,
+            "median_pct":median(first_watch_pcts) if first_watch_pcts else None,
+            "bands":first_watch_bands
           },
+          "forward_outcomes":_outcome_windows(db,event_rows),
           "signals":{
             "total":len(signals),
             "plus_30_reached":milestone_counts[30],
             "plus_50_reached":milestone_counts[50],
-            "recent":signal_rows
+            "recent":[
+              {"id":r[0],"symbol":r[1],"retrieval_ts":r[2],"lane":r[3],"state":r[4],"change_pct":r[5],"proof":r[6]}
+              for r in signals[-50:]
+            ]
           },
-          "warning":"Research-only candidate. v0.3.3 FROZEN remains authoritative; no production alerts are emitted."
+          "warning":"Research-only candidate. Forward outcomes are retrospective analytics from observations strictly after each event; they never alter or backdate candidate state. v0.3.3 FROZEN remains authoritative."
         }
     finally:
         db.close()
