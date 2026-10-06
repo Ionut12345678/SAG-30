@@ -5,7 +5,7 @@ import sqlite3
 from pathlib import Path
 from datetime import datetime, timezone
 from radar.core import analyze, early_band, open_db, record, LABEL
-from radar.runner import load_universe, session_window, route_shortlist, routing_view
+from radar.runner import load_universe, session_window, route_shortlist, routing_view, routing_momentum
 from radar.evidence import observed_packet
 from radar.bridge import prepare as bridge_prepare, ack as bridge_ack
 from radar.health import build as health_build
@@ -237,6 +237,35 @@ class RadarTests(unittest.TestCase):
         self.assertEqual(source,'minuteBar')
         self.assertAlmostEqual(normalized['latestTrade']['p'],10.8)
         self.assertAlmostEqual(change,8.0)
+
+    def test_discovery_routing_can_promote_acceleration_and_fresh_volume_impulse(self):
+        snapshots={
+            'BASE': {'latestTrade':{'p':10},'dailyBar':{'v':1000}},
+            'ACCEL': {'latestTrade':{'p':10},'dailyBar':{'v':100}},
+            'IMPULSE': {'latestTrade':{'p':10},'dailyBar':{'v':100}},
+            'OTHER': {'latestTrade':{'p':10},'dailyBar':{'v':100}},
+        }
+        caps={k:1000000 for k in snapshots}
+        changes={k:1 for k in snapshots}
+        selected=route_shortlist(
+            snapshots,caps,changes,2,
+            accelerations={'ACCEL':5.0},
+            volume_impulses={'IMPULSE':0.25}
+        )
+        self.assertIn('ACCEL',selected)
+        self.assertIn('IMPULSE',selected)
+
+    def test_routing_momentum_is_per_minute_and_same_session(self):
+        db=open_db(':memory:')
+        run=db.execute("INSERT INTO runs(started,status) VALUES('now','RUNNING')").lastrowid
+        first={'latestTrade':{'p':10,'t':'2026-10-05T14:00:00Z'},'prevDailyBar':{'c':10,'t':'2026-10-02T20:00:00Z'},'dailyBar':{'v':1000}}
+        second={'latestTrade':{'p':10.5,'t':'2026-10-05T14:05:00Z'},'prevDailyBar':{'c':10,'t':'2026-10-02T20:00:00Z'},'dailyBar':{'v':1500}}
+        record(db,run,'TEST',first,'2026-10-05T14:00:00Z','2026-10-05T14:00:10+00:00',900)
+        record(db,run,'TEST',second,'2026-10-05T14:05:00Z','2026-10-05T14:05:10+00:00',900)
+        oid=db.execute('SELECT MAX(id) FROM observations').fetchone()[0]
+        accel,impulse=routing_momentum(db,'TEST',oid,5.0,second,1000000,'2026-10-05T14:05:10+00:00')
+        self.assertAlmostEqual(accel,1.0,places=6)
+        self.assertAlmostEqual(impulse,0.001,places=6)
 
     def test_discovery_routing_uses_turnover_price_response_and_activity(self):
         snapshots = {
