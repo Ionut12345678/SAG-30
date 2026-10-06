@@ -32,6 +32,7 @@ def build(db_path, scan_rc=0, bridge_rc=0):
         'model_readiness': {'status': 'NO_OBSERVATIONS', 'activity_confirmable_packets': 0},
         'semantic_shadow': {'packets': 0, 'with_history_samples': 0, 'with_observed_volume_ratio': 0, 'new_observed_highs': 0, 'two_positive_intervals': 0},
         'candidate_v034': {'status':'NO_DATA','states':{},'lanes':{},'signals_total':0,'last_signal':None},
+        'fast_scout': {'status':'NO_DATA'},
     }
     path = Path(db_path)
     if not path.exists():
@@ -107,6 +108,21 @@ def build(db_path, scan_rc=0, bridge_rc=0):
                     'signals_total':signals_total,
                     'last_signal':last_candidate,
                 }
+            if _table_exists(db,'scout_runs'):
+                sr=db.execute(
+                    'SELECT universe_count,eligible_count,selected_count,sticky_count,fetch_seconds,total_seconds FROM scout_runs WHERE run_id=?',
+                    (run_id,)
+                ).fetchone()
+                if sr:
+                    result['fast_scout']={
+                        'status':'PASS',
+                        'universe_count':sr[0],
+                        'eligible_count':sr[1],
+                        'selected_count':sr[2],
+                        'sticky_count':sr[3],
+                        'fetch_seconds':sr[4],
+                        'total_seconds':sr[5],
+                    }
             previous = db.execute('SELECT started FROM runs WHERE id<? ORDER BY id DESC LIMIT 1', (run_id,)).fetchone()
             if previous:
                 result['cadence_gap_seconds'] = round((datetime.fromisoformat(started)-datetime.fromisoformat(previous[0])).total_seconds(), 3)
