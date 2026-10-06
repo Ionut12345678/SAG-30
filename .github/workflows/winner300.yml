@@ -1,0 +1,37 @@
+name: SAG-30 300 winner research
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'research/300_winner_trigger'
+permissions:
+  contents: read
+jobs:
+  winner300:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile research script
+        run: python -m py_compile research/winner300_stress_test.py
+      - name: Run 300-winner stress test
+        env:
+          ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+        run: |
+          python research/winner300_stress_test.py \
+            --count 300 \
+            --lookback-days 240 \
+            --feed iex \
+            --workers 4 \
+            --out research/300_winner_stress_test.json
+      - name: Upload research result
+        uses: actions/upload-artifact@v4
+        with:
+          name: sag30-300-winner-stress-test
+          path: research/300_winner_stress_test.json
+          retention-days: 30
