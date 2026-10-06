@@ -142,6 +142,32 @@ def refresh_shadow_volume_baseline(db, symbols, headers, feed, now):
         return 0
 
 
+def prime_selected_after_discovery(db, run_id, selected, headers, config, evidence):
+    """Prospective second snapshot after shortlist selection and baseline backfill."""
+    if not selected:
+        return 0
+    started=utcnow()
+    url='https://data.alpaca.markets/v2/stocks/snapshots?' + urlencode({'symbols': ','.join(selected), 'feed': config['feed']})
+    result,retrieved=request(url,headers)
+    ok=0
+    states={}
+    for symbol in selected:
+        snapshot=result.get(symbol,{})
+        quality=record(db,run_id,symbol,snapshot,started,retrieved,config['max_source_age_seconds'])
+        observation_id=db.execute(
+            'SELECT MAX(id) FROM observations WHERE run_id=? AND symbol=?',(run_id,symbol)
+        ).fetchone()[0]
+        packet=observed_packet(db,observation_id,evidence.get(symbol))
+        evaluate(db,observation_id,packet)
+        build_semantic_shadow(db,observation_id,utcnow())
+        state=evaluate_candidate_v034(db,observation_id,utcnow())
+        states[state]=states.get(state,0)+1
+        ok += int(quality=='OK')
+    db.commit()
+    log.info('SAG30_POST_DISCOVERY_PRIME selected=%s ok=%s candidate_states=%s',len(selected),ok,sorted(states.items()))
+    return len(selected)
+
+
 def run():
     verify_spec()
     config = json.loads(Path(os.getenv('RADAR_CONFIG', 'config/radar.json')).read_text())
@@ -248,6 +274,7 @@ def run():
                 marks = ','.join('?' for _ in selected)
                 db.execute('DELETE FROM shadow_volume_baseline WHERE symbol NOT IN (' + marks + ')', selected)
                 refresh_shadow_volume_baseline(db, selected, headers, config['feed'], now)
+                prime_selected_after_discovery(db, run_id, selected, headers, config, evidence)
         if symbols and not snapshots:
             raise ValueError('No fresh valid snapshots; inspect recorded DATA_QUALITY reasons')
         db.execute('UPDATE runs SET finished=?,status=?,detail=? WHERE id=?',
