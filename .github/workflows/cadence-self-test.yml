@@ -1,0 +1,34 @@
+name: SAG-30 cadence self-test
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/cadence-self-test.yml'
+permissions:
+  contents: read
+jobs:
+  cadence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Measure four five-minute cycles
+        shell: bash
+        run: |
+          set -euo pipefail
+          previous=""
+          for cycle in 1 2 3 4; do
+            now=$(date -u +%s)
+            iso=$(date -u --iso-8601=seconds)
+            if [ -n "$previous" ]; then
+              delta=$((now-previous))
+              echo "SAG30_CADENCE cycle=$cycle ts=$iso delta_seconds=$delta"
+              if [ "$delta" -lt 290 ] || [ "$delta" -gt 310 ]; then
+                echo "Cadence outside 290-310 second tolerance"
+                exit 1
+              fi
+            else
+              echo "SAG30_CADENCE cycle=$cycle ts=$iso"
+            fi
+            previous=$now
+            if [ "$cycle" -lt 4 ]; then sleep 300; fi
+          done
