@@ -12,6 +12,7 @@ from urllib.request import Request, urlopen
 from zoneinfo import ZoneInfo
 from .core import LABEL, open_db, record, utcnow
 from .model import evaluate, verify_spec
+from .evidence import observed_packet
 
 log = logging.getLogger('radar')
 
@@ -104,7 +105,8 @@ def run():
                         'SAG30_DATA_QUALITY symbol=%s reason=%s source_ts=%s retrieval_ts=%s age_seconds=%s',
                         symbol, reason, source_ts, retrieval_ts, age_seconds,
                     )
-                evaluate(db, observation_id, evidence.get(symbol))
+                packet = observed_packet(db, observation_id, evidence.get(symbol))
+                evaluate(db, observation_id, packet)
                 if quality == 'OK':
                     snapshots[symbol] = snapshot
             db.commit()
