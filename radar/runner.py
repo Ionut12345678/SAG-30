@@ -18,7 +18,7 @@ from .semantic_shadow import build as build_semantic_shadow
 from .volume_baseline_shadow import ingest as ingest_shadow_volume_baseline, historical_range
 from .candidate_v034 import evaluate as evaluate_candidate_v034
 from .candidate_v034r2 import evaluate as evaluate_candidate_v034r2
-from .scout import init as init_scout, momentum_and_update as scout_momentum_and_update, active_symbols as scout_active_symbols, record_promotions as scout_record_promotions
+from .scout import init as init_scout, momentum_and_update as scout_momentum_and_update, active_symbols as scout_active_symbols, record_promotions as scout_record_promotions, record_universe_history as scout_record_universe_history
 
 log = logging.getLogger('radar')
 
@@ -202,9 +202,10 @@ def scout_discovery(db, run_id, universe, market_caps, headers, config, now):
             routing_changes[symbol]=change
             accelerations[symbol]=accel
             impulses[symbol]=impulse
+            turnover=(volume*price/cap) if cap>0 and price>0 else 0.0
             features[symbol]={
               'retrieval_ts':retrieved,'change_pct':change,'acceleration':accel,'impulse':impulse,
-              'route_source':route_source
+              'turnover':turnover,'route_source':route_source
             }
             eligible += 1
             fallbacks += int(route_source=='minuteBar')
@@ -223,6 +224,7 @@ def scout_discovery(db, run_id, universe, market_caps, headers, config, now):
         if len(selected)>=deep_limit:
             break
 
+    scout_record_universe_history(db,run_id,session,features,selected,sticky)
     scout_record_promotions(db,run_id,selected,features,sticky)
     db.execute(
       "UPDATE scout_runs SET finished_ts=?,eligible_count=?,selected_count=?,sticky_count=?,fetch_seconds=?,total_seconds=? WHERE run_id=?",

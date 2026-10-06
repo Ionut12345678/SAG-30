@@ -46,6 +46,25 @@ def init(db):
       sticky INTEGER NOT NULL DEFAULT 0,
       PRIMARY KEY(run_id,symbol)
     );
+    CREATE TABLE IF NOT EXISTS scout_history(
+      run_id INTEGER NOT NULL,
+      session TEXT NOT NULL,
+      symbol TEXT NOT NULL,
+      retrieval_ts TEXT NOT NULL,
+      change_pct REAL NOT NULL,
+      acceleration_pp_per_min REAL NOT NULL,
+      fresh_turnover_impulse_per_min REAL NOT NULL,
+      turnover REAL NOT NULL,
+      route_source TEXT NOT NULL,
+      rank_change INTEGER NOT NULL,
+      rank_acceleration INTEGER NOT NULL,
+      rank_impulse INTEGER NOT NULL,
+      rank_turnover INTEGER NOT NULL,
+      selected INTEGER NOT NULL DEFAULT 0,
+      sticky INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY(run_id,symbol)
+    );
+    CREATE INDEX IF NOT EXISTS scout_history_symbol_session ON scout_history(symbol,session,retrieval_ts);
     """)
 
 def _session(ts):
@@ -117,3 +136,34 @@ def record_promotions(db,run_id,selected,features,sticky):
           (run_id,symbol,f.get("retrieval_ts"),f.get("change_pct"),f.get("acceleration"),f.get("impulse"),
            f.get("route_source","unknown"),int(symbol in sticky))
         )
+
+
+def record_universe_history(db,run_id,session,features,selected,sticky):
+    """Persist lightweight full-universe routing history for prospective winner-recall audits."""
+    init(db)
+    if not features:
+        return 0
+    selected=set(selected); sticky=set(sticky)
+    symbols=list(features)
+    def ranks(key):
+        ordered=sorted(symbols,key=lambda x:(float(features[x].get(key) or 0),x),reverse=True)
+        return {symbol:i+1 for i,symbol in enumerate(ordered)}
+    rank_change=ranks("change_pct")
+    rank_accel=ranks("acceleration")
+    rank_impulse=ranks("impulse")
+    rank_turnover=ranks("turnover")
+    rows=[]
+    for symbol in symbols:
+        f=features[symbol]
+        rows.append((
+          run_id,session,symbol,f["retrieval_ts"],float(f["change_pct"]),
+          float(f.get("acceleration") or 0),float(f.get("impulse") or 0),float(f.get("turnover") or 0),
+          f.get("route_source","unknown"),rank_change[symbol],rank_accel[symbol],
+          rank_impulse[symbol],rank_turnover[symbol],int(symbol in selected),int(symbol in sticky)
+        ))
+    db.executemany(
+      "INSERT OR REPLACE INTO scout_history(run_id,session,symbol,retrieval_ts,change_pct,acceleration_pp_per_min,"
+      "fresh_turnover_impulse_per_min,turnover,route_source,rank_change,rank_acceleration,rank_impulse,rank_turnover,selected,sticky) "
+      "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", rows
+    )
+    return len(rows)

@@ -15,6 +15,8 @@ from radar.volume_baseline_shadow import ingest as baseline_ingest, fields as ba
 from radar.candidate_v034 import evaluate as candidate_v034_evaluate
 from radar.candidate_v034r2 import evaluate as candidate_v034r2_evaluate
 from radar.candidate_v034_report import build as candidate_v034_report_build
+from radar.scout import init as scout_init
+from radar.winner_recall_report import build as winner_recall_build
 
 class RadarTests(unittest.TestCase):
     def snapshot(self, timestamp='2026-10-05T14:00:00+00:00'):
@@ -333,6 +335,35 @@ class RadarTests(unittest.TestCase):
         changes = {'TURN': 1, 'MOVE': 12, 'VOL': 0.5, 'OTHER': 0}
         selected = route_shortlist(snapshots, caps, changes, 3)
         self.assertEqual(set(selected), {'TURN','MOVE','VOL'})
+
+    def test_winner_recall_audit_distinguishes_shortlist_and_model_miss(self):
+        with tempfile.TemporaryDirectory() as directory:
+            db_path=Path(directory)/'radar.sqlite3'
+            db=open_db(db_path); scout_init(db)
+            db.execute("CREATE TABLE candidate_v034r2_events(observation_id INTEGER PRIMARY KEY,evaluated_ts TEXT,symbol TEXT,session TEXT,state TEXT,lane TEXT,change_pct REAL,rvol REAL,baseline_samples INTEGER,detail TEXT,spec_sha256 TEXT)")
+            # A is visible early but never selected -> SHORTLIST_MISS.
+            # B is selected early and gets a valid deep WATCH but never HOT -> MODEL_MISS.
+            rows=[
+              (1,'2026-10-05','A','2026-10-05T14:00:00+00:00',5.0,1,1,1,1,0,0),
+              (2,'2026-10-05','A','2026-10-05T14:05:00+00:00',35.0,1,1,1,1,0,0),
+              (1,'2026-10-05','B','2026-10-05T14:00:00+00:00',6.0,1,1,1,1,1,0),
+              (2,'2026-10-05','B','2026-10-05T14:05:00+00:00',40.0,1,1,1,1,1,0),
+            ]
+            for run_id,session,symbol,ts,pct,rc,ra,ri,rt,sel,sticky in rows:
+                db.execute("INSERT INTO scout_history VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                  (run_id,session,symbol,ts,pct,1.0,1.0,1.0,'latestTrade',rc,ra,ri,rt,sel,sticky))
+            run=db.execute("INSERT INTO runs(started,status) VALUES('2026-10-05T14:00:00+00:00','DISCOVERY_OK')").lastrowid
+            snap={'latestTrade':{'p':10.6,'t':'2026-10-05T14:00:00Z'},'prevDailyBar':{'c':10.0,'t':'2026-10-02T20:00:00Z'}}
+            record(db,run,'B',snap,'2026-10-05T14:00:00Z','2026-10-05T14:00:01+00:00',900)
+            oid=db.execute('SELECT MAX(id) FROM observations').fetchone()[0]
+            db.execute("INSERT INTO candidate_v034r2_events VALUES(?,?,?,?,?,?,?,?,?,?,?)",
+              (oid,'2026-10-05T14:00:02+00:00','B','2026-10-05','C34R2-WATCH','FRESH',6.0,4.0,5,'watch','x'))
+            db.commit(); db.close()
+            report=winner_recall_build(db_path)
+            by_symbol={x['symbol']:x for x in report['winners']}
+            self.assertEqual(by_symbol['A']['classification'],'SHORTLIST_MISS')
+            self.assertEqual(by_symbol['B']['classification'],'MODEL_MISS')
+            self.assertEqual(report['winner_sessions'],2)
 
     def test_health_reports_cycle_and_pending_bridge(self):
         with tempfile.TemporaryDirectory() as directory:
