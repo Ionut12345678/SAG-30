@@ -134,6 +134,14 @@ jobs:
             --scan-rc "${{ steps.scan.outputs.rc || '1' }}" \
             --bridge-rc "${{ steps.bridge.outputs.rc || '1' }}"
 
+      - name: Build semantic SHADOW calibration report
+        if: ${{ always() && steps.restore.outcome == 'success' }}
+        shell: bash
+        run: |
+          python -m radar.shadow_report \
+            --db state/radar.sqlite3 \
+            --out state/semantic_shadow_report.json
+
       - name: Persist audit state and heartbeat
         if: ${{ always() && steps.restore.outcome == 'success' }}
         shell: bash
@@ -148,6 +156,7 @@ jobs:
             exit 1
           fi
           cp state/health.json /tmp/radar-state/health.json
+          cp state/semantic_shadow_report.json /tmp/radar-state/semantic_shadow_report.json
           cd /tmp/radar-state
           git init
           git config user.name 'SAG-30 radar'
@@ -163,7 +172,7 @@ jobs:
           fi
           git rm --cached --ignore-unmatch radar.sqlite3 >/dev/null 2>&1 || true
           rm -f radar.sqlite3
-          git add radar.sqlite3.gz health.json
+          git add radar.sqlite3.gz health.json semantic_shadow_report.json
           if git diff --cached --quiet; then exit 0; fi
           git commit -m 'Append prospective radar audit and heartbeat'
           git push origin HEAD:radar-state
