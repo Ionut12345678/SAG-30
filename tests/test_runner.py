@@ -26,6 +26,8 @@ class RunnerTests(unittest.TestCase):
             db = open_db(root/'state.db')
             self.assertEqual(db.execute('SELECT status FROM runs').fetchone()[0],'DISCOVERY_OK')
             self.assertEqual(db.execute('SELECT symbol FROM candidates').fetchone()[0],'TEST')
-            self.assertEqual(db.execute('SELECT count(*) FROM observations').fetchone()[0],2)
+            self.assertEqual(db.execute('SELECT count(*) FROM observations').fetchone()[0],1)
             self.assertEqual(db.execute('SELECT count(*) FROM signals').fetchone()[0],0)
+            self.assertEqual(db.execute('SELECT count(*) FROM scout_state').fetchone()[0],1)
+            self.assertEqual(db.execute('SELECT count(*) FROM scout_promotions').fetchone()[0],1)
 

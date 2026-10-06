@@ -17,6 +17,7 @@ from .evidence import observed_packet
 from .semantic_shadow import build as build_semantic_shadow
 from .volume_baseline_shadow import ingest as ingest_shadow_volume_baseline, historical_range
 from .candidate_v034 import evaluate as evaluate_candidate_v034
+from .scout import init as init_scout, momentum_and_update as scout_momentum_and_update, active_symbols as scout_active_symbols, record_promotions as scout_record_promotions
 
 log = logging.getLogger('radar')
 
@@ -67,7 +68,10 @@ def route_shortlist(snapshots, market_caps, changes, limit, accelerations=None, 
         price=float((snapshots[symbol].get('latestTrade') or {}).get('p') or 0)
         cap=float(market_caps.get(symbol) or 0)
         return volume(symbol)*price/cap if cap > 0 else 0
+    early=[s for s in symbols if isinstance(changes.get(s),(int,float)) and float(changes[s]) < 20]
     routes=[
+        sorted(early,key=lambda s:(float(accelerations.get(s) or 0),s),reverse=True),
+        sorted(early,key=lambda s:(float(volume_impulses.get(s) or 0),s),reverse=True),
         sorted(symbols,key=lambda s:(turnover(s),s),reverse=True),
         sorted(symbols,key=lambda s:(float(changes.get(s) or 0),s),reverse=True),
         sorted(symbols,key=lambda s:(float(accelerations.get(s) or 0),s),reverse=True),
@@ -159,6 +163,81 @@ def routing_momentum(db, symbol, observation_id, current_change, snapshot, marke
     except (TypeError,ValueError,KeyError,json.JSONDecodeError):
         return 0.0,0.0
 
+
+def scout_discovery(db, run_id, universe, market_caps, headers, config, now):
+    """Lightweight full-universe pass. No frozen/candidate semantic evaluation happens here."""
+    init_scout(db)
+    wall_started=time.monotonic()
+    fetch_started=time.monotonic()
+    fetched=fetch_snapshot_batches(universe,headers,config['feed'],config.get('snapshot_workers',8))
+    fetch_seconds=time.monotonic()-fetch_started
+    routing_snapshots={}
+    routing_changes={}
+    accelerations={}
+    impulses={}
+    features={}
+    fallbacks=0
+    eligible=0
+    db.execute(
+      "INSERT OR REPLACE INTO scout_runs(run_id,started_ts,universe_count) VALUES(?,?,?)",
+      (run_id,now.isoformat(),len(universe))
+    )
+    for _,batch,started,result,retrieved in fetched:
+        for symbol in batch:
+            snapshot=result.get(symbol,{})
+            route=routing_view(snapshot,retrieved,config['max_source_age_seconds'])
+            if not route:
+                continue
+            normalized,change,route_source=route
+            price=float((normalized.get('latestTrade') or {}).get('p') or 0)
+            volume=float((normalized.get('dailyBar') or {}).get('v') or 0)
+            source_ts=(normalized.get('latestTrade') or {}).get('t')
+            accel,fresh_volume,minutes=scout_momentum_and_update(
+                db,symbol,retrieved,source_ts,price,change,volume,route_source
+            )
+            cap=float(market_caps.get(symbol) or 0)
+            impulse=(fresh_volume*price/cap)/minutes if minutes and minutes>0 and cap>0 and price>0 else 0.0
+            routing_snapshots[symbol]=normalized
+            routing_changes[symbol]=change
+            accelerations[symbol]=accel
+            impulses[symbol]=impulse
+            features[symbol]={
+              'retrieval_ts':retrieved,'change_pct':change,'acceleration':accel,'impulse':impulse,
+              'route_source':route_source
+            }
+            eligible += 1
+            fallbacks += int(route_source=='minuteBar')
+        db.commit()
+
+    routed=route_shortlist(
+        routing_snapshots,market_caps,routing_changes,config['shortlist_limit'],accelerations,impulses
+    )
+    session=now.astimezone(ZoneInfo('America/New_York')).date().isoformat()
+    sticky=scout_active_symbols(db,session,config.get('sticky_active_limit',15))
+    deep_limit=int(config.get('deep_shortlist_limit',45))
+    selected=[]
+    for symbol in list(sticky)+list(routed):
+        if symbol not in selected:
+            selected.append(symbol)
+        if len(selected)>=deep_limit:
+            break
+
+    scout_record_promotions(db,run_id,selected,features,sticky)
+    db.execute(
+      "UPDATE scout_runs SET finished_ts=?,eligible_count=?,selected_count=?,sticky_count=?,fetch_seconds=?,total_seconds=? WHERE run_id=?",
+      (utcnow(),eligible,len(selected),sum(s in set(sticky) for s in selected),round(fetch_seconds,3),
+       round(time.monotonic()-wall_started,3),run_id)
+    )
+    db.commit()
+    top_accel=sorted(accelerations.items(),key=lambda x:x[1],reverse=True)[:8]
+    top_impulse=sorted(impulses.items(),key=lambda x:x[1],reverse=True)[:8]
+    early_selected=[(s,routing_changes.get(s),accelerations.get(s),impulses.get(s)) for s in selected if isinstance(routing_changes.get(s),(int,float)) and routing_changes[s] < 20]
+    log.info(
+      'SAG30_FAST_SCOUT universe=%s eligible=%s selected=%s sticky=%s fetch_seconds=%.3f total_seconds=%.3f minute_fallbacks=%s top_accel=%s top_impulse=%s early_selected=%s',
+      len(universe),eligible,len(selected),sum(s in set(sticky) for s in selected),fetch_seconds,time.monotonic()-wall_started,
+      fallbacks,top_accel,top_impulse,early_selected[:15]
+    )
+    return selected,features
 
 def refresh_shadow_volume_baseline(db, symbols, headers, feed, now):
     """Best-effort research backfill for current shortlist; never blocks production."""
@@ -252,106 +331,40 @@ def run():
         market_caps = load_market_caps(config['universe_file'])
         db.execute('DELETE FROM candidates WHERE expires < ?', (now.isoformat(),))
         candidates = [r[0] for r in db.execute('SELECT symbol FROM candidates ORDER BY symbol')]
-        symbols = universe if broad else candidates
-        snapshots = {}
-        changes = {}
-        routing_snapshots = {}
-        routing_changes = {}
-        routing_fallbacks = 0
-        routing_accelerations = {}
-        routing_volume_impulses = {}
         evidence_path = Path(config.get('evidence_file', 'config/evidence.json'))
         evidence = json.loads(evidence_path.read_text()) if evidence_path.exists() else {}
-        if not broad and candidates:
-            refresh_shadow_volume_baseline(db, candidates, headers, config['feed'], now)
         if not evidence_path.exists():
             log.warning('SAG30_SEMANTIC_EVIDENCE source=missing path=%s; undefined frozen gates remain WAIT/UNKNOWN', evidence_path)
-        fetched_batches=fetch_snapshot_batches(
-            symbols, headers, config['feed'], config.get('snapshot_workers',8)
-        )
-        for offset,batch,started,result,retrieved in fetched_batches:
-            for symbol in batch:
-                snapshot = result.get(symbol, {})
-                quality = record(db, run_id, symbol, snapshot, started, retrieved, config['max_source_age_seconds'])
-                observation_id = db.execute('SELECT MAX(id) FROM observations WHERE run_id=? AND symbol=?', (run_id,symbol)).fetchone()[0]
-                if quality != 'OK':
-                    source_ts, retrieval_ts, reason = db.execute(
-                        'SELECT source_ts,retrieval_ts,reason FROM observations WHERE id=?', (observation_id,)
-                    ).fetchone()
-                    age_seconds = None
-                    try:
-                        age_seconds = round(
-                            (datetime.fromisoformat(retrieval_ts) - datetime.fromisoformat(source_ts.replace('Z', '+00:00'))).total_seconds(),
-                            3,
-                        )
-                    except (TypeError, ValueError, AttributeError):
-                        pass
-                    log.warning(
-                        'SAG30_DATA_QUALITY symbol=%s reason=%s source_ts=%s retrieval_ts=%s age_seconds=%s',
-                        symbol, reason, source_ts, retrieval_ts, age_seconds,
-                    )
-                packet = observed_packet(db, observation_id, evidence.get(symbol))
-                evaluate(db, observation_id, packet)
-                build_semantic_shadow(db, observation_id, utcnow())
-                evaluate_candidate_v034(db, observation_id, utcnow())
-                if quality == 'OK':
-                    snapshots[symbol] = snapshot
-                    changes[symbol] = db.execute('SELECT change_pct FROM observations WHERE id=?', (observation_id,)).fetchone()[0]
-                    routing_snapshots[symbol] = snapshot
-                    routing_changes[symbol] = changes[symbol]
-                    accel,impulse=routing_momentum(
-                        db,symbol,observation_id,changes[symbol],snapshot,market_caps.get(symbol),retrieved
-                    )
-                    routing_accelerations[symbol]=accel
-                    routing_volume_impulses[symbol]=impulse
-                else:
-                    route = routing_view(snapshot, retrieved, config['max_source_age_seconds'])
-                    if route:
-                        normalized, route_change, route_source = route
-                        routing_snapshots[symbol] = normalized
-                        routing_changes[symbol] = route_change
-                        accel,impulse=routing_momentum(
-                            db,symbol,observation_id,route_change,normalized,market_caps.get(symbol),retrieved
-                        )
-                        routing_accelerations[symbol]=accel
-                        routing_volume_impulses[symbol]=impulse
-                        if route_source == 'minuteBar':
-                            routing_fallbacks += 1
-            db.commit()
-            quality_counts = db.execute(
-                'SELECT quality,reason,COUNT(*) FROM observations WHERE run_id=? AND symbol IN (' +
-                ','.join('?' for _ in batch) + ') GROUP BY quality,reason ORDER BY COUNT(*) DESC',
-                [run_id, *batch],
-            ).fetchall()
-            log.info('SAG30_DATA_QUALITY_SUMMARY batch=%s', quality_counts)
-            time.sleep(0.4)
+
         if broad:
-            # Multi-route operational discovery only; none of these rankings is a model gate.
-            selected = route_shortlist(
-                routing_snapshots, market_caps, routing_changes, config['shortlist_limit'],
-                routing_accelerations, routing_volume_impulses
-            )
-            top_accel=sorted(routing_accelerations.items(),key=lambda x:x[1],reverse=True)[:5]
-            top_impulse=sorted(routing_volume_impulses.items(),key=lambda x:x[1],reverse=True)[:5]
-            log.info('SAG30_ROUTING eligible=%s model_ok=%s minute_fallbacks=%s selected=%s top_accel=%s top_impulse=%s',
-                     len(routing_snapshots),len(snapshots),routing_fallbacks,len(selected),top_accel,top_impulse)
-            if selected:
-                marks = ','.join('?' for _ in selected)
-                db.execute('DELETE FROM candidates WHERE symbol NOT IN (' + marks + ')', selected)
+            selected,_=scout_discovery(db,run_id,universe,market_caps,headers,config,now)
+            if not selected:
+                raise ValueError('FAST SCOUT found no fresh routing-eligible snapshots')
+            marks=','.join('?' for _ in selected)
+            db.execute('DELETE FROM candidates WHERE symbol NOT IN ('+marks+')',selected)
             for symbol in selected:
-                db.execute('INSERT INTO candidates VALUES(?,?,?,?) ON CONFLICT(symbol) DO UPDATE SET last_seen=excluded.last_seen,expires=excluded.expires',
-                    (symbol, now.isoformat(), now.isoformat(), (now + timedelta(hours=24)).isoformat()))
-            if selected:
-                marks = ','.join('?' for _ in selected)
-                db.execute('DELETE FROM shadow_volume_baseline WHERE symbol NOT IN (' + marks + ')', selected)
-                refresh_shadow_volume_baseline(db, selected, headers, config['feed'], now)
-                prime_selected_after_discovery(db, run_id, selected, headers, config, evidence)
-        if symbols and not snapshots:
-            raise ValueError('No fresh valid snapshots; inspect recorded DATA_QUALITY reasons')
+                db.execute(
+                  'INSERT INTO candidates VALUES(?,?,?,?) ON CONFLICT(symbol) DO UPDATE SET last_seen=excluded.last_seen,expires=excluded.expires',
+                  (symbol,now.isoformat(),now.isoformat(),(now+timedelta(hours=24)).isoformat())
+                )
+            refresh_shadow_volume_baseline(db,selected,headers,config['feed'],now)
+            db.execute('DELETE FROM shadow_volume_baseline WHERE symbol NOT IN ('+marks+')',selected)
+            deep_count=prime_selected_after_discovery(db,run_id,selected,headers,config,evidence)
+            run_status='DISCOVERY_OK'
+            detail=f'FAST_SCOUT {len(universe)} universe -> {deep_count} deep observations'
+        else:
+            if not candidates:
+                raise ValueError('No shortlist candidates available for deep monitor')
+            refresh_shadow_volume_baseline(db,candidates,headers,config['feed'],now)
+            deep_count=prime_selected_after_discovery(db,run_id,candidates,headers,config,evidence)
+            run_status='MONITOR_OK'
+            detail=f'DEEP_MONITOR {deep_count} observations'
+        if deep_count <= 0:
+            raise ValueError('No deep observations recorded after routing')
         db.execute('UPDATE runs SET finished=?,status=?,detail=? WHERE id=?',
-            (utcnow(), 'DISCOVERY_OK' if broad else 'MONITOR_OK', f'{len(symbols)} observations; semantic gates require sourced evidence', run_id))
+            (utcnow(),run_status,detail,run_id))
         db.commit()
-        log.info('Run %s completed: %s observations; frozen rules evaluated conservatively', run_id, len(symbols))
+        log.info('Run %s completed: %s',run_id,detail)
     except Exception as exc:
         db.execute('UPDATE runs SET finished=?,status=?,detail=? WHERE id=?', (utcnow(), 'FAILED', str(exc) if isinstance(exc,(ValueError,RuntimeError)) else type(exc).__name__, run_id))
         db.commit()
