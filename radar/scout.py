@@ -103,7 +103,14 @@ def record_promotions(db,run_id,selected,features,sticky):
     init(db)
     sticky=set(sticky)
     for symbol in selected:
-        f=features.get(symbol,{})
+        f=features.get(symbol)
+        if not f:
+            prior=db.execute(
+              "SELECT retrieval_ts,change_pct,route_source FROM scout_state WHERE symbol=?",(symbol,)
+            ).fetchone()
+            if not prior:
+                continue
+            f={"retrieval_ts":prior[0],"change_pct":prior[1],"acceleration":0.0,"impulse":0.0,"route_source":prior[2]}
         db.execute(
           "INSERT OR REPLACE INTO scout_promotions(run_id,symbol,scout_retrieval_ts,change_pct,acceleration_pp_per_min,"
           "fresh_turnover_impulse_per_min,route_source,sticky) VALUES(?,?,?,?,?,?,?,?)",
