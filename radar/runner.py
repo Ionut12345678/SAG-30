@@ -47,23 +47,6 @@ def load_universe(path):
         symbols.append(symbol)
     return sorted(set(symbols))
 
-def flush_alerts(db):
-    token, chat = os.getenv('TELEGRAM_BOT_TOKEN'), os.getenv('TELEGRAM_CHAT_ID')
-    if not token or not chat:
-        return
-    for event_id, message in db.execute('SELECT id,message FROM outbox WHERE delivered_ts IS NULL ORDER BY id LIMIT 10').fetchall():
-        db.execute('UPDATE outbox SET attempts=attempts+1 WHERE id=?', (event_id,))
-        db.commit()
-        try:
-            answer, _ = request('https://api.telegram.org/bot' + token + '/sendMessage',
-                {'Content-Type': 'application/json'}, json.dumps({'chat_id': chat, 'text': message}).encode())
-            if not answer.get('ok'):
-                raise RuntimeError('Telegram rejected message')
-            db.execute('UPDATE outbox SET delivered_ts=? WHERE id=?', (utcnow(), event_id))
-            db.commit()
-        except Exception:
-            log.error('Notification delivery failed; retained for retry')
-
 def run():
     verify_spec()
     config = json.loads(Path(os.getenv('RADAR_CONFIG', 'config/radar.json')).read_text())
@@ -147,7 +130,6 @@ def run():
         db.execute('UPDATE runs SET finished=?,status=?,detail=? WHERE id=?',
             (utcnow(), 'DISCOVERY_OK' if broad else 'MONITOR_OK', f'{len(symbols)} observations; semantic gates require sourced evidence', run_id))
         db.commit()
-        flush_alerts(db)
         log.info('Run %s completed: %s observations; frozen rules evaluated conservatively', run_id, len(symbols))
     except Exception as exc:
         db.execute('UPDATE runs SET finished=?,status=?,detail=? WHERE id=?', (utcnow(), 'FAILED', str(exc) if isinstance(exc,(ValueError,RuntimeError)) else type(exc).__name__, run_id))
