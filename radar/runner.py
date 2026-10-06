@@ -17,6 +17,7 @@ from .evidence import observed_packet
 from .semantic_shadow import build as build_semantic_shadow
 from .volume_baseline_shadow import ingest as ingest_shadow_volume_baseline, historical_range
 from .candidate_v034 import evaluate as evaluate_candidate_v034
+from .candidate_v034r2 import evaluate as evaluate_candidate_v034r2
 from .scout import init as init_scout, momentum_and_update as scout_momentum_and_update, active_symbols as scout_active_symbols, record_promotions as scout_record_promotions
 
 log = logging.getLogger('radar')
@@ -295,7 +296,9 @@ def prime_selected_after_discovery(db, run_id, selected, headers, config, eviden
         evaluate(db,observation_id,packet)
         build_semantic_shadow(db,observation_id,utcnow())
         state=evaluate_candidate_v034(db,observation_id,utcnow())
+        state_r2=evaluate_candidate_v034r2(db,observation_id,utcnow())
         states[state]=states.get(state,0)+1
+        states["R2:"+state_r2]=states.get("R2:"+state_r2,0)+1
         ok += int(quality=='OK')
     db.commit()
     log.info('SAG30_POST_DISCOVERY_PRIME selected=%s ok=%s candidate_states=%s',len(selected),ok,sorted(states.items()))
