@@ -5,6 +5,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: write
+  pull-requests: write
 concurrency:
   group: sag30-state
   cancel-in-progress: false
@@ -47,7 +48,7 @@ jobs:
         run: |
           mkdir -p state
           python - <<'PY'
-          import json, sqlite3
+          import json, os, sqlite3
           from pathlib import Path
 
           db_path = Path("state/radar.sqlite3")
@@ -68,7 +69,7 @@ jobs:
 
           payload = {"id": row[0], "event_key": row[1], "created_ts": row[2], "message": row[3]}
           out.write_text(json.dumps(payload, indent=2) + "\n")
-          with open("$GITHUB_OUTPUT", "a") as fh:
+          with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
               fh.write("has_signal=true\n")
               fh.write(f"event_id={row[0]}\n")
           PY
