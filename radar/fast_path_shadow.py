@@ -124,17 +124,29 @@ def snapshots(symbols, headers, feed):
     return out
 
 def view(snap):
+    """Use completed 1-minute bars for FAST-PATH flow evidence.
+
+    The prior implementation used dailyBar cumulative volume, which can remain
+    unchanged in extended hours and made every one-minute flow impulse zero.
+    Minute-bar timestamp + volume are the correct evidence unit for this loop.
+    """
     prev=(snap.get("prevDailyBar") or {}).get("c")
-    if not isinstance(prev,(int,float)) or prev<=0: return None
+    if not isinstance(prev,(int,float)) or prev<=0:
+        return None
+    mb=snap.get("minuteBar") or {}
+    price=mb.get("c")
+    ts=mb.get("t")
+    vol=mb.get("v")
+    if isinstance(price,(int,float)) and price>0 and ts and isinstance(vol,(int,float)):
+        return float(price),float((price/prev-1)*100),float(vol),ts
+    # Price-only fallback is allowed for EVENT observation, but cannot create
+    # FLOW persistence because volume is zero and source timestamp is trade time.
     trade=snap.get("latestTrade") or {}
     price=trade.get("p")
     ts=trade.get("t")
     if not isinstance(price,(int,float)) or price<=0 or not ts:
-        mb=snap.get("minuteBar") or {}
-        price=mb.get("c");ts=mb.get("t")
-    if not isinstance(price,(int,float)) or price<=0 or not ts:return None
-    vol=float((snap.get("dailyBar") or {}).get("v") or 0)
-    return float(price),float((price/prev-1)*100),vol,ts
+        return None
+    return float(price),float((price/prev-1)*100),0.0,ts
 
 def evaluate_one(db, session, symbol, source, catalyst, obs, now):
     price,pct,vol,source_ts=obs
@@ -144,19 +156,25 @@ def evaluate_one(db, session, symbol, source, catalyst, obs, now):
     ).fetchone()
     accel=0.0; impulse=0.0; pos_count=0
     first=now.isoformat()
+    new_source=True
     if row:
         first=row[0]
         pos_count=int(row[3] or 0)
+        prior_source_ts=row[8]
+        new_source=(source_ts != prior_source_ts)
         try:
-            dt=(now-datetime.fromisoformat(row[1])).total_seconds()/60.0
+            prior_dt=datetime.fromisoformat(prior_source_ts.replace("Z","+00:00")) if prior_source_ts else datetime.fromisoformat(row[1])
+            current_dt=datetime.fromisoformat(source_ts.replace("Z","+00:00"))
+            dt=(current_dt-prior_dt).total_seconds()/60.0
         except Exception:
             dt=0
-        if dt>0:
+        if new_source and dt>0:
             accel=(pct-float(row[5] or 0))/dt
-            fresh=max(0.0,vol-float(row[6] or 0))
-            impulse=fresh/dt
-    positive=(0 < pct < 10 and accel>0 and impulse>0)
-    pos_count=pos_count+1 if positive else 0
+            # minuteBar volume is already the fresh volume for the new interval.
+            impulse=max(0.0,vol)/dt
+    positive=(new_source and 0 < pct < 10 and accel>0 and impulse>0)
+    if new_source:
+        pos_count=pos_count+1 if positive else 0
 
     state="DISCOVERED"; evidence=[]
     if pct>=20:
