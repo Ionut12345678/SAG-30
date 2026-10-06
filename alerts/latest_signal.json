@@ -1,7 +1,8 @@
 {
   "test": false,
-  "bridge_validation_only": true,
-  "event_key": "bridge-validation:2026-10-06:2",
-  "created_ts": "2026-10-06T14:04:00Z",
-  "message": "SAG-30 CHATGPT BRIDGE VALIDATION ONLY — NOT A MARKET SIGNAL; NOT BUY. Confirm receipt/notification only. v0.3.3 FROZEN unchanged."
+  "event_type": "CANARY",
+  "event_key": "bridge-canary:2026-10-06:1709",
+  "created_ts": "2026-10-06T14:09:00Z",
+  "trading_action": "NONE",
+  "message": "SAG-30 bridge canary. This is a non-TEST event and MUST generate a ChatGPT notification. Infrastructure validation only; no ticker, no BUY/SELL decision, no trading action. SAG-30 v0.3.3 FROZEN unchanged."
 }
