@@ -30,6 +30,7 @@ def build(db_path, scan_rc=0, bridge_rc=0):
         'last_signal': None,
         'cadence_gap_seconds': None,
         'model_readiness': {'status': 'NO_OBSERVATIONS', 'activity_confirmable_packets': 0},
+        'semantic_shadow': {'packets': 0, 'with_history_samples': 0, 'with_observed_volume_ratio': 0, 'new_observed_highs': 0, 'two_positive_intervals': 0},
     }
     path = Path(db_path)
     if not path.exists():
@@ -67,6 +68,23 @@ def build(db_path, scan_rc=0, bridge_rc=0):
                     'status': 'ACTIVITY_EVIDENCE_AVAILABLE' if activity_ready else ('BLOCKED_SEMANTIC_EVIDENCE' if ok else 'NO_VALID_OBSERVATIONS'),
                     'activity_confirmable_packets': activity_ready,
                 }
+            if _table_exists(db, 'semantic_shadow'):
+                shadow_rows=db.execute(
+                    'SELECT s.payload FROM semantic_shadow s JOIN observations o ON o.id=s.observation_id WHERE o.run_id=?',
+                    (run_id,)
+                ).fetchall()
+                shadow={'packets':len(shadow_rows),'with_history_samples':0,'with_observed_volume_ratio':0,'new_observed_highs':0,'two_positive_intervals':0}
+                for (raw,) in shadow_rows:
+                    p=json.loads(raw)
+                    if int(p.get('same_clock_volume_sample_count') or 0) > 0:
+                        shadow['with_history_samples'] += 1
+                    if isinstance(p.get('observed_same_clock_volume_ratio'),(int,float)):
+                        shadow['with_observed_volume_ratio'] += 1
+                    if p.get('new_observed_high') is True:
+                        shadow['new_observed_highs'] += 1
+                    if int(p.get('consecutive_positive_intervals') or 0) >= 2:
+                        shadow['two_positive_intervals'] += 1
+                result['semantic_shadow']=shadow
             previous = db.execute('SELECT started FROM runs WHERE id<? ORDER BY id DESC LIMIT 1', (run_id,)).fetchone()
             if previous:
                 result['cadence_gap_seconds'] = round((datetime.fromisoformat(started)-datetime.fromisoformat(previous[0])).total_seconds(), 3)

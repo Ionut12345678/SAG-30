@@ -9,6 +9,7 @@ from radar.runner import load_universe, session_window, route_shortlist
 from radar.evidence import observed_packet
 from radar.bridge import prepare as bridge_prepare, ack as bridge_ack
 from radar.health import build as health_build
+from radar.semantic_shadow import build as semantic_shadow_build
 
 class RadarTests(unittest.TestCase):
     def snapshot(self, timestamp='2026-10-05T14:00:00+00:00'):
@@ -79,6 +80,23 @@ class RadarTests(unittest.TestCase):
         merged = observed_packet(db, observation_id, external)
         self.assertEqual(merged['rvol'], 3.5)
         self.assertTrue(merged['valid_activity_baseline']['value'])
+
+    def test_semantic_shadow_records_metrics_without_promoting_frozen_baseline(self):
+        db = open_db(':memory:')
+        run = db.execute("INSERT INTO runs(started,status) VALUES('now','RUNNING')").lastrowid
+        snap1 = {'latestTrade': {'p': 10.5, 't': '2026-10-05T14:00:00Z'}, 'prevDailyBar': {'c': 10, 't': '2026-10-02T20:00:00Z'}, 'dailyBar': {'v': 1000}}
+        snap2 = {'latestTrade': {'p': 10.8, 't': '2026-10-05T14:05:00Z'}, 'prevDailyBar': {'c': 10, 't': '2026-10-02T20:00:00Z'}, 'dailyBar': {'v': 1500}}
+        record(db, run, 'TEST', snap1, '2026-10-05T14:00:00Z', '2026-10-05T14:00:10+00:00', 900)
+        first = db.execute('SELECT MAX(id) FROM observations').fetchone()[0]
+        semantic_shadow_build(db, first, '2026-10-05T14:00:11+00:00')
+        record(db, run, 'TEST', snap2, '2026-10-05T14:05:00Z', '2026-10-05T14:05:10+00:00', 900)
+        second = db.execute('SELECT MAX(id) FROM observations').fetchone()[0]
+        payload = semantic_shadow_build(db, second, '2026-10-05T14:05:11+00:00')
+        self.assertFalse(payload['authoritative'])
+        self.assertFalse(payload['frozen_activity_baseline_valid'])
+        self.assertTrue(payload['new_observed_high'])
+        self.assertAlmostEqual(payload['change_delta_pp'], 3.0, places=6)
+        self.assertEqual(db.execute('SELECT count(*) FROM semantic_shadow').fetchone()[0], 2)
 
     def test_bridge_batches_all_events_and_acks_only_explicitly(self):
         with tempfile.TemporaryDirectory() as directory:
