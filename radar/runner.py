@@ -105,10 +105,32 @@ def run():
                 snapshot = result.get(symbol, {})
                 quality = record(db, run_id, symbol, snapshot, started, retrieved, config['max_source_age_seconds'])
                 observation_id = db.execute('SELECT MAX(id) FROM observations WHERE run_id=? AND symbol=?', (run_id,symbol)).fetchone()[0]
+                if quality != 'OK':
+                    source_ts, retrieval_ts, reason = db.execute(
+                        'SELECT source_ts,retrieval_ts,reason FROM observations WHERE id=?', (observation_id,)
+                    ).fetchone()
+                    age_seconds = None
+                    try:
+                        age_seconds = round(
+                            (datetime.fromisoformat(retrieval_ts) - datetime.fromisoformat(source_ts.replace('Z', '+00:00'))).total_seconds(),
+                            3,
+                        )
+                    except (TypeError, ValueError, AttributeError):
+                        pass
+                    log.warning(
+                        'SAG30_DATA_QUALITY symbol=%s reason=%s source_ts=%s retrieval_ts=%s age_seconds=%s',
+                        symbol, reason, source_ts, retrieval_ts, age_seconds,
+                    )
                 evaluate(db, observation_id, evidence.get(symbol))
                 if quality == 'OK':
                     snapshots[symbol] = snapshot
             db.commit()
+            quality_counts = db.execute(
+                'SELECT quality,reason,COUNT(*) FROM observations WHERE run_id=? AND symbol IN (' +
+                ','.join('?' for _ in batch) + ') GROUP BY quality,reason ORDER BY COUNT(*) DESC',
+                [run_id, *batch],
+            ).fetchall()
+            log.info('SAG30_DATA_QUALITY_SUMMARY batch=%s', quality_counts)
             time.sleep(0.4)
         if broad:
             # Operational shortlist ranking only; activity is never a model gate.
