@@ -85,6 +85,7 @@ def fields(db, symbol, retrieval_ts, current_cumulative_volume=None):
 
 def historical_range(now, calendar_days=24):
     local=now.astimezone(ET)
-    start=(local.date()-timedelta(days=calendar_days)).isoformat()+"T04:00:00-04:00"
-    end=local.date().isoformat()+"T20:00:00-04:00"
-    return start,end
+    start_date=local.date()-timedelta(days=calendar_days)
+    start=datetime.combine(start_date, datetime.min.time(), tzinfo=ET).replace(hour=4)
+    end=datetime.combine(local.date(), datetime.min.time(), tzinfo=ET).replace(hour=20)
+    return start.isoformat(),end.isoformat()
