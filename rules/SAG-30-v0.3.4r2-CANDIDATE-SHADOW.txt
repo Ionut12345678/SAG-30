@@ -1,0 +1,61 @@
+SAG-30 Early Radar v0.3.4r2 CANDIDATE SHADOW CHALLENGER
+STATUS: RESEARCH ONLY / NOT BUY / NOT PRODUCTION
+PARENT: v0.3.4 rev1 remains unchanged for comparison. v0.3.3 FROZEN remains authoritative.
+
+PURPOSE
+Test two implementation/semantic corrections without altering production:
+1) once activity has been prospectively confirmed in-session, later conversion/acceptance/expansion may continue even if current RVOL falls below 3x;
+2) +30/+50 objective requires positive price context before conversion/HOT, preventing negative-change HOT states.
+
+BASELINE / ACTIVITY
+- Same 5-minute IEX cumulative-volume baseline as v0.3.4 rev1.
+- Candidate-valid baseline: >=5 prior-session samples and positive median cumulative volume.
+- Activity confirmed at RVOL >=3x.
+- Once first activity is confirmed in-session, activity memory persists for the candidate path unless the path is reset by failed acceptance or the session changes.
+- RVOL strength saturates at 10x for interpretation only.
+
+LANES
+- Same lane classification as v0.3.4 rev1.
+- Promotion enabled only for FRESH.
+
+POSITIVE CONTEXT
+- A path may be WATCH while change_pct <=0.
+- Conversion requires current change_pct >0 and <20%.
+- HOT/LATE promotion therefore cannot originate from a negative-price-context conversion.
+
+PRICE CONVERSION
+After activity has been confirmed at least once in the current session, conversion occurs on a later same-session observation when:
+- price > immediately prior valid same-session price;
+- change_pct > immediately prior valid same-session change_pct;
+- 0 < current change_pct <20%.
+
+ACCEPTANCE / FAILED / ABSORPTION / EXPANSION
+- Same definitions as v0.3.4 rev1.
+- Failure checks continue even when current RVOL is below 3x.
+- Acceptance/expansion progression continues from stored activity memory; fresh RVOL confirmation is not required at every later observation.
+
+ANTI-HINDSIGHT
+- Prospective only; no backdating.
+- Scout routing never creates semantic credit.
+- Deep snapshot is later than scout selection.
+
+OUTPUT
+Research-only states:
+C34R2-LOW
+C34R2-WATCH
+C34R2-CONVERSION
+C34R2-ACCEPTED
+C34R2-WAIT-ABSORPTION
+C34R2-HOT-SHADOW
+C34R2-LATE-SHADOW
+C34R2-FAILED
+C34R2-BLOCKED-LANE
+C34R2-DATA_QUALITY
+
+VALIDATION
+Compare prospectively against rev1 on:
+- first WATCH %, first conversion %, first HOT %;
+- HOT -> +30/+50 hit rate and lead time;
+- missed winners;
+- negative/false HOT suppression;
+- path continuity when RVOL falls below 3x.
