@@ -118,6 +118,8 @@ class RadarTests(unittest.TestCase):
         self.assertEqual(fields['shadow_baseline_sample_count'],2)
         self.assertAlmostEqual(fields['shadow_baseline_median_cumulative_volume'],375.0)
         self.assertAlmostEqual(fields['shadow_observed_volume_ratio'],1000.0/375.0)
+        override = baseline_fields(db,'TEST','2026-10-05T14:05:10+00:00',750.0)
+        self.assertAlmostEqual(override['shadow_observed_volume_ratio'],2.0)
 
     def test_shadow_report_is_non_authoritative(self):
         with tempfile.TemporaryDirectory() as directory:
