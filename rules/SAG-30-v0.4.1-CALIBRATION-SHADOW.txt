@@ -1,0 +1,77 @@
+SAG-30 v0.4.1 FAST-PATH CALIBRATION SHADOW
+Status: PRE-REGISTERED RESEARCH / NOT BUY
+Parent: v0.4 FAST-PATH SHADOW
+Production control: v0.3.3 FROZEN unchanged.
+
+Purpose
+Address four known validation risks:
+1. winner-only selection bias,
+2. IEX 1-minute coverage gaps,
+3. execution realism,
+4. vague promotion criteria.
+
+Required denominator cohort
+For historical calibration, compare:
+A. Winner sessions: intraday high >= +30%.
+B. Near-miss/non-winner sessions: reached >= +5% but never reached +30% that session.
+The non-winner cohort should be at least the same size as the winner cohort when available.
+
+Required retrospective replay
+Replay 1-minute bars prospectively within each session.
+No look-ahead features may be used before each timestamp.
+Report separately:
+- FLOW recall on winners,
+- FLOW false-positive rate on >=+5% non-winners,
+- PRE-ARM precision,
+- TRIGGER precision,
+- median lead time to +30/+50,
+- percentage of paths where a trigger is theoretically actionable.
+
+IEX data-quality telemetry
+For the live watchpool record:
+- minute_bar_present,
+- consecutive_1m_bar,
+- minute_bar_present_rate,
+- consecutive_1m_bar_rate.
+Never interpret absent FLOW as a model failure when the required 1-minute data was absent.
+
+Execution telemetry
+At PREARM_EVENT, PREARM_FLOW and TRIGGER_SHADOW record latest bid, ask and spread%.
+A candidate is marked execution-observable only when ask is available.
+Historical replay cannot prove executable fills unless quote data is available; bar-only replay remains calibration-only.
+
+PRE-REGISTERED PROMOTION GATES
+These gates are fixed before prospective outcome data and may not be tuned from individual winners.
+
+Minimum evidence:
+- >= 40 new prospective winner sessions >= +30%;
+- >= 15 distinct U.S. trading sessions;
+- >= 200 total PRE-ARM events with mature same-session outcomes.
+
+Data quality:
+- >= 80% of watchpool observations must have a usable 1-minute bar;
+- >= 65% must have a consecutive 1-minute bar where continuity is required.
+
+Effectiveness:
+- winner recall under +10% among data-observable winners >= 35%;
+- PRE-ARM precision to same-session +30% >= 8%;
+- TRIGGER_SHADOW precision to same-session +30% >= 12%;
+- median PRE-ARM lead time to +30% >= 3 minutes.
+
+Execution:
+- ask available on >= 80% of PRE-ARM/TRIGGER events;
+- report precision separately for spread <= 3% and spread > 3%;
+- no BUY-SHADOW promotion if the <=3% spread subset does not preserve the effectiveness gates.
+
+Event vs Flow:
+Always report EVENT and FLOW separately:
+- count,
+- precision,
+- recall contribution,
+- median lead time,
+- overlap.
+Do not combine them into one headline metric only.
+
+Promotion rule
+All minimum-evidence, data-quality, effectiveness and execution gates must pass prospectively.
+Historical replay may calibrate or reject hypotheses but can never by itself authorize BUY-SHADOW.
