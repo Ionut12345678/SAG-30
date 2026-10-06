@@ -7,6 +7,7 @@ a future versioned semantic specification.
 import json
 from datetime import datetime
 from statistics import median
+from .volume_baseline_shadow import fields as volume_baseline_fields
 
 def init(db):
     db.execute("""
@@ -71,29 +72,7 @@ def build(db, observation_id, recorded_ts):
     giveback_pp=None if peak_pct is None or change_pct is None else peak_pct-float(change_pct)
 
     current_volume=_daily_volume(raw)
-    # Same-clock research samples from earlier sessions. We expose the raw sample
-    # count and ratio but DO NOT call the baseline "valid" because v0.3.3 does not
-    # define baseline construction or minimum sample size.
-    current_clock=datetime.fromisoformat(retrieval_ts).strftime("%H:%M")
-    hist=db.execute(
-        "SELECT retrieval_ts,payload FROM observations "
-        "WHERE symbol=? AND id<? AND quality='OK' ORDER BY id DESC LIMIT 300",
-        (symbol,observation_id)
-    ).fetchall()
-    by_session={}
-    for ts,payload in hist:
-        if _session(ts) == session:
-            continue
-        if datetime.fromisoformat(ts).strftime("%H:%M") != current_clock:
-            continue
-        vol=_daily_volume(payload)
-        if vol is not None:
-            by_session.setdefault(_session(ts),vol)
-    samples=list(by_session.values())
-    baseline_median=median(samples) if samples else None
-    observed_rvol=None
-    if current_volume is not None and baseline_median not in (None,0):
-        observed_rvol=current_volume/baseline_median
+    volume_shadow=volume_baseline_fields(db, symbol, retrieval_ts, None)
 
     payload={
       "version":"semantic-shadow-v1",
@@ -114,9 +93,11 @@ def build(db, observation_id, recorded_ts):
       "observed_peak_change_pct":peak_pct,
       "giveback_from_observed_peak_pp":giveback_pp,
       "current_cumulative_volume":current_volume,
-      "same_clock_volume_sample_count":len(samples),
-      "same_clock_volume_median":baseline_median,
-      "observed_same_clock_volume_ratio":observed_rvol,
+      "same_clock_volume_sample_count":volume_shadow["shadow_baseline_sample_count"],
+      "same_clock_volume_median":volume_shadow["shadow_baseline_median_cumulative_volume"],
+      "observed_same_clock_volume_ratio":volume_shadow["shadow_observed_volume_ratio"],
+      "same_clock_bucket_et":volume_shadow["shadow_bucket_et"],
+      "same_clock_baseline_method":volume_shadow["shadow_baseline_method"],
       "frozen_activity_baseline_valid":False,
       "frozen_activity_baseline_reason":"SHADOW metric only; v0.3.3 does not define baseline construction/minimum sample size",
       "notes":[
