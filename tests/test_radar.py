@@ -11,6 +11,7 @@ from radar.bridge import prepare as bridge_prepare, ack as bridge_ack
 from radar.health import build as health_build
 from radar.semantic_shadow import build as semantic_shadow_build
 from radar.shadow_report import build as shadow_report_build
+from radar.volume_baseline_shadow import ingest as baseline_ingest, fields as baseline_fields
 
 class RadarTests(unittest.TestCase):
     def snapshot(self, timestamp='2026-10-05T14:00:00+00:00'):
@@ -98,6 +99,23 @@ class RadarTests(unittest.TestCase):
         self.assertTrue(payload['new_observed_high'])
         self.assertAlmostEqual(payload['change_delta_pp'], 3.0, places=6)
         self.assertEqual(db.execute('SELECT count(*) FROM semantic_shadow').fetchone()[0], 2)
+
+    def test_intraday_shadow_baseline_is_same_bucket_and_non_authoritative(self):
+        db = open_db(':memory:')
+        bars = {'TEST': [
+            {'t':'2026-10-01T14:00:00Z','v':100},
+            {'t':'2026-10-01T14:05:00Z','v':150},
+            {'t':'2026-10-02T14:00:00Z','v':200},
+            {'t':'2026-10-02T14:05:00Z','v':300},
+            {'t':'2026-10-05T14:00:00Z','v':400},
+            {'t':'2026-10-05T14:05:00Z','v':600},
+        ]}
+        baseline_ingest(db, bars)
+        fields = baseline_fields(db,'TEST','2026-10-05T14:05:10+00:00')
+        self.assertFalse(fields['authoritative'])
+        self.assertEqual(fields['shadow_baseline_sample_count'],2)
+        self.assertAlmostEqual(fields['shadow_baseline_median_cumulative_volume'],375.0)
+        self.assertAlmostEqual(fields['shadow_observed_volume_ratio'],1000.0/375.0)
 
     def test_shadow_report_is_non_authoritative(self):
         with tempfile.TemporaryDirectory() as directory:
