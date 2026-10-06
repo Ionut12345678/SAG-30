@@ -1,0 +1,43 @@
+SAG-30 MULTI-ENGINE DISCOVERY v0.1 SHADOW
+
+STATUS
+Research-only challenger. NOT BUY. Does not modify SAG-30 v0.3.3 FROZEN or v0.3.4r2 semantic gates.
+
+OBJECTIVE
+Increase recall of future +30%/+50% winners while they are still below +10%.
+
+ENGINE A - BASE
+Existing FAST SCOUT + r2 path remains unchanged.
+
+ENGINE B - HIGH-RECALL SCOUT
+Eligible research pool: -10% <= current change < +10%.
+A symbol is high-recall eligible when at least one live precursor family is present:
+- positive price acceleration,
+- positive fresh-turnover impulse,
+- turnover in the top 5% of the current sub-10 cross-section,
+- or current change > +2%.
+Only routing priority is affected. This is not a semantic signal.
+
+ENGINE C - CONTINUOUS RANKER
+Score 0-100 from cross-sectional percentiles:
+- acceleration 35%
+- fresh-turnover impulse 30%
+- turnover 20%
+- current change 15%.
+Weights are hypotheses to be validated prospectively and are not production rules.
+
+DUAL ENGINE
+Base shortlist is preserved.
+Up to 20 additional challenger symbols may enter deep observation.
+A research watchpool retains repeated high-recall candidates; default persistence requires >=2 observations.
+No challenger event can emit production outbox alerts.
+
+PRIMARY AUDIT
+Winner cohort: symbols that later reach +30%/+50%.
+Primary question: was the winner observed, selected, and/or r2-HOT before +10%?
+Secondary benchmark: before +20%.
+
+DECISION RULE
+Do not tune weights or thresholds from one winner.
+Compare base shortlist recall, dual-engine recall, and r2 HOT recall prospectively across a cohort.
+Any material semantic change requires a separately versioned challenger.
