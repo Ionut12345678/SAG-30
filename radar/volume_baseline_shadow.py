@@ -55,6 +55,12 @@ def fields(db, symbol, retrieval_ts, current_cumulative_volume=None):
     dt=datetime.fromisoformat(retrieval_ts).astimezone(ET)
     session=dt.date().isoformat()
     bucket=dt.replace(minute=(dt.minute//5)*5,second=0,microsecond=0).strftime("%H:%M")
+    if current_cumulative_volume is None:
+        current=db.execute(
+            "SELECT cumulative_volume FROM shadow_volume_baseline WHERE symbol=? AND session_date=? AND bucket_et=?",
+            (symbol,session,bucket)
+        ).fetchone()
+        current_cumulative_volume=float(current[0]) if current else None
     samples=[r[0] for r in db.execute(
         "SELECT cumulative_volume FROM shadow_volume_baseline WHERE symbol=? AND session_date<? AND bucket_et=? ORDER BY session_date DESC LIMIT 20",
         (symbol,session,bucket)
