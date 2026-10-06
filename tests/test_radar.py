@@ -5,7 +5,7 @@ import sqlite3
 from pathlib import Path
 from datetime import datetime, timezone
 from radar.core import analyze, early_band, open_db, record, LABEL
-from radar.runner import load_universe, session_window
+from radar.runner import load_universe, session_window, route_shortlist
 from radar.evidence import observed_packet
 from radar.bridge import prepare as bridge_prepare, ack as bridge_ack
 from radar.health import build as health_build
@@ -102,6 +102,19 @@ class RadarTests(unittest.TestCase):
             db.close()
             self.assertEqual(bridge_prepare(db_path, out_path), 1)
 
+
+
+    def test_discovery_routing_uses_turnover_price_response_and_activity(self):
+        snapshots = {
+            'TURN': {'latestTrade': {'p': 10}, 'dailyBar': {'v': 1000}},
+            'MOVE': {'latestTrade': {'p': 10}, 'dailyBar': {'v': 100}},
+            'VOL': {'latestTrade': {'p': 10}, 'dailyBar': {'v': 10000}},
+            'OTHER': {'latestTrade': {'p': 10}, 'dailyBar': {'v': 50}},
+        }
+        caps = {'TURN': 10000, 'MOVE': 1000000, 'VOL': 1000000000, 'OTHER': 1000000}
+        changes = {'TURN': 1, 'MOVE': 12, 'VOL': 0.5, 'OTHER': 0}
+        selected = route_shortlist(snapshots, caps, changes, 3)
+        self.assertEqual(set(selected), {'TURN','MOVE','VOL'})
 
     def test_health_reports_cycle_and_pending_bridge(self):
         with tempfile.TemporaryDirectory() as directory:
