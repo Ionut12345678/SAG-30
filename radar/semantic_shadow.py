@@ -72,7 +72,7 @@ def build(db, observation_id, recorded_ts):
     giveback_pp=None if peak_pct is None or change_pct is None else peak_pct-float(change_pct)
 
     current_volume=_daily_volume(raw)
-    volume_shadow=volume_baseline_fields(db, symbol, retrieval_ts, None)
+    volume_shadow=volume_baseline_fields(db, symbol, retrieval_ts, current_volume)
 
     payload={
       "version":"semantic-shadow-v1",
