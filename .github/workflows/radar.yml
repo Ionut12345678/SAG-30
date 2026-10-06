@@ -67,14 +67,19 @@ jobs:
           from pathlib import Path
           p=Path("state/radar.sqlite3")
           out=Path("state/chatgpt_signal.json")
+          published=Path("state/chatgpt_signal_event_key")
           if not p.exists():
               out.unlink(missing_ok=True); raise SystemExit(1)
           db=sqlite3.connect(p)
-          row=db.execute("SELECT id,event_key,created_ts,message FROM outbox WHERE delivered_ts IS NULL ORDER BY id DESC LIMIT 1").fetchone()
+          row=db.execute("SELECT id,event_key,created_ts,message FROM outbox ORDER BY id DESC LIMIT 1").fetchone()
           db.close()
           if not row:
               out.unlink(missing_ok=True); raise SystemExit(1)
+          previous=published.read_text().strip() if published.exists() else ""
+          if row[1] == previous:
+              out.unlink(missing_ok=True); raise SystemExit(1)
           out.write_text(json.dumps({"id":row[0],"event_key":row[1],"created_ts":row[2],"message":row[3]},indent=2)+"\\n")
+          published.write_text(row[1]+"\\n")
           print(row[0])
           PY
           }
