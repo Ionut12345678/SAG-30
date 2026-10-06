@@ -361,8 +361,8 @@ class RadarTests(unittest.TestCase):
             db.commit(); db.close()
             report=winner_recall_build(db_path)
             by_symbol={x['symbol']:x for x in report['winners']}
-            self.assertEqual(by_symbol['A']['classification'],'SHORTLIST_MISS')
-            self.assertEqual(by_symbol['B']['classification'],'MODEL_MISS')
+            self.assertEqual(by_symbol['A']['classification_under_10'],'SHORTLIST_MISS')
+            self.assertEqual(by_symbol['B']['classification_under_10'],'MODEL_MISS')
             self.assertEqual(report['winner_sessions'],2)
 
     def test_health_reports_cycle_and_pending_bridge(self):
