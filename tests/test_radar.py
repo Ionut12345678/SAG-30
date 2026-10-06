@@ -12,6 +12,8 @@ from radar.health import build as health_build
 from radar.semantic_shadow import build as semantic_shadow_build
 from radar.shadow_report import build as shadow_report_build
 from radar.volume_baseline_shadow import ingest as baseline_ingest, fields as baseline_fields
+from radar.candidate_v034 import evaluate as candidate_v034_evaluate
+from radar.candidate_v034_report import build as candidate_v034_report_build
 
 class RadarTests(unittest.TestCase):
     def snapshot(self, timestamp='2026-10-05T14:00:00+00:00'):
@@ -131,6 +133,62 @@ class RadarTests(unittest.TestCase):
             self.assertFalse(report['authoritative'])
             self.assertEqual(report['status'], 'SHADOW_ONLY')
             self.assertEqual(report['packets'], 1)
+
+    def test_v034_candidate_fresh_path_is_prospective_and_never_emits_production_alert(self):
+        db = open_db(':memory:')
+        run = db.execute("INSERT INTO runs(started,status) VALUES('now','RUNNING')").lastrowid
+        sequence = [
+            ('2026-10-05T14:00:00Z',10.0,0.0,None,None,None,None),
+            ('2026-10-05T14:05:00Z',10.3,3.0,10.0,0.0,0.3,3.0),
+            ('2026-10-05T14:10:00Z',10.3,3.0,10.3,3.0,0.0,0.0),
+            ('2026-10-05T14:15:00Z',10.5,5.0,10.3,3.0,0.2,2.0),
+        ]
+        states=[]
+        for ts,price,pct,prev_price,prev_pct,price_delta,pct_delta in sequence:
+            snap={'latestTrade':{'p':price,'t':ts},'prevDailyBar':{'c':10.0,'t':'2026-10-02T20:00:00Z'},'dailyBar':{'v':10000}}
+            record(db,run,'TEST',snap,ts,ts.replace('Z','+00:00'),900)
+            oid=db.execute('SELECT MAX(id) FROM observations').fetchone()[0]
+            payload={
+              'symbol':'TEST','retrieval_ts':ts.replace('Z','+00:00'),'source_ts':ts,
+              'same_clock_volume_sample_count':5,'observed_same_clock_volume_ratio':4.0,
+              'previous_price':prev_price,'previous_change_pct':prev_pct,
+              'price_delta':price_delta,'change_delta_pp':pct_delta
+            }
+            db.execute('CREATE TABLE IF NOT EXISTS semantic_shadow(observation_id INTEGER PRIMARY KEY,recorded_ts TEXT NOT NULL,payload TEXT NOT NULL)')
+            db.execute('INSERT INTO semantic_shadow VALUES(?,?,?)',(oid,ts,json.dumps(payload)))
+            states.append(candidate_v034_evaluate(db,oid,ts))
+        self.assertEqual(states[0],'C34-WATCH')
+        self.assertEqual(states[1],'C34-CONVERSION')
+        self.assertEqual(states[2],'C34-ACCEPTED')
+        self.assertEqual(states[3],'C34-HOT-SHADOW')
+        self.assertEqual(db.execute('SELECT COUNT(*) FROM candidate_v034_signals').fetchone()[0],1)
+        self.assertEqual(db.execute('SELECT COUNT(*) FROM outbox').fetchone()[0],0)
+
+    def test_v034_candidate_requires_five_baseline_sessions(self):
+        db = open_db(':memory:')
+        run = db.execute("INSERT INTO runs(started,status) VALUES('now','RUNNING')").lastrowid
+        ts='2026-10-05T14:05:00Z'
+        snap={'latestTrade':{'p':10.3,'t':ts},'prevDailyBar':{'c':10.0,'t':'2026-10-02T20:00:00Z'},'dailyBar':{'v':10000}}
+        record(db,run,'TEST',snap,ts,ts.replace('Z','+00:00'),900)
+        oid=db.execute('SELECT MAX(id) FROM observations').fetchone()[0]
+        db.execute('CREATE TABLE semantic_shadow(observation_id INTEGER PRIMARY KEY,recorded_ts TEXT NOT NULL,payload TEXT NOT NULL)')
+        db.execute('INSERT INTO semantic_shadow VALUES(?,?,?)',(oid,ts,json.dumps({
+          'same_clock_volume_sample_count':4,'observed_same_clock_volume_ratio':100.0,
+          'previous_price':10.0,'previous_change_pct':0.0,'price_delta':0.3,'change_delta_pp':3.0
+        })))
+        state=candidate_v034_evaluate(db,oid,ts)
+        self.assertEqual(state,'C34-LOW')
+
+    def test_v034_candidate_report_is_research_only(self):
+        with tempfile.TemporaryDirectory() as directory:
+            db_path=Path(directory)/'radar.sqlite3'
+            db=open_db(db_path)
+            from radar.candidate_v034 import init as candidate_init
+            candidate_init(db)
+            db.commit(); db.close()
+            report=candidate_v034_report_build(db_path)
+            self.assertFalse(report['authoritative'])
+            self.assertEqual(report['status'],'CANDIDATE_SHADOW_ONLY')
 
     def test_bridge_batches_all_events_and_acks_only_explicitly(self):
         with tempfile.TemporaryDirectory() as directory:
