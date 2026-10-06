@@ -135,6 +135,30 @@ def build(db_path):
             frontier=[v for v in newest.values() if v["state"] in INTERESTING_STATES]
             frontier.sort(key=lambda r:(STATE_PRIORITY.get(r["state"],99),-(r["change_pct"] if isinstance(r["change_pct"],(int,float)) else -999)))
 
+        scout_to_deep=[]
+        if latest_run_id is not None and _table_exists(db,"scout_promotions"):
+            promotions=db.execute(
+              "SELECT symbol,scout_retrieval_ts,change_pct,acceleration_pp_per_min,fresh_turnover_impulse_per_min,route_source,sticky "
+              "FROM scout_promotions WHERE run_id=? ORDER BY sticky DESC, symbol",(latest_run_id,)
+            ).fetchall()
+            for p in promotions:
+                deep=db.execute(
+                  "SELECT c.state,c.change_pct,c.rvol,c.baseline_samples,o.retrieval_ts "
+                  "FROM candidate_v034_events c JOIN observations o ON o.id=c.observation_id "
+                  "WHERE o.run_id=? AND c.symbol=? ORDER BY c.observation_id DESC LIMIT 1",
+                  (latest_run_id,p[0])
+                ).fetchone()
+                scout_to_deep.append({
+                  "symbol":p[0],"scout_ts":p[1],"scout_change_pct":p[2],
+                  "acceleration_pp_per_min":p[3],"fresh_turnover_impulse_per_min":p[4],
+                  "route_source":p[5],"sticky":bool(p[6]),
+                  "deep_state":deep[0] if deep else None,
+                  "deep_change_pct":deep[1] if deep else None,
+                  "deep_rvol":deep[2] if deep else None,
+                  "deep_baseline_samples":deep[3] if deep else None,
+                  "deep_retrieval_ts":deep[4] if deep else None,
+                })
+
         signals=db.execute("SELECT id,symbol,retrieval_ts,lane,state,change_pct,proof FROM candidate_v034_signals ORDER BY id").fetchall() if _table_exists(db,"candidate_v034_signals") else []
         milestone_counts={30:0,50:0}
         if _table_exists(db,"candidate_v034_milestones"):
@@ -167,6 +191,7 @@ def build(db_path):
           "states":states,
           "lanes":lanes,
           "current_frontier":frontier[:50],
+          "scout_to_deep":scout_to_deep[:60],
           "baseline":{
             "events_with_candidate_valid_sample_count":int(baseline[1] or 0),
             "events_rvol_ge_3":int(baseline[2] or 0),
