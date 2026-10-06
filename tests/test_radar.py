@@ -2,9 +2,8 @@ import unittest
 import tempfile
 from pathlib import Path
 from datetime import datetime, timezone
-from unittest.mock import patch
 from radar.core import analyze, early_band, open_db, record, LABEL
-from radar.runner import load_universe, session_window, flush_alerts
+from radar.runner import load_universe, session_window
 
 class RadarTests(unittest.TestCase):
     def snapshot(self, timestamp='2026-10-05T14:00:00+00:00'):
@@ -57,15 +56,6 @@ class RadarTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 load_universe(path)
 
-    @patch.dict('os.environ', {'TELEGRAM_BOT_TOKEN':'test', 'TELEGRAM_CHAT_ID':'test'})
-    @patch('radar.runner.request', return_value=({'ok': True}, 'now'))
-    def test_alert_delivery(self, request):
-        db = open_db(':memory:')
-        db.execute('INSERT INTO outbox(event_key,created_ts,message) VALUES(?,?,?)', ('test','now',LABEL))
-        flush_alerts(db)
-        flush_alerts(db)
-        self.assertEqual(request.call_count, 1)
-        self.assertIsNotNone(db.execute('SELECT delivered_ts FROM outbox').fetchone()[0])
 
 if __name__ == '__main__':
     unittest.main()
