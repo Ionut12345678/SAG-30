@@ -95,6 +95,50 @@ def _winner_path_audit(db, rows):
     winners.sort(key=lambda x:(not x["reached_50"],-x["max_change_pct_next_60m"]))
     return winners[:50]
 
+def _r2_summary(db, latest_run_id):
+    if not _table_exists(db,"candidate_v034r2_events"):
+        return {"status":"NO_DATA"}
+    states=dict(db.execute("SELECT state,COUNT(*) FROM candidate_v034r2_events GROUP BY state").fetchall())
+    first=db.execute(
+      "SELECT first_watch_pct FROM candidate_v034r2_state WHERE first_watch_ts IS NOT NULL AND first_watch_pct IS NOT NULL"
+    ).fetchall()
+    pcts=[float(x[0]) for x in first]
+    bands={}
+    for pct in pcts:
+        b=_band(pct); bands[b]=bands.get(b,0)+1
+    signals=db.execute(
+      "SELECT symbol,retrieval_ts,state,change_pct,proof FROM candidate_v034r2_signals ORDER BY id"
+    ).fetchall() if _table_exists(db,"candidate_v034r2_signals") else []
+    frontier=[]
+    if latest_run_id is not None:
+        rows=db.execute(
+          "SELECT c.symbol,c.state,c.change_pct,c.rvol,c.baseline_samples,c.detail,o.retrieval_ts "
+          "FROM candidate_v034r2_events c JOIN observations o ON o.id=c.observation_id "
+          "WHERE o.run_id=? ORDER BY c.observation_id",(latest_run_id,)
+        ).fetchall()
+        frontier=[
+          {"symbol":x[0],"state":x[1],"change_pct":x[2],"rvol":x[3],"baseline_samples":x[4],"detail":x[5],"retrieval_ts":x[6]}
+          for x in rows if x[1] in ("C34R2-WATCH","C34R2-CONVERSION","C34R2-ACCEPTED","C34R2-WAIT-ABSORPTION","C34R2-HOT-SHADOW","C34R2-LATE-SHADOW")
+        ]
+    return {
+      "status":"CANDIDATE_SHADOW_CHALLENGER",
+      "version":"SAG-30 v0.3.4r2",
+      "states":states,
+      "first_watch":{
+        "symbols":len(pcts),
+        "mean_pct":sum(pcts)/len(pcts) if pcts else None,
+        "median_pct":median(pcts) if pcts else None,
+        "bands":bands
+      },
+      "signals":{
+        "total":len(signals),
+        "negative_change_signals":sum(1 for x in signals if x[3] < 0),
+        "recent":[{"symbol":x[0],"retrieval_ts":x[1],"state":x[2],"change_pct":x[3],"proof":x[4]} for x in signals[-50:]]
+      },
+      "current_frontier":frontier[:50]
+    }
+
+
 def build(db_path):
     db=sqlite3.connect(db_path)
     try:
@@ -192,6 +236,7 @@ def build(db_path):
           "lanes":lanes,
           "current_frontier":frontier[:50],
           "scout_to_deep":scout_to_deep[:60],
+          "challenger_r2":_r2_summary(db,latest_run_id),
           "baseline":{
             "events_with_candidate_valid_sample_count":int(baseline[1] or 0),
             "events_rvol_ge_3":int(baseline[2] or 0),

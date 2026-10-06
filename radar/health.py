@@ -32,6 +32,7 @@ def build(db_path, scan_rc=0, bridge_rc=0):
         'model_readiness': {'status': 'NO_OBSERVATIONS', 'activity_confirmable_packets': 0},
         'semantic_shadow': {'packets': 0, 'with_history_samples': 0, 'with_observed_volume_ratio': 0, 'new_observed_highs': 0, 'two_positive_intervals': 0},
         'candidate_v034': {'status':'NO_DATA','states':{},'lanes':{},'signals_total':0,'last_signal':None},
+        'candidate_v034r2': {'status':'NO_DATA','states':{},'signals_total':0,'last_signal':None},
         'fast_scout': {'status':'NO_DATA'},
     }
     path = Path(db_path)
@@ -107,6 +108,22 @@ def build(db_path, scan_rc=0, bridge_rc=0):
                     'lanes':candidate_lanes,
                     'signals_total':signals_total,
                     'last_signal':last_candidate,
+                }
+            if _table_exists(db,'candidate_v034r2_events'):
+                r2_states=dict(db.execute(
+                    'SELECT c.state,COUNT(*) FROM candidate_v034r2_events c JOIN observations o ON o.id=c.observation_id WHERE o.run_id=? GROUP BY c.state',
+                    (run_id,)
+                ).fetchall())
+                r2_total=db.execute('SELECT COUNT(*) FROM candidate_v034r2_signals').fetchone()[0] if _table_exists(db,'candidate_v034r2_signals') else 0
+                r2_last=None
+                if r2_total:
+                    s=db.execute('SELECT symbol,retrieval_ts,lane,state,change_pct,proof FROM candidate_v034r2_signals ORDER BY id DESC LIMIT 1').fetchone()
+                    r2_last=dict(zip(('symbol','retrieval_ts','lane','state','change_pct','proof'),s))
+                result['candidate_v034r2']={
+                    'status':'CANDIDATE_SHADOW_CHALLENGER',
+                    'states':r2_states,
+                    'signals_total':r2_total,
+                    'last_signal':r2_last,
                 }
             if _table_exists(db,'scout_runs'):
                 sr=db.execute(
