@@ -240,20 +240,21 @@ class RadarTests(unittest.TestCase):
 
     def test_discovery_routing_can_promote_acceleration_and_fresh_volume_impulse(self):
         snapshots={
-            'BASE': {'latestTrade':{'p':10},'dailyBar':{'v':1000}},
+            'TURN': {'latestTrade':{'p':10},'dailyBar':{'v':10000}},
+            'MOVE': {'latestTrade':{'p':10},'dailyBar':{'v':100}},
             'ACCEL': {'latestTrade':{'p':10},'dailyBar':{'v':100}},
             'IMPULSE': {'latestTrade':{'p':10},'dailyBar':{'v':100}},
-            'OTHER': {'latestTrade':{'p':10},'dailyBar':{'v':100}},
+            'OTHER1': {'latestTrade':{'p':10},'dailyBar':{'v':100}},
+            'OTHER2': {'latestTrade':{'p':10},'dailyBar':{'v':100}},
         }
         caps={k:1000000 for k in snapshots}
-        changes={k:1 for k in snapshots}
+        changes={k:1 for k in snapshots}; changes['MOVE']=12
         selected=route_shortlist(
-            snapshots,caps,changes,2,
+            snapshots,caps,changes,4,
             accelerations={'ACCEL':5.0},
             volume_impulses={'IMPULSE':0.25}
         )
-        self.assertIn('ACCEL',selected)
-        self.assertIn('IMPULSE',selected)
+        self.assertEqual(set(selected),{'TURN','MOVE','ACCEL','IMPULSE'})
 
     def test_routing_momentum_is_per_minute_and_same_session(self):
         db=open_db(':memory:')
@@ -265,7 +266,7 @@ class RadarTests(unittest.TestCase):
         oid=db.execute('SELECT MAX(id) FROM observations').fetchone()[0]
         accel,impulse=routing_momentum(db,'TEST',oid,5.0,second,1000000,'2026-10-05T14:05:10+00:00')
         self.assertAlmostEqual(accel,1.0,places=6)
-        self.assertAlmostEqual(impulse,0.001,places=6)
+        self.assertAlmostEqual(impulse,0.00105,places=6)
 
     def test_discovery_routing_uses_turnover_price_response_and_activity(self):
         snapshots = {
