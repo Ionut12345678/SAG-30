@@ -15,6 +15,7 @@ from .model import evaluate, verify_spec
 from .evidence import observed_packet
 from .semantic_shadow import build as build_semantic_shadow
 from .volume_baseline_shadow import ingest as ingest_shadow_volume_baseline, historical_range
+from .candidate_v034 import evaluate as evaluate_candidate_v034
 
 log = logging.getLogger('radar')
 
@@ -210,6 +211,7 @@ def run():
                 packet = observed_packet(db, observation_id, evidence.get(symbol))
                 evaluate(db, observation_id, packet)
                 build_semantic_shadow(db, observation_id, utcnow())
+                evaluate_candidate_v034(db, observation_id, utcnow())
                 if quality == 'OK':
                     snapshots[symbol] = snapshot
                     changes[symbol] = db.execute('SELECT change_pct FROM observations WHERE id=?', (observation_id,)).fetchone()[0]

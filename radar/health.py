@@ -31,6 +31,7 @@ def build(db_path, scan_rc=0, bridge_rc=0):
         'cadence_gap_seconds': None,
         'model_readiness': {'status': 'NO_OBSERVATIONS', 'activity_confirmable_packets': 0},
         'semantic_shadow': {'packets': 0, 'with_history_samples': 0, 'with_observed_volume_ratio': 0, 'new_observed_highs': 0, 'two_positive_intervals': 0},
+        'candidate_v034': {'status':'NO_DATA','states':{},'lanes':{},'signals_total':0,'last_signal':None},
     }
     path = Path(db_path)
     if not path.exists():
@@ -85,6 +86,27 @@ def build(db_path, scan_rc=0, bridge_rc=0):
                     if int(p.get('consecutive_positive_intervals') or 0) >= 2:
                         shadow['two_positive_intervals'] += 1
                 result['semantic_shadow']=shadow
+            if _table_exists(db, 'candidate_v034_events'):
+                candidate_states=dict(db.execute(
+                    'SELECT c.state,COUNT(*) FROM candidate_v034_events c JOIN observations o ON o.id=c.observation_id WHERE o.run_id=? GROUP BY c.state',
+                    (run_id,)
+                ).fetchall())
+                candidate_lanes=dict(db.execute(
+                    'SELECT c.lane,COUNT(*) FROM candidate_v034_events c JOIN observations o ON o.id=c.observation_id WHERE o.run_id=? GROUP BY c.lane',
+                    (run_id,)
+                ).fetchall())
+                signals_total=db.execute('SELECT COUNT(*) FROM candidate_v034_signals').fetchone()[0] if _table_exists(db,'candidate_v034_signals') else 0
+                last_candidate=None
+                if signals_total:
+                    s=db.execute('SELECT symbol,retrieval_ts,lane,state,change_pct,proof FROM candidate_v034_signals ORDER BY id DESC LIMIT 1').fetchone()
+                    last_candidate=dict(zip(('symbol','retrieval_ts','lane','state','change_pct','proof'),s))
+                result['candidate_v034']={
+                    'status':'CANDIDATE_SHADOW_ONLY',
+                    'states':candidate_states,
+                    'lanes':candidate_lanes,
+                    'signals_total':signals_total,
+                    'last_signal':last_candidate,
+                }
             previous = db.execute('SELECT started FROM runs WHERE id<? ORDER BY id DESC LIMIT 1', (run_id,)).fetchone()
             if previous:
                 result['cadence_gap_seconds'] = round((datetime.fromisoformat(started)-datetime.fromisoformat(previous[0])).total_seconds(), 3)
