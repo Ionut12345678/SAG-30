@@ -5,7 +5,7 @@ import sqlite3
 from pathlib import Path
 from datetime import datetime, timezone
 from radar.core import analyze, early_band, open_db, record, LABEL
-from radar.runner import load_universe, session_window, route_shortlist
+from radar.runner import load_universe, session_window, route_shortlist, routing_view
 from radar.evidence import observed_packet
 from radar.bridge import prepare as bridge_prepare, ack as bridge_ack
 from radar.health import build as health_build
@@ -155,6 +155,20 @@ class RadarTests(unittest.TestCase):
             self.assertEqual(bridge_prepare(db_path, out_path), 1)
 
 
+
+    def test_routing_can_use_fresh_minute_bar_without_relaxing_model_quality(self):
+        snapshot = {
+            'latestTrade': {'p':10.0,'t':'2026-10-05T13:00:00Z'},
+            'minuteBar': {'c':10.8,'t':'2026-10-05T14:00:00Z'},
+            'prevDailyBar': {'c':10.0,'t':'2026-10-02T20:00:00Z'},
+            'dailyBar': {'v':1000},
+        }
+        route = routing_view(snapshot,'2026-10-05T14:01:00+00:00',900)
+        self.assertIsNotNone(route)
+        normalized, change, source = route
+        self.assertEqual(source,'minuteBar')
+        self.assertAlmostEqual(normalized['latestTrade']['p'],10.8)
+        self.assertAlmostEqual(change,8.0)
 
     def test_discovery_routing_uses_turnover_price_response_and_activity(self):
         snapshots = {
