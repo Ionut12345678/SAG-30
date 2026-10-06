@@ -18,6 +18,7 @@ def ensure_schema(db):
 def prepare(db_path, out_path):
     db=sqlite3.connect(db_path)
     ensure_schema(db)
+    db.commit()
     rows=db.execute("""SELECT o.id,o.event_key,o.created_ts,o.message
                        FROM outbox o LEFT JOIN bridge_publications b ON b.event_key=o.event_key
                        WHERE b.event_key IS NULL ORDER BY o.id""").fetchall()
