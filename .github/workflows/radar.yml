@@ -59,28 +59,10 @@ jobs:
         shell: bash
         run: |
           set -u
-          publish_signal() {
-            python - <<'PY'
-          import json, sqlite3
-          from pathlib import Path
-          p=Path("state/radar.sqlite3")
-          out=Path("state/chatgpt_signal.json")
-          published=Path("state/chatgpt_signal_event_key")
-          if not p.exists():
-              out.unlink(missing_ok=True); raise SystemExit(1)
-          db=sqlite3.connect(p)
-          row=db.execute("SELECT id,event_key,created_ts,message FROM outbox ORDER BY id DESC LIMIT 1").fetchone()
-          db.close()
-          if not row:
-              out.unlink(missing_ok=True); raise SystemExit(1)
-          previous=published.read_text().strip() if published.exists() else ""
-          if row[1] == previous:
-              out.unlink(missing_ok=True); raise SystemExit(1)
-          out.write_text(json.dumps({"id":row[0],"event_key":row[1],"created_ts":row[2],"message":row[3]},indent=2)+"\\n")
-          published.write_text(row[1]+"\\n")
-          print(row[0])
-          PY
+          prepare_signal_batch() {
+            python -m radar.bridge prepare --db state/radar.sqlite3 --out state/chatgpt_signal.json
           }
+
 
           push_signal_pr() {
             EVENT_ID="$1"
@@ -104,6 +86,8 @@ jobs:
             git add alerts/latest_signal.json
             git commit -m "SAG-30 signal event $EVENT_ID"
             git push --force-with-lease origin HEAD:"$BRANCH"
+            PUBLISHED_COMMIT="$(git rev-parse HEAD)"
+            python -m radar.bridge ack --db state/radar.sqlite3 --payload state/chatgpt_signal.json --commit "$PUBLISHED_COMMIT"
             PR_NUMBER="$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$BRANCH" --base main --state open --json number --jq '.[0].number // empty')"
             if [ -z "$PR_NUMBER" ]; then
               gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "$BRANCH" \
@@ -117,7 +101,7 @@ jobs:
             started=$(date -u +%s)
             echo "SAG30_CYCLE_START cycle=$cycle retrieval_wallclock=$(date -u --iso-8601=seconds)"
             python -m radar.runner || echo "SAG30_CYCLE_ERROR cycle=$cycle"
-            EVENT_ID="$(publish_signal)" && push_signal_pr "$EVENT_ID" || true
+            EVENT_KEYS="$(prepare_signal_batch)" && push_signal_pr "$EVENT_KEYS" || true
             if [ "$cycle" -lt 12 ]; then
               elapsed=$(( $(date -u +%s) - started ))
               sleep_for=$(( 300 - elapsed ))
