@@ -78,6 +78,8 @@ jobs:
             mkdir -p alerts
             cp state/chatgpt_signal.json alerts/latest_signal.json
             if git diff --quiet -- alerts/latest_signal.json && git ls-files --error-unmatch alerts/latest_signal.json >/dev/null 2>&1; then
+              PUBLISHED_COMMIT="$(git rev-parse HEAD)"
+              python -m radar.bridge ack --db state/radar.sqlite3 --payload state/chatgpt_signal.json --commit "$PUBLISHED_COMMIT"
               git checkout main >/dev/null 2>&1 || true
               return 0
             fi
