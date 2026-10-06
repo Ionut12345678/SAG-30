@@ -1,0 +1,29 @@
+name: SAG-30 DQ diagnostic
+on:
+  push:
+    branches: [main]
+    paths: ['.github/dq-trigger']
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore and summarize
+        shell: bash
+        run: |
+          mkdir -p state
+          git fetch origin radar-state
+          git show FETCH_HEAD:radar.sqlite3 > state/radar.sqlite3
+          python - <<'PY'
+          import sqlite3
+          db=sqlite3.connect('state/radar.sqlite3')
+          rid=db.execute("SELECT MAX(id) FROM runs").fetchone()[0]
+          print("SAG30_DQ_RUN",rid)
+          for row in db.execute("SELECT reason,COUNT(*) FROM observations WHERE run_id=? GROUP BY reason ORDER BY COUNT(*) DESC",(rid,)):
+              print("SAG30_DQ_SUMMARY",row)
+          for row in db.execute("SELECT symbol,source_ts,retrieval_ts,reason FROM observations WHERE run_id=? LIMIT 20",(rid,)):
+              print("SAG30_DQ_SAMPLE",row)
+          db.close()
+          PY
