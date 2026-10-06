@@ -14,6 +14,7 @@ from .core import LABEL, open_db, record, utcnow
 from .model import evaluate, verify_spec
 from .evidence import observed_packet
 from .semantic_shadow import build as build_semantic_shadow
+from .volume_baseline_shadow import ingest as ingest_shadow_volume_baseline, historical_range
 
 log = logging.getLogger('radar')
 
@@ -78,6 +79,43 @@ def route_shortlist(snapshots, market_caps, changes, limit):
                     return selected
     return selected
 
+def refresh_shadow_volume_baseline(db, symbols, headers, feed, now):
+    """Best-effort research backfill for current shortlist; never blocks production."""
+    if not symbols:
+        return 0
+    start,end=historical_range(now)
+    bars={}
+    page_token=None
+    pages=0
+    try:
+        while pages < 20:
+            params={
+                'symbols': ','.join(symbols),
+                'timeframe': '5Min',
+                'start': start,
+                'end': end,
+                'adjustment': 'raw',
+                'feed': feed,
+                'limit': 10000,
+            }
+            if page_token:
+                params['page_token']=page_token
+            payload,_=request('https://data.alpaca.markets/v2/stocks/bars?' + urlencode(params), headers)
+            for symbol,items in (payload.get('bars') or {}).items():
+                bars.setdefault(symbol,[]).extend(items or [])
+            page_token=payload.get('next_page_token')
+            pages += 1
+            if not page_token:
+                break
+        rows=ingest_shadow_volume_baseline(db,bars)
+        db.commit()
+        log.info('SAG30_SHADOW_BASELINE symbols=%s pages=%s rows=%s',len(symbols),pages,rows)
+        return rows
+    except Exception as exc:
+        log.warning('SAG30_SHADOW_BASELINE unavailable: %s', str(exc))
+        return 0
+
+
 def run():
     verify_spec()
     config = json.loads(Path(os.getenv('RADAR_CONFIG', 'config/radar.json')).read_text())
@@ -112,6 +150,8 @@ def run():
         changes = {}
         evidence_path = Path(config.get('evidence_file', 'config/evidence.json'))
         evidence = json.loads(evidence_path.read_text()) if evidence_path.exists() else {}
+        if not broad and candidates:
+            refresh_shadow_volume_baseline(db, candidates, headers, config['feed'], now)
         if not evidence_path.exists():
             log.warning('SAG30_SEMANTIC_EVIDENCE source=missing path=%s; undefined frozen gates remain WAIT/UNKNOWN', evidence_path)
         for offset in range(0, len(symbols), 100):
@@ -162,6 +202,10 @@ def run():
             for symbol in selected:
                 db.execute('INSERT INTO candidates VALUES(?,?,?,?) ON CONFLICT(symbol) DO UPDATE SET last_seen=excluded.last_seen,expires=excluded.expires',
                     (symbol, now.isoformat(), now.isoformat(), (now + timedelta(hours=24)).isoformat()))
+            if selected:
+                marks = ','.join('?' for _ in selected)
+                db.execute('DELETE FROM shadow_volume_baseline WHERE symbol NOT IN (' + marks + ')', selected)
+                refresh_shadow_volume_baseline(db, selected, headers, config['feed'], now)
         if symbols and not snapshots:
             raise ValueError('No fresh valid snapshots; inspect recorded DATA_QUALITY reasons')
         db.execute('UPDATE runs SET finished=?,status=?,detail=? WHERE id=?',
