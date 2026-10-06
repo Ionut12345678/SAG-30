@@ -1,0 +1,35 @@
+SAG-30 v0.4 FAST-PATH SHADOW
+Status: RESEARCH-ONLY / NOT BUY
+Parent production model: SAG-30 Early Radar v0.3.3 FROZEN SHADOW
+Frozen checksum is unchanged.
+
+Objective
+Reduce the observation gap exposed by the 300-winner stress test without changing production gates.
+
+Architecture
+1. Full-universe discovery remains on the existing ~5-minute cadence.
+2. High-recall/watchpool candidates are re-observed between full scans.
+3. The GitHub workflow performs three intermediate FAST-PATH observations approximately 55 seconds apart.
+4. Recent classified news can interrupt the normal watchpool and add a symbol directly to FAST-PATH when the symbol belongs to the configured universe.
+5. FAST-PATH never emits BUY.
+
+Research states
+DISCOVERED
+PREARM_EVENT
+PREARM_FLOW
+TRIGGER_SHADOW
+LATE_SHADOW
+
+EVENT path
+A classified pre-move catalyst plus a positive sub-10% price reaction can create PREARM_EVENT.
+A later rising observation can create TRIGGER_SHADOW.
+
+FLOW path
+A positive move below +10% with positive price acceleration and fresh volume must persist for at least two FAST-PATH observations before PREARM_FLOW.
+A continued rising observation can create TRIGGER_SHADOW.
+
+Safety
+- TRIGGER_SHADOW is not BUY.
+- No v0.3.3 FROZEN rule, r2 gate, bridge BUY semantics, or production signal is modified.
+- Any promotion of these hypotheses requires prospective validation.
+- >=20% is considered late for this challenger and receives LATE_SHADOW.
