@@ -19,6 +19,7 @@ from .volume_baseline_shadow import ingest as ingest_shadow_volume_baseline, his
 from .candidate_v034 import evaluate as evaluate_candidate_v034
 from .candidate_v034r2 import evaluate as evaluate_candidate_v034r2
 from .scout import init as init_scout, momentum_and_update as scout_momentum_and_update, active_symbols as scout_active_symbols, record_promotions as scout_record_promotions, record_universe_history as scout_record_universe_history
+from .multi_engine_shadow import evaluate as multi_engine_evaluate, record as multi_engine_record, watchpool_symbols as multi_engine_watchpool_symbols
 
 log = logging.getLogger('radar')
 
@@ -217,12 +218,30 @@ def scout_discovery(db, run_id, universe, market_caps, headers, config, now):
     session=now.astimezone(ZoneInfo('America/New_York')).date().isoformat()
     sticky=scout_active_symbols(db,session,config.get('sticky_active_limit',15))
     deep_limit=int(config.get('deep_shortlist_limit',45))
-    selected=[]
+    base_selected=[]
     for symbol in list(sticky)+list(routed):
-        if symbol not in selected:
-            selected.append(symbol)
-        if len(selected)>=deep_limit:
+        if symbol not in base_selected:
+            base_selected.append(symbol)
+        if len(base_selected)>=deep_limit:
             break
+
+    scores,high_recall,challenger_extras=multi_engine_evaluate(
+        features,base_selected,
+        extra_limit=config.get('multi_engine_extra_limit',20),
+        watch_rank_limit=config.get('multi_engine_watch_rank_limit',80),
+        min_change=config.get('multi_engine_min_change_pct',-10.0),
+        max_change=config.get('multi_engine_max_change_pct',10.0),
+    )
+    retained=multi_engine_watchpool_symbols(
+        db,session,
+        limit=config.get('multi_engine_retained_limit',15),
+        min_seen=config.get('multi_engine_min_seen',2),
+    )
+    selected=list(base_selected)
+    for symbol in list(retained)+list(challenger_extras):
+        if symbol in features and symbol not in selected:
+            selected.append(symbol)
+    multi_engine_record(db,run_id,session,features,scores,base_selected,challenger_extras)
 
     scout_record_universe_history(db,run_id,session,features,selected,sticky)
     scout_record_promotions(db,run_id,selected,features,sticky)
@@ -236,8 +255,9 @@ def scout_discovery(db, run_id, universe, market_caps, headers, config, now):
     top_impulse=sorted(impulses.items(),key=lambda x:x[1],reverse=True)[:8]
     early_selected=[(s,routing_changes.get(s),accelerations.get(s),impulses.get(s)) for s in selected if isinstance(routing_changes.get(s),(int,float)) and routing_changes[s] < 20]
     log.info(
-      'SAG30_FAST_SCOUT universe=%s eligible=%s selected=%s sticky=%s fetch_seconds=%.3f total_seconds=%.3f minute_fallbacks=%s top_accel=%s top_impulse=%s early_selected=%s',
-      len(universe),eligible,len(selected),sum(s in set(sticky) for s in selected),fetch_seconds,time.monotonic()-wall_started,
+      'SAG30_FAST_SCOUT universe=%s eligible=%s selected=%s base_selected=%s challenger_extra=%s retained=%s high_recall=%s sticky=%s fetch_seconds=%.3f total_seconds=%.3f minute_fallbacks=%s top_accel=%s top_impulse=%s early_selected=%s',
+      len(universe),eligible,len(selected),len(base_selected),len(challenger_extras),len(retained),len(high_recall),
+      sum(s in set(sticky) for s in selected),fetch_seconds,time.monotonic()-wall_started,
       fallbacks,top_accel,top_impulse,early_selected[:15]
     )
     return selected,features
