@@ -10,6 +10,7 @@ from radar.evidence import observed_packet
 from radar.bridge import prepare as bridge_prepare, ack as bridge_ack
 from radar.health import build as health_build
 from radar.semantic_shadow import build as semantic_shadow_build
+from radar.shadow_report import build as shadow_report_build
 
 class RadarTests(unittest.TestCase):
     def snapshot(self, timestamp='2026-10-05T14:00:00+00:00'):
@@ -97,6 +98,21 @@ class RadarTests(unittest.TestCase):
         self.assertTrue(payload['new_observed_high'])
         self.assertAlmostEqual(payload['change_delta_pp'], 3.0, places=6)
         self.assertEqual(db.execute('SELECT count(*) FROM semantic_shadow').fetchone()[0], 2)
+
+    def test_shadow_report_is_non_authoritative(self):
+        with tempfile.TemporaryDirectory() as directory:
+            db_path = Path(directory) / 'radar.sqlite3'
+            db = open_db(db_path)
+            run = db.execute("INSERT INTO runs(started,status) VALUES('now','RUNNING')").lastrowid
+            snap = {'latestTrade': {'p': 10.5, 't': '2026-10-05T14:00:00Z'}, 'prevDailyBar': {'c': 10, 't': '2026-10-02T20:00:00Z'}, 'dailyBar': {'v': 1000}}
+            record(db, run, 'TEST', snap, '2026-10-05T14:00:00Z', '2026-10-05T14:00:10+00:00', 900)
+            oid = db.execute('SELECT MAX(id) FROM observations').fetchone()[0]
+            semantic_shadow_build(db, oid, '2026-10-05T14:00:11+00:00')
+            db.commit(); db.close()
+            report = shadow_report_build(db_path)
+            self.assertFalse(report['authoritative'])
+            self.assertEqual(report['status'], 'SHADOW_ONLY')
+            self.assertEqual(report['packets'], 1)
 
     def test_bridge_batches_all_events_and_acks_only_explicitly(self):
         with tempfile.TemporaryDirectory() as directory:
