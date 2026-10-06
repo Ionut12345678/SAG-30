@@ -1,7 +1,7 @@
 """Prospective evidence packet builder for SAG-30 v0.3.3 FROZEN.
 
 Collects only directly observable facts from stored market snapshots. Semantic gates
-left undefined by the frozen prose remain unresolved rather than being manufactured.
+left undefined by the frozen prose remain unresolved rather than being manufactured.\nExact-source external evidence can resolve those fields without backdating.
 """
 import json
 
