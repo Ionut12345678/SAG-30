@@ -347,8 +347,8 @@ def run():
                   'INSERT INTO candidates VALUES(?,?,?,?) ON CONFLICT(symbol) DO UPDATE SET last_seen=excluded.last_seen,expires=excluded.expires',
                   (symbol,now.isoformat(),now.isoformat(),(now+timedelta(hours=24)).isoformat())
                 )
-            db.execute('DELETE FROM shadow_volume_baseline WHERE symbol NOT IN ('+marks+')',selected)
             refresh_shadow_volume_baseline(db,selected,headers,config['feed'],now)
+            db.execute('DELETE FROM shadow_volume_baseline WHERE symbol NOT IN ('+marks+')',selected)
             deep_count=prime_selected_after_discovery(db,run_id,selected,headers,config,evidence)
             run_status='DISCOVERY_OK'
             detail=f'FAST_SCOUT {len(universe)} universe -> {deep_count} deep observations'
