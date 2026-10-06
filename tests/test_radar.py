@@ -131,6 +131,7 @@ class RadarTests(unittest.TestCase):
             self.assertEqual(payload['observations']['ok'], 1)
             self.assertEqual(payload['pending_bridge_events'], 1)
             self.assertEqual(payload['health'], 'DEGRADED')
+            self.assertEqual(payload['model_readiness']['status'], 'BLOCKED_SEMANTIC_EVIDENCE')
             failed = health_build(db_path, 1, 0)
             self.assertEqual(failed['health'], 'FAIL')
 
