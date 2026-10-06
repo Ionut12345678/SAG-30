@@ -1,7 +1,7 @@
 name: SAG-30 radar
 on:
   schedule:
-    - cron: '*/5 * * * 1-5'
+    - cron: '7 * * * 1-5'
   workflow_dispatch:
 permissions:
   contents: write
@@ -12,7 +12,7 @@ concurrency:
 jobs:
   observe:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 65
     steps:
       - uses: actions/checkout@v4
         with:
@@ -34,13 +34,25 @@ jobs:
             status=$?
             if [ "$status" -ne 2 ]; then exit "$status"; fi
           fi
-      - name: Observe
+      - name: Observe at controlled five-minute cadence
         env:
           ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
           ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        run: python -m radar.runner
+        shell: bash
+        run: |
+          set -u
+          for cycle in $(seq 1 12); do
+            started=$(date -u +%s)
+            echo "SAG30_CYCLE_START cycle=$cycle retrieval_wallclock=$(date -u --iso-8601=seconds)"
+            python -m radar.runner || echo "SAG30_CYCLE_ERROR cycle=$cycle"
+            if [ "$cycle" -lt 12 ]; then
+              elapsed=$(( $(date -u +%s) - started ))
+              sleep_for=$(( 300 - elapsed ))
+              if [ "$sleep_for" -gt 0 ]; then sleep "$sleep_for"; fi
+            fi
+          done
       - name: Publish ChatGPT signal event
         id: chatgpt_bridge
         if: ${{ success() }}
