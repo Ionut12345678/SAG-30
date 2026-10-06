@@ -22,6 +22,19 @@ class RadarTests(unittest.TestCase):
             self.assertEqual(result[1], 'DATA_QUALITY')
             self.assertIsNone(result[4])
 
+    def test_previous_bar_weekend_is_valid(self):
+        snapshot = {'latestTrade': {'p': 11, 't': '2026-10-05T14:00:00Z'},
+                    'prevDailyBar': {'c': 10, 't': '2026-10-02T20:00:00Z'}}
+        result = analyze(snapshot, '2026-10-05T14:01:00+00:00', 900)
+        self.assertEqual(result[1], 'OK')
+
+    def test_previous_bar_future_is_rejected(self):
+        snapshot = {'latestTrade': {'p': 11, 't': '2026-10-05T14:00:00Z'},
+                    'prevDailyBar': {'c': 10, 't': '2026-10-05T14:02:00Z'}}
+        result = analyze(snapshot, '2026-10-05T14:01:00+00:00', 900)
+        self.assertEqual(result[1], 'DATA_QUALITY')
+        self.assertIn('invalid_previous_close_time', result[2])
+
     def test_prospective_append_and_no_invented_hot(self):
         db = open_db(':memory:')
         run = db.execute("INSERT INTO runs(started,status) VALUES('now','RUNNING')").lastrowid

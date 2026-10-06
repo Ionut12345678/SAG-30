@@ -58,7 +58,11 @@ def analyze(snapshot, retrieved, max_age):
     try:
         previous_time = datetime.fromisoformat(previous.get('t', '').replace('Z','+00:00'))
         retrieval_time = datetime.fromisoformat(retrieved)
-        if previous_time.tzinfo is None or previous_time.date() >= retrieval_time.date() or (retrieval_time - previous_time).days > 7:
+        # prevDailyBar is the provider's previous trading bar, not necessarily the
+        # previous calendar day (weekends/holidays must not be treated as corrupt).
+        # Reject only impossible/future bars or bars so old they cannot represent
+        # a recent previous session. The frozen evaluator itself is unchanged.
+        if previous_time.tzinfo is None or previous_time >= retrieval_time or (retrieval_time - previous_time).total_seconds() > 7 * 86400:
             reasons.append('invalid_previous_close_time')
     except (ValueError, TypeError):
         reasons.append('invalid_previous_close_time')
