@@ -29,6 +29,7 @@ def build(db_path, scan_rc=0, bridge_rc=0):
         'pending_bridge_events': 0,
         'last_signal': None,
         'cadence_gap_seconds': None,
+        'model_readiness': {'status': 'NO_OBSERVATIONS', 'activity_confirmable_packets': 0},
     }
     path = Path(db_path)
     if not path.exists():
@@ -47,6 +48,21 @@ def build(db_path, scan_rc=0, bridge_rc=0):
             result['evaluation_states'] = dict(db.execute(
                 'SELECT e.status,COUNT(*) FROM evaluations e JOIN observations o ON o.id=e.observation_id WHERE o.run_id=? GROUP BY e.status',
                 (run_id,)).fetchall())
+            if _table_exists(db, 'evidence'):
+                packets=db.execute(
+                    'SELECT ev.payload FROM evidence ev JOIN observations o ON o.id=ev.observation_id WHERE o.run_id=?',
+                    (run_id,)).fetchall()
+                activity_ready=0
+                for (raw,) in packets:
+                    packet=json.loads(raw)
+                    baseline=packet.get('valid_activity_baseline') or {}
+                    rvol=packet.get('rvol')
+                    if isinstance(rvol,(int,float)) and baseline.get('value') is True and baseline.get('provenance'):
+                        activity_ready += 1
+                result['model_readiness'] = {
+                    'status': 'ACTIVITY_EVIDENCE_AVAILABLE' if activity_ready else ('BLOCKED_SEMANTIC_EVIDENCE' if ok else 'NO_VALID_OBSERVATIONS'),
+                    'activity_confirmable_packets': activity_ready,
+                }
             previous = db.execute('SELECT started FROM runs WHERE id<? ORDER BY id DESC LIMIT 1', (run_id,)).fetchone()
             if previous:
                 result['cadence_gap_seconds'] = round((datetime.fromisoformat(started)-datetime.fromisoformat(previous[0])).total_seconds(), 3)
