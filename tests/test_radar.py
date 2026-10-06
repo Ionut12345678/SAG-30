@@ -13,6 +13,7 @@ from radar.semantic_shadow import build as semantic_shadow_build
 from radar.shadow_report import build as shadow_report_build
 from radar.volume_baseline_shadow import ingest as baseline_ingest, fields as baseline_fields, historical_range
 from radar.candidate_v034 import evaluate as candidate_v034_evaluate
+from radar.candidate_v034r2 import evaluate as candidate_v034r2_evaluate
 from radar.candidate_v034_report import build as candidate_v034_report_build
 
 class RadarTests(unittest.TestCase):
@@ -173,6 +174,59 @@ class RadarTests(unittest.TestCase):
         self.assertEqual(states[3],'C34-HOT-SHADOW')
         self.assertEqual(db.execute('SELECT COUNT(*) FROM candidate_v034_signals').fetchone()[0],1)
         self.assertEqual(db.execute('SELECT COUNT(*) FROM outbox').fetchone()[0],0)
+
+    def test_v034r2_keeps_activity_memory_when_rvol_falls(self):
+        db=open_db(':memory:')
+        run=db.execute("INSERT INTO runs(started,status) VALUES('now','RUNNING')").lastrowid
+        sequence=[
+          ('2026-10-05T14:00:00Z',10.0,0.0,4.0,10.0,-0.5),
+          ('2026-10-05T14:05:00Z',10.3,3.0,2.0,10.0,0.0),
+          ('2026-10-05T14:10:00Z',10.3,3.0,2.0,10.3,3.0),
+          ('2026-10-05T14:15:00Z',10.5,5.0,2.0,10.3,3.0),
+        ]
+        states=[]
+        previous_price=None; previous_pct=None
+        for ts,price,pct,rvol,_,_ in sequence:
+            snap={'latestTrade':{'p':price,'t':ts},'prevDailyBar':{'c':10.0,'t':'2026-10-02T20:00:00Z'},'dailyBar':{'v':10000}}
+            record(db,run,'TEST',snap,ts,ts.replace('Z','+00:00'),900)
+            oid=db.execute('SELECT MAX(id) FROM observations').fetchone()[0]
+            db.execute('CREATE TABLE IF NOT EXISTS semantic_shadow(observation_id INTEGER PRIMARY KEY,recorded_ts TEXT NOT NULL,payload TEXT NOT NULL)')
+            db.execute('INSERT INTO semantic_shadow VALUES(?,?,?)',(oid,ts,json.dumps({
+              'same_clock_volume_sample_count':5,'observed_same_clock_volume_ratio':rvol,
+              'previous_price':previous_price,'previous_change_pct':previous_pct,
+              'price_delta':None if previous_price is None else price-previous_price,
+              'change_delta_pp':None if previous_pct is None else pct-previous_pct
+            })))
+            states.append(candidate_v034r2_evaluate(db,oid,ts))
+            previous_price=price; previous_pct=pct
+        self.assertEqual(states[0],'C34R2-WATCH')
+        self.assertEqual(states[1],'C34R2-CONVERSION')
+        self.assertEqual(states[2],'C34R2-ACCEPTED')
+        self.assertEqual(states[3],'C34R2-HOT-SHADOW')
+
+    def test_v034r2_blocks_negative_context_conversion(self):
+        db=open_db(':memory:')
+        run=db.execute("INSERT INTO runs(started,status) VALUES('now','RUNNING')").lastrowid
+        seq=[
+          ('2026-10-05T14:00:00Z',9.0,-10.0,4.0,None,None),
+          ('2026-10-05T14:05:00Z',9.2,-8.0,2.0,9.0,-10.0),
+        ]
+        states=[]
+        for ts,price,pct,rvol,pp,pc in seq:
+            snap={'latestTrade':{'p':price,'t':ts},'prevDailyBar':{'c':10.0,'t':'2026-10-02T20:00:00Z'},'dailyBar':{'v':10000}}
+            record(db,run,'TEST',snap,ts,ts.replace('Z','+00:00'),900)
+            oid=db.execute('SELECT MAX(id) FROM observations').fetchone()[0]
+            db.execute('CREATE TABLE IF NOT EXISTS semantic_shadow(observation_id INTEGER PRIMARY KEY,recorded_ts TEXT NOT NULL,payload TEXT NOT NULL)')
+            db.execute('INSERT INTO semantic_shadow VALUES(?,?,?)',(oid,ts,json.dumps({
+              'same_clock_volume_sample_count':5,'observed_same_clock_volume_ratio':rvol,
+              'previous_price':pp,'previous_change_pct':pc,
+              'price_delta':None if pp is None else price-pp,
+              'change_delta_pp':None if pc is None else pct-pc
+            })))
+            states.append(candidate_v034r2_evaluate(db,oid,ts))
+        self.assertEqual(states[0],'C34R2-WATCH')
+        self.assertEqual(states[1],'C34R2-WATCH')
+        self.assertEqual(db.execute('SELECT COUNT(*) FROM candidate_v034r2_signals').fetchone()[0],0)
 
     def test_v034_candidate_requires_five_baseline_sessions(self):
         db = open_db(':memory:')
