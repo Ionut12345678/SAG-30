@@ -4,6 +4,7 @@ import logging
 import os
 import sys
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
 from pathlib import Path
 from urllib.error import HTTPError
@@ -55,8 +56,10 @@ def load_market_caps(path):
     with open(path, newline='') as file:
         return {row['symbol'].strip().upper(): float(row['market_cap_usd']) for row in csv.DictReader(file)}
 
-def route_shortlist(snapshots, market_caps, changes, limit):
+def route_shortlist(snapshots, market_caps, changes, limit, accelerations=None, volume_impulses=None):
     """Diversified discovery routing only; these rankings are never frozen model gates."""
+    accelerations=accelerations or {}
+    volume_impulses=volume_impulses or {}
     symbols=list(snapshots)
     def volume(symbol):
         return float((snapshots[symbol].get('dailyBar') or {}).get('v') or 0)
@@ -67,6 +70,8 @@ def route_shortlist(snapshots, market_caps, changes, limit):
     routes=[
         sorted(symbols,key=lambda s:(turnover(s),s),reverse=True),
         sorted(symbols,key=lambda s:(float(changes.get(s) or 0),s),reverse=True),
+        sorted(symbols,key=lambda s:(float(accelerations.get(s) or 0),s),reverse=True),
+        sorted(symbols,key=lambda s:(float(volume_impulses.get(s) or 0),s),reverse=True),
         sorted(symbols,key=lambda s:(volume(s),s),reverse=True),
     ]
     selected=[]
@@ -103,6 +108,56 @@ def routing_view(snapshot, retrieved, max_age):
             normalized['latestTrade']={'p':float(price),'t':stamp}
             return normalized, float((float(price)/float(close)-1)*100), key
     return None
+
+
+def fetch_snapshot_batches(symbols, headers, feed, workers=8):
+    """Fetch snapshot batches concurrently, then return them in deterministic universe order."""
+    batches=[(offset,symbols[offset:offset+100]) for offset in range(0,len(symbols),100)]
+    if not batches:
+        return []
+    workers=max(1,min(int(workers or 1),len(batches)))
+    def one(item):
+        offset,batch=item
+        started=utcnow()
+        url='https://data.alpaca.markets/v2/stocks/snapshots?' + urlencode({'symbols': ','.join(batch), 'feed': feed})
+        result,retrieved=request(url,headers)
+        return offset,batch,started,result,retrieved
+    completed=[]
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        futures=[pool.submit(one,item) for item in batches]
+        for future in as_completed(futures):
+            completed.append(future.result())
+    return sorted(completed,key=lambda x:x[0])
+
+def routing_momentum(db, symbol, observation_id, current_change, snapshot, market_cap, retrieval_ts):
+    """Routing-only price acceleration and fresh turnover impulse, normalized per minute."""
+    if not isinstance(current_change,(int,float)):
+        return 0.0,0.0
+    prior=db.execute(
+        "SELECT retrieval_ts,change_pct,payload FROM observations WHERE symbol=? AND id<? AND change_pct IS NOT NULL ORDER BY id DESC LIMIT 1",
+        (symbol,observation_id)
+    ).fetchone()
+    if not prior:
+        return 0.0,0.0
+    try:
+        current_dt=datetime.fromisoformat(retrieval_ts)
+        prior_dt=datetime.fromisoformat(prior[0])
+        if current_dt.astimezone(ZoneInfo('America/New_York')).date()!=prior_dt.astimezone(ZoneInfo('America/New_York')).date():
+            return 0.0,0.0
+        minutes=(current_dt-prior_dt).total_seconds()/60.0
+        if minutes<=0 or minutes>60:
+            return 0.0,0.0
+        acceleration=(float(current_change)-float(prior[1]))/minutes
+        prior_payload=json.loads(prior[2])
+        current_volume=float((snapshot.get('dailyBar') or {}).get('v') or 0)
+        prior_volume=float((prior_payload.get('dailyBar') or {}).get('v') or 0)
+        price=float((snapshot.get('latestTrade') or {}).get('p') or (snapshot.get('minuteBar') or {}).get('c') or 0)
+        cap=float(market_cap or 0)
+        fresh=max(0.0,current_volume-prior_volume)
+        impulse=(fresh*price/cap)/minutes if cap>0 and price>0 else 0.0
+        return acceleration,impulse
+    except (TypeError,ValueError,KeyError,json.JSONDecodeError):
+        return 0.0,0.0
 
 
 def refresh_shadow_volume_baseline(db, symbols, headers, feed, now):
@@ -203,17 +258,18 @@ def run():
         routing_snapshots = {}
         routing_changes = {}
         routing_fallbacks = 0
+        routing_accelerations = {}
+        routing_volume_impulses = {}
         evidence_path = Path(config.get('evidence_file', 'config/evidence.json'))
         evidence = json.loads(evidence_path.read_text()) if evidence_path.exists() else {}
         if not broad and candidates:
             refresh_shadow_volume_baseline(db, candidates, headers, config['feed'], now)
         if not evidence_path.exists():
             log.warning('SAG30_SEMANTIC_EVIDENCE source=missing path=%s; undefined frozen gates remain WAIT/UNKNOWN', evidence_path)
-        for offset in range(0, len(symbols), 100):
-            batch = symbols[offset:offset + 100]
-            started = utcnow()
-            url = 'https://data.alpaca.markets/v2/stocks/snapshots?' + urlencode({'symbols': ','.join(batch), 'feed': config['feed']})
-            result, retrieved = request(url, headers)
+        fetched_batches=fetch_snapshot_batches(
+            symbols, headers, config['feed'], config.get('snapshot_workers',8)
+        )
+        for offset,batch,started,result,retrieved in fetched_batches:
             for symbol in batch:
                 snapshot = result.get(symbol, {})
                 quality = record(db, run_id, symbol, snapshot, started, retrieved, config['max_source_age_seconds'])
@@ -243,12 +299,22 @@ def run():
                     changes[symbol] = db.execute('SELECT change_pct FROM observations WHERE id=?', (observation_id,)).fetchone()[0]
                     routing_snapshots[symbol] = snapshot
                     routing_changes[symbol] = changes[symbol]
+                    accel,impulse=routing_momentum(
+                        db,symbol,observation_id,changes[symbol],snapshot,market_caps.get(symbol),retrieved
+                    )
+                    routing_accelerations[symbol]=accel
+                    routing_volume_impulses[symbol]=impulse
                 else:
                     route = routing_view(snapshot, retrieved, config['max_source_age_seconds'])
                     if route:
                         normalized, route_change, route_source = route
                         routing_snapshots[symbol] = normalized
                         routing_changes[symbol] = route_change
+                        accel,impulse=routing_momentum(
+                            db,symbol,observation_id,route_change,normalized,market_caps.get(symbol),retrieved
+                        )
+                        routing_accelerations[symbol]=accel
+                        routing_volume_impulses[symbol]=impulse
                         if route_source == 'minuteBar':
                             routing_fallbacks += 1
             db.commit()
@@ -261,9 +327,14 @@ def run():
             time.sleep(0.4)
         if broad:
             # Multi-route operational discovery only; none of these rankings is a model gate.
-            selected = route_shortlist(routing_snapshots, market_caps, routing_changes, config['shortlist_limit'])
-            log.info('SAG30_ROUTING eligible=%s model_ok=%s minute_fallbacks=%s selected=%s',
-                     len(routing_snapshots),len(snapshots),routing_fallbacks,len(selected))
+            selected = route_shortlist(
+                routing_snapshots, market_caps, routing_changes, config['shortlist_limit'],
+                routing_accelerations, routing_volume_impulses
+            )
+            top_accel=sorted(routing_accelerations.items(),key=lambda x:x[1],reverse=True)[:5]
+            top_impulse=sorted(routing_volume_impulses.items(),key=lambda x:x[1],reverse=True)[:5]
+            log.info('SAG30_ROUTING eligible=%s model_ok=%s minute_fallbacks=%s selected=%s top_accel=%s top_impulse=%s',
+                     len(routing_snapshots),len(snapshots),routing_fallbacks,len(selected),top_accel,top_impulse)
             if selected:
                 marks = ','.join('?' for _ in selected)
                 db.execute('DELETE FROM candidates WHERE symbol NOT IN (' + marks + ')', selected)
