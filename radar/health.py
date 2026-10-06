@@ -48,6 +48,10 @@ def build(db_path, scan_rc=0, bridge_rc=0):
             result['evaluation_states'] = dict(db.execute(
                 'SELECT e.status,COUNT(*) FROM evaluations e JOIN observations o ON o.id=e.observation_id WHERE o.run_id=? GROUP BY e.status',
                 (run_id,)).fetchall())
+            result['model_readiness'] = {
+                'status': 'BLOCKED_SEMANTIC_EVIDENCE' if ok else 'NO_VALID_OBSERVATIONS',
+                'activity_confirmable_packets': 0,
+            }
             if _table_exists(db, 'evidence'):
                 packets=db.execute(
                     'SELECT ev.payload FROM evidence ev JOIN observations o ON o.id=ev.observation_id WHERE o.run_id=?',
