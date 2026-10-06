@@ -11,7 +11,7 @@ from radar.bridge import prepare as bridge_prepare, ack as bridge_ack
 from radar.health import build as health_build
 from radar.semantic_shadow import build as semantic_shadow_build
 from radar.shadow_report import build as shadow_report_build
-from radar.volume_baseline_shadow import ingest as baseline_ingest, fields as baseline_fields
+from radar.volume_baseline_shadow import ingest as baseline_ingest, fields as baseline_fields, historical_range
 from radar.candidate_v034 import evaluate as candidate_v034_evaluate
 from radar.candidate_v034_report import build as candidate_v034_report_build
 
@@ -120,6 +120,14 @@ class RadarTests(unittest.TestCase):
         self.assertAlmostEqual(fields['shadow_observed_volume_ratio'],1000.0/375.0)
         override = baseline_fields(db,'TEST','2026-10-05T14:05:10+00:00',750.0)
         self.assertAlmostEqual(override['shadow_observed_volume_ratio'],2.0)
+
+    def test_historical_range_respects_new_york_dst(self):
+        winter_start,winter_end=historical_range(datetime(2026,1,15,15,tzinfo=timezone.utc),1)
+        summer_start,summer_end=historical_range(datetime(2026,7,15,15,tzinfo=timezone.utc),1)
+        self.assertTrue(winter_start.endswith('-05:00'))
+        self.assertTrue(winter_end.endswith('-05:00'))
+        self.assertTrue(summer_start.endswith('-04:00'))
+        self.assertTrue(summer_end.endswith('-04:00'))
 
     def test_shadow_report_is_non_authoritative(self):
         with tempfile.TemporaryDirectory() as directory:
