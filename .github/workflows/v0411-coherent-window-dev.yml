@@ -53,8 +53,9 @@ jobs:
           cases=[]
           for (se,sy),pk in labels.items():
             if se!='2026-10-07' or pk<5:continue
-            cases.append({'symbol':sy,'peak':pk,'w3':hit(sy,3),'w5':hit(sy,5)})
-          for n in ['w3','w5']:
+            h0=hit(sy,0)
+            cases.append({'symbol':sy,'peak':pk,'samebar':h0,'w3':hit(sy,3),'w5':hit(sy,5)})
+          for n in ['samebar','w3','w5']:
             w=[x for x in cases if x['peak']>=30]; neg=[x for x in cases if 5<=x['peak']<30]
             hh=sum(bool(x[n]) for x in w);ff=sum(bool(x[n]) for x in neg)
             print(n,json.dumps({'winners':len(w),'hits':hh,'recall':hh/len(w) if w else 0,'hard_neg':len(neg),'false':ff,'fpr':ff/len(neg) if neg else 0}))
