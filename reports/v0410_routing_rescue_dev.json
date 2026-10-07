@@ -1,0 +1,119 @@
+{
+  "DKI": [
+    {
+      "R25_A50": false,
+      "R30_A60": false,
+      "R40_A60": false,
+      "R50_A50": false,
+      "R50_A75": false,
+      "existing_selected_pre10": false,
+      "peak": 156.0,
+      "session": "2026-10-07",
+      "symbol": "DKI"
+    }
+  ],
+  "SBFM": [
+    {
+      "R25_A50": true,
+      "R30_A60": true,
+      "R40_A60": true,
+      "R50_A50": true,
+      "R50_A75": true,
+      "existing_selected_pre10": false,
+      "peak": 290.6646372399797,
+      "session": "2026-10-07",
+      "symbol": "SBFM"
+    }
+  ],
+  "incremental_load": {
+    "R25_A50": {
+      "max_extra": 1,
+      "mean_extra_on_affected_runs": 1.0,
+      "median_extra": 1.0,
+      "runs_with_extra": 6
+    },
+    "R30_A60": {
+      "max_extra": 3,
+      "mean_extra_on_affected_runs": 1.2105263157894737,
+      "median_extra": 1,
+      "runs_with_extra": 19
+    },
+    "R40_A60": {
+      "max_extra": 4,
+      "mean_extra_on_affected_runs": 1.5777777777777777,
+      "median_extra": 1,
+      "runs_with_extra": 45
+    },
+    "R50_A50": {
+      "max_extra": 7,
+      "mean_extra_on_affected_runs": 2.0,
+      "median_extra": 2,
+      "runs_with_extra": 51
+    },
+    "R50_A75": {
+      "max_extra": 7,
+      "mean_extra_on_affected_runs": 2.6911764705882355,
+      "median_extra": 2.0,
+      "runs_with_extra": 68
+    }
+  },
+  "metrics": {
+    "R25_A50": {
+      "false_hits": 32,
+      "hard_negative_fpr": 0.07424593967517401,
+      "hard_negatives": 431,
+      "hits30": 1,
+      "hits50": 1,
+      "recall30": 0.024390243902439025,
+      "recall50": 0.03125,
+      "winners30": 41,
+      "winners50": 32
+    },
+    "R30_A60": {
+      "false_hits": 74,
+      "hard_negative_fpr": 0.1716937354988399,
+      "hard_negatives": 431,
+      "hits30": 5,
+      "hits50": 5,
+      "recall30": 0.12195121951219512,
+      "recall50": 0.15625,
+      "winners30": 41,
+      "winners50": 32
+    },
+    "R40_A60": {
+      "false_hits": 120,
+      "hard_negative_fpr": 0.27842227378190254,
+      "hard_negatives": 431,
+      "hits30": 7,
+      "hits50": 6,
+      "recall30": 0.17073170731707318,
+      "recall50": 0.1875,
+      "winners30": 41,
+      "winners50": 32
+    },
+    "R50_A50": {
+      "false_hits": 141,
+      "hard_negative_fpr": 0.3271461716937355,
+      "hard_negatives": 431,
+      "hits30": 7,
+      "hits50": 6,
+      "recall30": 0.17073170731707318,
+      "recall50": 0.1875,
+      "winners30": 41,
+      "winners50": 32
+    },
+    "R50_A75": {
+      "false_hits": 167,
+      "hard_negative_fpr": 0.3874709976798144,
+      "hard_negatives": 431,
+      "hits30": 7,
+      "hits50": 6,
+      "recall30": 0.17073170731707318,
+      "recall50": 0.1875,
+      "winners30": 41,
+      "winners50": 32
+    }
+  },
+  "note": "DEV routing study. v0.4.9 semantics unchanged. Broad-scout outcomes include routing misses. No BUY.",
+  "status": "V0.4.10_ROUTING_RESCUE_DEV_NOT_OOS_NOT_BUY"
+}
