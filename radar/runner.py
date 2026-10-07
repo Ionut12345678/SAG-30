@@ -364,19 +364,29 @@ def run():
         if broad:
             selected,_=scout_discovery(db,run_id,universe,market_caps,headers,config,now)
             if not selected:
-                raise ValueError('FAST SCOUT found no fresh routing-eligible snapshots')
-            marks=','.join('?' for _ in selected)
-            db.execute('DELETE FROM candidates WHERE symbol NOT IN ('+marks+')',selected)
-            for symbol in selected:
-                db.execute(
-                  'INSERT INTO candidates VALUES(?,?,?,?) ON CONFLICT(symbol) DO UPDATE SET last_seen=excluded.last_seen,expires=excluded.expires',
-                  (symbol,now.isoformat(),now.isoformat(),(now+timedelta(hours=24)).isoformat())
-                )
-            refresh_shadow_volume_baseline(db,selected,headers,config['feed'],now)
-            db.execute('DELETE FROM shadow_volume_baseline WHERE symbol NOT IN ('+marks+')',selected)
-            deep_count=prime_selected_after_discovery(db,run_id,selected,headers,config,evidence)
-            run_status='DISCOVERY_OK'
-            detail=f'FAST_SCOUT {len(universe)} universe -> {deep_count} deep observations'
+                # Infrastructure/data failover only. Never claim full-universe discovery was healthy,
+                # never backfill, and never change frozen/candidate model semantics.
+                if not candidates:
+                    raise ValueError('FAST SCOUT found no fresh routing-eligible snapshots and no existing shortlist is available')
+                refresh_shadow_volume_baseline(db,candidates,headers,config['feed'],now)
+                deep_count=prime_selected_after_discovery(db,run_id,candidates,headers,config,evidence)
+                if deep_count <= 0:
+                    raise ValueError('FAST SCOUT data gap and fallback shortlist produced no observations')
+                run_status='MONITOR_DATA_GAP'
+                detail=f'DISCOVERY_DATA_GAP eligible=0/{len(universe)}; fallback existing shortlist {deep_count} observations; full-universe discovery unhealthy'
+            else:
+                marks=','.join('?' for _ in selected)
+                db.execute('DELETE FROM candidates WHERE symbol NOT IN ('+marks+')',selected)
+                for symbol in selected:
+                    db.execute(
+                      'INSERT INTO candidates VALUES(?,?,?,?) ON CONFLICT(symbol) DO UPDATE SET last_seen=excluded.last_seen,expires=excluded.expires',
+                      (symbol,now.isoformat(),now.isoformat(),(now+timedelta(hours=24)).isoformat())
+                    )
+                refresh_shadow_volume_baseline(db,selected,headers,config['feed'],now)
+                db.execute('DELETE FROM shadow_volume_baseline WHERE symbol NOT IN ('+marks+')',selected)
+                deep_count=prime_selected_after_discovery(db,run_id,selected,headers,config,evidence)
+                run_status='DISCOVERY_OK'
+                detail=f'FAST_SCOUT {len(universe)} universe -> {deep_count} deep observations'
         else:
             if not candidates:
                 raise ValueError('No shortlist candidates available for deep monitor')
