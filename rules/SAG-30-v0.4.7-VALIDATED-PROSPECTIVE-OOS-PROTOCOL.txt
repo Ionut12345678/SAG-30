@@ -1,0 +1,41 @@
+SAG-30 v0.4.7 VALIDATED — PROSPECTIVE/OOS PROTOCOL
+Status: FROZEN PROSPECTIVE SHADOW / NOT BUY
+Production control: SAG-30 v0.3.3 FROZEN unchanged.
+
+Historical freeze
+EVENT OR FILTERED_FLOW is frozen exactly as independently validated:
+- EVENT = classified timestamped catalyst/news discovered before +10 early boundary.
+- Base FLOW = event-time <=5m, two positive eligible intervals, <+10, first +30 censor.
+- FILTERED_FLOW = base FLOW AND ACTIVITY_RATIO >=1.50.
+- ACTIVITY_RATIO = current PRE-ARM observed 1m volume / median of up to prior 20 valid observed 1m bar volumes in the same session.
+- Missing prior valid volume baseline => filtered FLOW does not pass.
+No historical threshold retuning.
+
+Independent historical validation already completed on 300 winners +300 date-matched hard negatives entirely before 2026-09-18:
+- recall 39.00%
+- FPR 27.00%
+- balanced precision 59.09%
+- FPR relative reduction 37.69% versus unfiltered union.
+Historical result does not authorize BUY.
+
+Prospective start
+First complete prospective US session after this protocol is committed. No backfill and no credit for observations before activation.
+Do not change EVENT, FLOW or ACTIVITY_RATIO threshold during the prospective block.
+
+Required prospective telemetry at FIRST SIGNAL
+- retrieval timestamp and source timestamp
+- symbol, signal type EVENT/FILTERED_FLOW, move consumed
+- activity ratio for FILTERED_FLOW
+- bid, ask, spread_pct when available
+- minute-bar presence / data continuity
+- catalyst class/context for EVENT
+- ask availability
+- depth/slippage/halt state = UNKNOWN unless actually retrieved; never infer.
+
+Outcome audit
+After session maturation, identify eligible +30 outcomes and same-date hard negatives without changing signal history. Report recall, FPR, precision, lead, EVENT/FLOW contribution, and execution telemetry.
+Do not call a miss MODEL FAIL when source/cadence/data was insufficient.
+
+Stability rule
+Do not resume historical parameter tuning from individual prospective cases. Any material semantic change requires a new version and new prospective start.
+v0.3.3 remains the only production FROZEN control; v0.4.7 is research-only and never BUY.
