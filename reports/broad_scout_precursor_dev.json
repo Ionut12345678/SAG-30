@@ -1,0 +1,368 @@
+{
+  "metrics": {
+    "RANK100": {
+      "early_recall": 1.0,
+      "early_scout_winners": 7,
+      "early_winner_hits": 7,
+      "false_hits": 110,
+      "fpr": 0.7586206896551724,
+      "hard_negatives": 145,
+      "winner_hits": 7,
+      "winners": 33
+    },
+    "RANK100_CHG100": {
+      "early_recall": 1.0,
+      "early_scout_winners": 7,
+      "early_winner_hits": 7,
+      "false_hits": 113,
+      "fpr": 0.7793103448275862,
+      "hard_negatives": 145,
+      "winner_hits": 7,
+      "winners": 33
+    },
+    "RANK50": {
+      "early_recall": 1.0,
+      "early_scout_winners": 7,
+      "early_winner_hits": 7,
+      "false_hits": 96,
+      "fpr": 0.6620689655172414,
+      "hard_negatives": 145,
+      "winner_hits": 7,
+      "winners": 33
+    }
+  },
+  "note": "Routing study only; no model gate changes.",
+  "status": "BROAD_SCOUT_PRECURSOR_DEV_NOT_OOS_NOT_BUY",
+  "winner_detail": [
+    {
+      "RANK100": false,
+      "RANK100_CHG100": false,
+      "RANK50": false,
+      "early_scout": false,
+      "peak": 59.018264840182646,
+      "scout_seen": true,
+      "session": "2026-10-06",
+      "symbol": "APUS"
+    },
+    {
+      "RANK100": false,
+      "RANK100_CHG100": false,
+      "RANK50": false,
+      "early_scout": false,
+      "peak": 30.78797725426483,
+      "scout_seen": true,
+      "session": "2026-10-06",
+      "symbol": "FRGT"
+    },
+    {
+      "RANK100": false,
+      "RANK100_CHG100": false,
+      "RANK50": false,
+      "early_scout": false,
+      "peak": 53.35570469798658,
+      "scout_seen": true,
+      "session": "2026-10-06",
+      "symbol": "IPDN"
+    },
+    {
+      "RANK100": false,
+      "RANK100_CHG100": false,
+      "RANK50": false,
+      "early_scout": false,
+      "peak": 66.59024912119824,
+      "scout_seen": true,
+      "session": "2026-10-06",
+      "symbol": "MOBX"
+    },
+    {
+      "RANK100": false,
+      "RANK100_CHG100": false,
+      "RANK50": false,
+      "early_scout": false,
+      "peak": 99.89339019189767,
+      "scout_seen": true,
+      "session": "2026-10-06",
+      "symbol": "OLB"
+    },
+    {
+      "RANK100": false,
+      "RANK100_CHG100": false,
+      "RANK50": false,
+      "early_scout": false,
+      "peak": 57.62851429243621,
+      "scout_seen": true,
+      "session": "2026-10-06",
+      "symbol": "OLOX"
+    },
+    {
+      "RANK100": false,
+      "RANK100_CHG100": false,
+      "RANK50": false,
+      "early_scout": false,
+      "peak": 34.114977307110436,
+      "scout_seen": true,
+      "session": "2026-10-06",
+      "symbol": "PMI"
+    },
+    {
+      "RANK100": false,
+      "RANK100_CHG100": false,
+      "RANK50": false,
+      "early_scout": false,
+      "peak": 54.629629629629605,
+      "scout_seen": true,
+      "session": "2026-10-06",
+      "symbol": "SMXT"
+    },
+    {
+      "RANK100": false,
+      "RANK100_CHG100": false,
+      "RANK50": false,
+      "early_scout": false,
+      "peak": 102.19780219780219,
+      "scout_seen": true,
+      "session": "2026-10-06",
+      "symbol": "VCIG"
+    },
+    {
+      "RANK100": false,
+      "RANK100_CHG100": false,
+      "RANK50": false,
+      "early_scout": false,
+      "peak": 49.077669902912625,
+      "scout_seen": true,
+      "session": "2026-10-06",
+      "symbol": "XHLD"
+    },
+    {
+      "RANK100": false,
+      "RANK100_CHG100": false,
+      "RANK50": false,
+      "early_scout": false,
+      "peak": 65.52511415525115,
+      "scout_seen": true,
+      "session": "2026-10-07",
+      "symbol": "APUS"
+    },
+    {
+      "RANK100": false,
+      "RANK100_CHG100": false,
+      "RANK50": false,
+      "early_scout": false,
+      "peak": 293.80804953560374,
+      "scout_seen": true,
+      "session": "2026-10-07",
+      "symbol": "BIYA"
+    },
+    {
+      "RANK100": false,
+      "RANK100_CHG100": false,
+      "RANK50": false,
+      "early_scout": false,
+      "peak": 156.0,
+      "scout_seen": true,
+      "session": "2026-10-07",
+      "symbol": "DKI"
+    },
+    {
+      "RANK100": false,
+      "RANK100_CHG100": false,
+      "RANK50": false,
+      "early_scout": false,
+      "peak": 32.851985559566785,
+      "scout_seen": true,
+      "session": "2026-10-07",
+      "symbol": "FFR"
+    },
+    {
+      "RANK100": false,
+      "RANK100_CHG100": false,
+      "RANK50": false,
+      "early_scout": false,
+      "peak": 334.03523850451234,
+      "scout_seen": true,
+      "session": "2026-10-07",
+      "symbol": "GCDT"
+    },
+    {
+      "RANK100": true,
+      "RANK100_CHG100": true,
+      "RANK50": true,
+      "early_scout": true,
+      "peak": 83.15231788079471,
+      "scout_seen": true,
+      "session": "2026-10-07",
+      "symbol": "GIPR"
+    },
+    {
+      "RANK100": false,
+      "RANK100_CHG100": false,
+      "RANK50": false,
+      "early_scout": false,
+      "peak": 54.36241610738255,
+      "scout_seen": true,
+      "session": "2026-10-07",
+      "symbol": "IPDN"
+    },
+    {
+      "RANK100": false,
+      "RANK100_CHG100": false,
+      "RANK50": false,
+      "early_scout": false,
+      "peak": 90.00000000000001,
+      "scout_seen": true,
+      "session": "2026-10-07",
+      "symbol": "LGCL"
+    },
+    {
+      "RANK100": false,
+      "RANK100_CHG100": false,
+      "RANK50": false,
+      "early_scout": false,
+      "peak": 70.60240963855419,
+      "scout_seen": true,
+      "session": "2026-10-07",
+      "symbol": "LPCN"
+    },
+    {
+      "RANK100": false,
+      "RANK100_CHG100": false,
+      "RANK50": false,
+      "early_scout": false,
+      "peak": 43.44262295081967,
+      "scout_seen": true,
+      "session": "2026-10-07",
+      "symbol": "MI"
+    },
+    {
+      "RANK100": false,
+      "RANK100_CHG100": false,
+      "RANK50": false,
+      "early_scout": false,
+      "peak": 66.59024912119824,
+      "scout_seen": true,
+      "session": "2026-10-07",
+      "symbol": "MOBX"
+    },
+    {
+      "RANK100": false,
+      "RANK100_CHG100": false,
+      "RANK50": false,
+      "early_scout": false,
+      "peak": 68.20683210466206,
+      "scout_seen": true,
+      "session": "2026-10-07",
+      "symbol": "MTEN"
+    },
+    {
+      "RANK100": true,
+      "RANK100_CHG100": true,
+      "RANK50": true,
+      "early_scout": true,
+      "peak": 32.11009174311925,
+      "scout_seen": true,
+      "session": "2026-10-07",
+      "symbol": "NCPL"
+    },
+    {
+      "RANK100": true,
+      "RANK100_CHG100": true,
+      "RANK50": true,
+      "early_scout": true,
+      "peak": 56.25,
+      "scout_seen": true,
+      "session": "2026-10-07",
+      "symbol": "NXAT"
+    },
+    {
+      "RANK100": false,
+      "RANK100_CHG100": false,
+      "RANK50": false,
+      "early_scout": false,
+      "peak": 75.90618336886996,
+      "scout_seen": true,
+      "session": "2026-10-07",
+      "symbol": "OLB"
+    },
+    {
+      "RANK100": false,
+      "RANK100_CHG100": false,
+      "RANK50": false,
+      "early_scout": false,
+      "peak": 57.62851429243621,
+      "scout_seen": true,
+      "session": "2026-10-07",
+      "symbol": "OLOX"
+    },
+    {
+      "RANK100": true,
+      "RANK100_CHG100": true,
+      "RANK50": true,
+      "early_scout": true,
+      "peak": 74.99999999999997,
+      "scout_seen": true,
+      "session": "2026-10-07",
+      "symbol": "PFAI"
+    },
+    {
+      "RANK100": false,
+      "RANK100_CHG100": false,
+      "RANK50": false,
+      "early_scout": false,
+      "peak": 34.114977307110436,
+      "scout_seen": true,
+      "session": "2026-10-07",
+      "symbol": "PMI"
+    },
+    {
+      "RANK100": true,
+      "RANK100_CHG100": true,
+      "RANK50": true,
+      "early_scout": true,
+      "peak": 290.6646372399797,
+      "scout_seen": true,
+      "session": "2026-10-07",
+      "symbol": "SBFM"
+    },
+    {
+      "RANK100": true,
+      "RANK100_CHG100": true,
+      "RANK50": true,
+      "early_scout": true,
+      "peak": 159.42622950819674,
+      "scout_seen": true,
+      "session": "2026-10-07",
+      "symbol": "SXTC"
+    },
+    {
+      "RANK100": false,
+      "RANK100_CHG100": false,
+      "RANK50": false,
+      "early_scout": false,
+      "peak": 122.96610169491528,
+      "scout_seen": true,
+      "session": "2026-10-07",
+      "symbol": "TOPP"
+    },
+    {
+      "RANK100": true,
+      "RANK100_CHG100": true,
+      "RANK50": true,
+      "early_scout": true,
+      "peak": 50.54945054945055,
+      "scout_seen": true,
+      "session": "2026-10-07",
+      "symbol": "VCIG"
+    },
+    {
+      "RANK100": false,
+      "RANK100_CHG100": false,
+      "RANK50": false,
+      "early_scout": false,
+      "peak": 49.077669902912625,
+      "scout_seen": true,
+      "session": "2026-10-07",
+      "symbol": "XHLD"
+    }
+  ]
+}
