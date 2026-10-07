@@ -1,0 +1,43 @@
+name: SAG30 TOPP reconstruction DEV
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/topp-reconstruction-v2-dev.yml']
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reconstruct TOPP
+        run: |
+          git fetch --depth=1 origin radar-state
+          git show FETCH_HEAD:radar.sqlite3.gz > /tmp/r.gz
+          gzip -dc /tmp/r.gz > /tmp/r.db
+          python - <<'PY'
+          import sqlite3,json
+          db=sqlite3.connect('/tmp/r.db')
+          sy='TOPP'; se='2026-10-07'
+          scout=db.execute("""select run_id,retrieval_ts,change_pct,rank_change,rank_acceleration,rank_impulse,rank_turnover,selected,sticky
+             from scout_history where session=? and symbol=? order by run_id,retrieval_ts""",(se,sy)).fetchall()
+          deep=db.execute("""select retrieval_ts,source_ts,change_pct,bar_high_pct,bar_volume,bid,ask,spread_pct,minute_bar_present
+             from fast_path_v047_observations where session=? and symbol=? order by retrieval_ts,source_ts""",(se,sy)).fetchall()
+          events=db.execute("""select retrieval_ts,change_pct,bar_high_pct,observed_volume,bid,ask,spread_pct,state
+             from fast_path_events where session=? and symbol=? order by retrieval_ts""",(se,sy)).fetchall()
+          def sr(x):return dict(run=x[0],ts=x[1],pct=x[2],rank_change=x[3],rank_accel=x[4],rank_impulse=x[5],rank_turnover=x[6],selected=bool(x[7]),sticky=bool(x[8]))
+          def dr(x):return dict(retrieval_ts=x[0],source_ts=x[1],pct=x[2],high=x[3],volume=x[4],bid=x[5],ask=x[6],spread=x[7],minute=bool(x[8]))
+          def er(x):return dict(retrieval_ts=x[0],pct=x[1],high=x[2],volume=x[3],bid=x[4],ask=x[5],spread=x[6],state=x[7])
+          pre10=[sr(x) for x in scout if float(x[2])<10]
+          band=[sr(x) for x in scout if 1<=float(x[2])<10]
+          rescue=[x for x in band if x['rank_change']<=25 and x['rank_accel']<=50]
+          out={'status':'DEV_RECONSTRUCTION_NOT_OOS_NOT_BUY','symbol':sy,'session':se,
+            'scout_count':len(scout),'scout_first':sr(scout[0]) if scout else None,
+            'scout_pre10':pre10,'scout_1_to_10':band,'v0410_would_route':rescue,
+            'scout_first_ge10':next((sr(x) for x in scout if float(x[2])>=10),None),
+            'scout_peak':max([float(x[2]) for x in scout],default=None),
+            'deep_count':len(deep),'deep_first':dr(deep[0]) if deep else None,
+            'deep_pre10':[dr(x) for x in deep if float(x[2] or 0)<10 and float(x[3] if x[3] is not None else x[2] or 0)<10],
+            'events_first':er(events[0]) if events else None,
+            'events': [er(x) for x in events[:20]],
+            'note':'Reconstruction only. No retro OOS credit; no threshold changes.'}
+          print(json.dumps(out,indent=2))
+          PY
