@@ -1,0 +1,31 @@
+name: SAG-30 v0.4.3 path-observability diagnostic
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'research/fast_path_v043_diagnostic.py'
+      - 'rules/SAG-30-v0.4.3-PATH-OBSERVABILITY-SHADOW.txt'
+      - '.github/workflows/fast_path_v043_diagnostic.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Compile
+        run: python -m py_compile research/fast_path_v041_replay.py research/fast_path_v042_replay.py research/fast_path_v043_diagnostic.py
+      - name: Run v0.4.3 balanced diagnostic
+        env:
+          ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+        run: python -m research.fast_path_v043_diagnostic --winners 300 --nonwinners 300 --lookback-days 240 --feed iex --workers 2 --out research/fast_path_v043_diagnostic.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sag30-v043-path-observability
+          path: research/fast_path_v043_diagnostic.json
+          retention-days: 30
