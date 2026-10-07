@@ -1,0 +1,62 @@
+name: SAG30 v0411 coherent window DEV
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/v0411-coherent-window-dev.yml']
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test coherent precursor windows
+        run: |
+          git fetch --depth=1 origin radar-state
+          git show FETCH_HEAD:radar.sqlite3.gz > /tmp/r.gz
+          gzip -dc /tmp/r.gz > /tmp/r.db
+          python - <<'PY'
+          import sqlite3,json,collections,statistics
+          from datetime import datetime
+          db=sqlite3.connect('/tmp/r.db')
+          def D(s):return datetime.fromisoformat(str(s).replace('Z','+00:00'))
+          # clean labels: broad scout sees +1..<+10, then later same-session peak
+          scout=db.execute("select session,symbol,run_id,change_pct from scout_history order by session,run_id").fetchall()
+          g=collections.defaultdict(list)
+          for r in scout:g[(r[0],r[1])].append(r)
+          labels={}
+          for k,a in g.items():
+            pre=[x for x in a if 1<=float(x[3])<10]
+            if not pre:continue
+            later=[x for x in a if x[2]>=pre[0][2]]
+            labels[k]=max(float(x[3]) for x in later)
+          def hit(sym,mins):
+            rr=db.execute("select source_ts,change_pct,bar_high_pct,bar_volume,bid,ask,spread_pct,minute_bar_present from fast_path_v047_observations where session='2026-10-07' and symbol=? order by source_ts",(sym,)).fetchall()
+            hist=[];vols=[];prev=None;prevts=None;streak=0
+            for src,p,h,v,bid,ask,sp,mb in rr:
+              if p is None:continue
+              p=float(p);h=float(h if h is not None else p)
+              if h>=10:break
+              if not mb or v is None or float(v)<=0:continue
+              med=statistics.median(vols[-20:]) if vols else 0;ratio=float(v)/med if med>0 else None
+              pos=False
+              if prev is not None and prevts:
+                dt=(D(src)-D(prevts)).total_seconds()/60;pos=0<dt<=5 and p>prev
+              streak=streak+1 if pos else 0
+              execok=bid is not None and ask is not None and sp is not None and float(sp)<=2
+              hist.append((D(src),ratio,execok,p,streak,src,sp))
+              recent=[x for x in hist if 0<=(D(src)-x[0]).total_seconds()/60<=mins]
+              maxact=max([x[1] for x in recent if x[1] is not None] or [0])
+              # current entry/execution and current 2-step structure; activity may have occurred within recent window
+              if 1<=p<=8 and streak>=2 and maxact>=1.5 and execok:
+                return {'ts':src,'pct':p,'current_activity':ratio,'window_max_activity':maxact,'spread':float(sp)}
+              vols.append(float(v));prev=p;prevts=src
+            return None
+          cases=[]
+          for (se,sy),pk in labels.items():
+            if se!='2026-10-07' or pk<5:continue
+            cases.append({'symbol':sy,'peak':pk,'w3':hit(sy,3),'w5':hit(sy,5)})
+          for n in ['w3','w5']:
+            w=[x for x in cases if x['peak']>=30]; neg=[x for x in cases if 5<=x['peak']<30]
+            hh=sum(bool(x[n]) for x in w);ff=sum(bool(x[n]) for x in neg)
+            print(n,json.dumps({'winners':len(w),'hits':hh,'recall':hh/len(w) if w else 0,'hard_neg':len(neg),'false':ff,'fpr':ff/len(neg) if neg else 0}))
+          print(json.dumps({'winner_hits':[x for x in cases if x['peak']>=30 and (x['w3'] or x['w5'])]},indent=2))
+          PY
