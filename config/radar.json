@@ -17,5 +17,8 @@
   "fast_path_watch_limit": 80,
   "fast_path_news_minutes": 3,
   "fast_path_iterations": 3,
-  "fast_path_sleep_seconds": 55
+  "fast_path_sleep_seconds": 55,
+  "discovery_fallback_feed": "delayed_sip",
+  "discovery_fallback_before_et_hour": 8,
+  "discovery_fallback_max_age_seconds": 1200
 }
