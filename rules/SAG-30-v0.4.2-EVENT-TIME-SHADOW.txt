@@ -1,0 +1,21 @@
+SAG-30 v0.4.2 EVENT-TIME FLOW SHADOW
+Status: PRE-REGISTERED RESEARCH / NOT BUY
+Parent: v0.4.1 CALIBRATION SHADOW
+Production control: SAG-30 v0.3.3 FROZEN unchanged.
+
+Hypothesis
+IEX sparse minute observations suppress FLOW recall when exact 1-minute adjacency is required.
+A missing adjacent minute is a data condition, not evidence of absent FLOW.
+
+Single change
+- Compute price velocity in event time: delta percent / elapsed observed minutes.
+- Permit an observed interval only when 0 < dt <= 5 minutes.
+- dt > 5 minutes is DATA_GAP and resets positive FLOW count.
+- Still require two positive observed FLOW intervals for PRE-ARM.
+- Never award PRE-ARM or TRIGGER at or after the first +30% print.
+- All v0.4.1 cohort definitions and outcome thresholds remain unchanged.
+
+Evaluation
+Same balanced 300 winner + 300 >=+5%/<+30% non-winner design.
+Compare recall, precision, false-positive rates, lead time, exact-1m coverage and event-time usable coverage.
+Promotion gates are NOT changed. Historical success cannot authorize BUY or alter v0.3.3 FROZEN.
