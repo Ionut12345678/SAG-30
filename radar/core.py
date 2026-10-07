@@ -33,6 +33,10 @@ def open_db(path):
       evaluated_ts TEXT NOT NULL, status TEXT NOT NULL, detail TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS outbox(id INTEGER PRIMARY KEY, event_key TEXT UNIQUE NOT NULL, created_ts TEXT NOT NULL,
       message TEXT NOT NULL, delivered_ts TEXT, attempts INTEGER NOT NULL DEFAULT 0);
+    CREATE INDEX IF NOT EXISTS idx_observations_run ON observations(run_id);
+    CREATE INDEX IF NOT EXISTS idx_observations_symbol_ts ON observations(symbol,retrieval_ts);
+    CREATE INDEX IF NOT EXISTS idx_observations_quality_symbol_ts ON observations(quality,symbol,retrieval_ts);
+    CREATE INDEX IF NOT EXISTS idx_runs_status_started ON runs(status,started);
     ''')
     return db
 
