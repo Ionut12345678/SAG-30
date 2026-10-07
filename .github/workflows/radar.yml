@@ -51,6 +51,30 @@ jobs:
             if [ "$status" -ne 2 ]; then exit "$status"; fi
           fi
 
+      - name: Run v0.4.12 EARLY-PREMARKET ROUTING SHADOW
+        if: ${{ always() && steps.restore.outcome == 'success' }}
+        shell: bash
+        run: |
+          set +e
+          python -m radar.v0412_premarket_router \
+            --db state/radar.sqlite3 \
+            --universe config/universe.csv \
+            --out state/v0412_premarket_router_report.json
+          rc=$?
+          set -e
+          if [ "$rc" -ne 0 ]; then
+            python - <<'PY'
+          import json
+          from datetime import datetime, timezone
+          json.dump({
+            "status":"DATA_GAP",
+            "observed_ts":datetime.now(timezone.utc).isoformat(),
+            "routes":[],
+            "note":"v0.4.12 external routing unavailable; core SAG-30 continues; NOT BUY"
+          },open("state/v0412_premarket_router_report.json","w"),indent=2)
+          PY
+          fi
+
       - name: Observe one prospective cycle
         id: scan
         env:
@@ -247,6 +271,7 @@ jobs:
           if [ -f state/v048_conversion_challenger_report.json ]; then cp state/v048_conversion_challenger_report.json /tmp/radar-state/v048_conversion_challenger_report.json; fi
           if [ -f state/v049_rolling_precursor_report.json ]; then cp state/v049_rolling_precursor_report.json /tmp/radar-state/v049_rolling_precursor_report.json; fi
           if [ -f state/v0411_coherent_window_report.json ]; then cp state/v0411_coherent_window_report.json /tmp/radar-state/v0411_coherent_window_report.json; fi
+          if [ -f state/v0412_premarket_router_report.json ]; then cp state/v0412_premarket_router_report.json /tmp/radar-state/v0412_premarket_router_report.json; fi
           cd /tmp/radar-state
           # radar-state is a mutable checkpoint, not an audit-history branch. Recreate it
           # as a one-commit snapshot so 5-minute cycles never download an ever-growing
@@ -262,6 +287,7 @@ jobs:
           if [ -f v048_conversion_challenger_report.json ]; then git add v048_conversion_challenger_report.json; fi
           if [ -f v049_rolling_precursor_report.json ]; then git add v049_rolling_precursor_report.json; fi
           if [ -f v0411_coherent_window_report.json ]; then git add v0411_coherent_window_report.json; fi
+          if [ -f v0412_premarket_router_report.json ]; then git add v0412_premarket_router_report.json; fi
           git commit -m 'Refresh prospective radar checkpoint'
           # GitHub occasionally returns a transient 5xx while accepting a large checkpoint
           # ref update. Retry the same immutable snapshot; do not rescan or alter history.
