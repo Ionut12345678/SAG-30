@@ -171,7 +171,17 @@ def scout_discovery(db, run_id, universe, market_caps, headers, config, now):
     init_scout(db)
     wall_started=time.monotonic()
     fetch_started=time.monotonic()
-    fetched=fetch_snapshot_batches(universe,headers,config['feed'],config.get('snapshot_workers',8))
+    local_hour=now.astimezone(ZoneInfo('America/New_York')).hour
+    discovery_feed=config['feed']
+    discovery_max_age=config['max_source_age_seconds']
+    fallback_feed=config.get('discovery_fallback_feed')
+    fallback_before=int(config.get('discovery_fallback_before_et_hour',0) or 0)
+    if fallback_feed and local_hour < fallback_before:
+        # Routing-only fallback for hours where the configured real-time venue is closed.
+        # This never changes model evidence: deep observations still use config['feed'].
+        discovery_feed=fallback_feed
+        discovery_max_age=int(config.get('discovery_fallback_max_age_seconds',discovery_max_age))
+    fetched=fetch_snapshot_batches(universe,headers,discovery_feed,config.get('snapshot_workers',8))
     fetch_seconds=time.monotonic()-fetch_started
     routing_snapshots={}
     routing_changes={}
@@ -187,7 +197,7 @@ def scout_discovery(db, run_id, universe, market_caps, headers, config, now):
     for _,batch,started,result,retrieved in fetched:
         for symbol in batch:
             snapshot=result.get(symbol,{})
-            route=routing_view(snapshot,retrieved,config['max_source_age_seconds'])
+            route=routing_view(snapshot,retrieved,discovery_max_age)
             if not route:
                 continue
             normalized,change,route_source=route
@@ -255,8 +265,8 @@ def scout_discovery(db, run_id, universe, market_caps, headers, config, now):
     top_impulse=sorted(impulses.items(),key=lambda x:x[1],reverse=True)[:8]
     early_selected=[(s,routing_changes.get(s),accelerations.get(s),impulses.get(s)) for s in selected if isinstance(routing_changes.get(s),(int,float)) and routing_changes[s] < 20]
     log.info(
-      'SAG30_FAST_SCOUT universe=%s eligible=%s selected=%s base_selected=%s challenger_extra=%s retained=%s high_recall=%s sticky=%s fetch_seconds=%.3f total_seconds=%.3f minute_fallbacks=%s top_accel=%s top_impulse=%s early_selected=%s',
-      len(universe),eligible,len(selected),len(base_selected),len(challenger_extras),len(retained),len(high_recall),
+      'SAG30_FAST_SCOUT feed=%s universe=%s eligible=%s selected=%s base_selected=%s challenger_extra=%s retained=%s high_recall=%s sticky=%s fetch_seconds=%.3f total_seconds=%.3f minute_fallbacks=%s top_accel=%s top_impulse=%s early_selected=%s',
+      discovery_feed,len(universe),eligible,len(selected),len(base_selected),len(challenger_extras),len(retained),len(high_recall),
       sum(s in set(sticky) for s in selected),fetch_seconds,time.monotonic()-wall_started,
       fallbacks,top_accel,top_impulse,early_selected[:15]
     )
