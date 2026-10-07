@@ -1,0 +1,6 @@
+# SAG-30 v0.4.11 COHERENT-WINDOW PRECURSOR CHALLENGER
+Status: PROSPECTIVE SHADOW / NOT BUY
+v0.3.3, v0.4.7, v0.4.8, v0.4.9 and v0.4.10 remain unchanged.
+Activation: first live radar cycle after implementation lands.
+Gates: current entry +1..+8; two positive price steps with <=5 event-min gap; current bid/ask and spread <=2%; max Activity Ratio >=1.50 within trailing 3 event minutes. Stop before first observed high >=+10.
+No retrospective credit, no backfill, no BUY. DEV basis: clean same-session transition cohort on 2026-10-07 improved winner hits 0/8 to 1/8 (NXAT at ~+4.17%) while hard-negative FPR moved 21/263=7.98% to 22/263=8.37%. Small cohort; prospective validation required.
