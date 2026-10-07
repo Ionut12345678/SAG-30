@@ -11,3 +11,5 @@ v047-bounded-checkpoint-cadence-2026-10-07T09:37Z
 validation-marker-v048
 
 v0.4.9 prospective activation validation 2026-10-07
+
+cadence-recovery retry-hardening 2026-10-07
