@@ -1,0 +1,52 @@
+SAG-30 SHADOW EVIDENCE MAP — through v0.4.4
+Status: RESEARCH MEMORY / NOT BUY
+Production control: SAG-30 v0.3.3 FROZEN unchanged.
+
+PURPOSE
+Carry forward falsified and supported findings so later SHADOW versions do not repeatedly retune already-tested dimensions. This file records evidence; it does not authorize signals.
+
+KEEP
+1. Balanced winner + near-miss non-winner evaluation. Winner-only studies cannot establish precision/FPR.
+2. Strict causal censoring: signal evidence must exist before first +30; early-credit evidence must be below +10.
+3. EVENT-TIME resilience for sparse IEX: observed intervals may bridge up to 5 minutes; >5m is a data gap/reset.
+4. Separate EVENT and FLOW engines and report their overlap/increment separately.
+5. Timestamped classified EVENT discovery. v0.4.4: 87/300 winners, 42/300 non-winners; recall 29.0%, balanced precision 67.44%, FPR 14.0%, median lead to +30 229.4m.
+6. Preserve exact balanced cohorts/raw data for model comparisons; separate acquisition from scoring.
+
+LANE-SPECIFIC
+1. FLOW. Overall v0.4.4/v0.4.2 recall = 36/300 = 12.0%, but among v0.4.3 path-observable winners it detects 36/67 = 53.73%. Therefore FLOW is useful for gradual observable paths, not a universal discovery engine.
+2. EVENT. Particularly useful for FLOW-unobservable and premarket paths: v0.4.4 EVENT detects 74/233 PATH_UNOBSERVABLE winners (31.76%) and 33/73 pre-09:30 +30 winners (45.21%).
+
+REJECT / DO NOT RETEST WITHOUT NEW EVIDENCE
+1. Exact 1-minute adjacency as a universal FLOW requirement. Sparse IEX materially suppresses recall.
+2. Treating missing IEX bars as negative FLOW evidence.
+3. Relaxing FLOW persistence as the primary fix. v0.4.3: only 13/300 winners were PERSISTENCE_MISS; 233/300 were PATH_UNOBSERVABLE.
+4. Winner-only parameter tuning.
+5. Crediting post-explosion signals or using session outcome information in the signal.
+6. Treating raw volume/RVOL family members as multiple independent confirmations.
+7. Optimizing recall alone. v0.4.4 union EVENT OR FLOW reaches 118/300 = 39.33% recall but has 178/300 = 59.33% non-winner FPR; false-positive control is now the main research bottleneck.
+
+CURRENT BEST HISTORICAL COMBINATION
+EVENT OR v0.4.2 FLOW:
+- winner recall 39.33%: PASS research comparator >=35%
+- balanced precision to +30 39.86%: PASS research comparator >=8%
+- non-winner FPR 59.33%: too high for a functional live candidate
+- EVENT incremental winners over FLOW: 82
+- EVENT/FLOW winner overlap: 5
+Interpretation: engines are complementary; do not collapse them into one gate.
+
+CURRENT BOTTLENECK
+FLOW-only discrimination.
+v0.4.4:
+- winner FLOW-only = 31
+- non-winner FLOW-only = 136
+The next model hypothesis should attempt to reject a substantial share of those 136 while retaining enough of the 31 to keep combined recall >=35%. Do not weaken EVENT to solve a FLOW problem.
+
+UNPROVEN / NEXT RESEARCH FAMILIES
+1. Signal-time FLOW discriminants computed only from information available at PRE-ARM: move consumed, instantaneous/event-time velocity, acceleration shape, price progress per observed interval, activity/volume impulse normalized to a causal baseline, time-of-session, and retention/giveback before PRE-ARM.
+2. Broader market-data coverage for paths classified unobservable under IEX.
+3. Execution realism: spread, halt state, quote/depth/slippage at alert time.
+4. Prospective/OOS performance after historical architecture stabilizes.
+
+DISCIPLINE
+Any new threshold/family must be pre-registered and evaluated on dev/holdout or prospective data. v0.3.3 FROZEN remains unchanged. SHADOW never implies BUY.
