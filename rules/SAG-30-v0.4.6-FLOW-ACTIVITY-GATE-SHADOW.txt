@@ -1,0 +1,46 @@
+SAG-30 v0.4.6 FLOW ACTIVITY GATE SHADOW
+Status: FROZEN VALIDATION CANDIDATE / NOT BUY
+Parent: v0.4.5 date-matched baseline
+Production control: SAG-30 v0.3.3 FROZEN unchanged.
+
+Development evidence
+On the v0.4.5 date-matched development cohort, EVENT OR unfiltered FLOW produced:
+- winners 119/300 = 39.67%
+- non-winners 137/300 = 45.67% FPR
+- balanced precision 46.48%
+FLOW-only contained 31 winners and 86 non-winners.
+
+Exploratory signal-time feature review identified causal activity impulse as the simplest promising discriminator. This review is DEVELOPMENT/IN-SAMPLE and is not validation.
+
+Frozen v0.4.6 hypothesis
+A FLOW PRE-ARM accompanied by current observed 1-minute volume >=1.50x the median volume of up to the prior 20 valid observed 1-minute bars in the same session will reject a material share of FLOW false positives while retaining enough incremental FLOW winners for EVENT OR filtered-FLOW to remain useful.
+
+Frozen rule
+- EVENT engine unchanged from v0.4.5.
+- Base FLOW engine unchanged: event-time gap <=5m, two consecutive positive eligible intervals, signal below +10, first +30 censor.
+- At the instant base FLOW first reaches PRE-ARM, compute ACTIVITY_RATIO = current_bar_volume / median(prior up-to-20 valid observed bar volumes).
+- Use only bars strictly before the PRE-ARM bar for the denominator.
+- If no prior valid observed bar volume exists, ACTIVITY_RATIO=UNKNOWN and FLOW does not pass the v0.4.6 activity gate.
+- FILTERED_FLOW requires base FLOW PRE-ARM AND ACTIVITY_RATIO >=1.50.
+- Do not use future bars, session outcome, later max volume, daily volume, or EVENT status to compute ACTIVITY_RATIO.
+- Volume/activity remains one evidence family.
+
+Validation design frozen before validation acquisition
+- Do NOT validate on the v0.4.5 development dates (2026-09-18 through 2026-10-06).
+- Build a separate 300-winner + 300 date-matched hard-negative cohort ending before 2026-09-18.
+- Same current-universe/IEX/news limitations are reported.
+- Apply threshold 1.50 exactly once; no threshold change after viewing validation.
+- Compare unfiltered v0.4.5 semantics and v0.4.6 EVENT OR FILTERED_FLOW on the SAME validation cohort.
+
+Validation criteria
+Primary:
+1. Combined winner recall >=35%.
+2. Combined balanced precision >=8%.
+3. Combined non-winner FPR materially below unfiltered FLOW union on the same validation cohort; target relative reduction >=25%.
+Secondary:
+- EVENT metrics unchanged.
+- Report retained/lost FLOW-only winners and removed FLOW-only non-winners.
+- Lead-time must not be worsened by post-signal information; activity gate is evaluated at the same PRE-ARM timestamp.
+
+If recall <35%, or FPR reduction <25%, v0.4.6 FAILS validation and threshold 1.50 is not retuned on validation. A new version/hypothesis is required.
+Historical validation never authorizes BUY.
