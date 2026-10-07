@@ -1,0 +1,25 @@
+name: SAG30 premarket discovery fallback DEV
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/premarket-discovery-fallback-dev.yml']
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          python - <<'PY'
+          import urllib.request,re,json
+          urls=[
+          'https://www.chartmill.com/stock/markets/usa/movers/premarket-gainers',
+          'https://www.chartmill.com/stock/markets/usa/movers/premarket-most-active',
+          'https://curvedtrading.com/movers/',
+          'https://www.thehotpennystocks.com/scans/premarket-penny-stocks/']
+          for u in urls:
+            try:
+              req=urllib.request.Request(u,headers={'User-Agent':'Mozilla/5.0','Accept':'text/html'})
+              h=urllib.request.urlopen(req,timeout=20).read().decode('utf-8','ignore')
+              hits=[s for s in ['TOPP','SBFM','LGCL','GIPR','LPCN','BIYA','SXTC','DKI'] if s in h]
+              print(json.dumps({'url':u,'bytes':len(h),'hits':hits,'status':'PASS'}))
+            except Exception as e:print(json.dumps({'url':u,'error':repr(e)}))
+          PY
