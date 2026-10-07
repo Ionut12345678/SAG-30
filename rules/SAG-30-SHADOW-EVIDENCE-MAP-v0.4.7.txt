@@ -1,0 +1,19 @@
+SAG-30 SHADOW EVIDENCE MAP — through v0.4.7
+Status: RESEARCH MEMORY / NOT BUY
+Production: v0.3.3 FROZEN unchanged.
+Inherits all prior evidence maps.
+
+v0.4.7 CAUSAL ACTIVITY IMPULSE — FAIL
+DEV baseline union recall/FPR: 31.54% / 42.95%.
+At the least restrictive pre-registered activity threshold >=1.0x:
+- union FPR fell to 25.50% (-17.45pp)
+- union recall fell to 24.83% (-6.71pp; only 78.72% of baseline recall)
+- FLOW recall fell from 10.07% to 2.01%.
+No threshold retained the required >=90% of DEV baseline recall. Selected threshold = NONE; threshold-specific HOLDOUT was not inspected.
+
+REJECT / DO NOT RETEST WITHOUT NEW EVIDENCE
+- v0.4.7 ACTIVITY_IMPULSE as a hard FLOW gate using mean volume of PRE-ARM pair / median prior observed 20 bars, >=5 prior bars.
+Interpretation: causal IEX activity magnitude is discriminative for noise but too destructive to incremental FLOW winner recall as a standalone hard gate. Do not rescue it by post-hoc OR combinations.
+
+NEXT UNTESTED FAMILY
+Move consumed at base FLOW PRE-ARM, using only the causal PRE-ARM price state.
