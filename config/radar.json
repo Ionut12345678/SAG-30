@@ -23,5 +23,6 @@
   "discovery_fallback_max_age_seconds": 1200,
   "deep_preferred_feed": "sip",
   "deep_preferred_before_et_hour": 8,
-  "fast_path_realtime_start_et_hour": 8
+  "fast_path_realtime_start_et_hour": 8,
+  "cadence_target_seconds": 300
 }
