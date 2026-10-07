@@ -1,0 +1,26 @@
+name: SAG30 premarket discovery source DEV
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/premarket-discovery-source-dev.yml']
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          python - <<'PY'
+          import urllib.request,re,json
+          urls=['https://stockanalysis.com/markets/premarket/','https://stockanalysis.com/markets/premarket/gainers/']
+          for u in urls:
+            try:
+              req=urllib.request.Request(u,headers={'User-Agent':'Mozilla/5.0'})
+              h=urllib.request.urlopen(req,timeout=20).read().decode('utf-8','ignore')
+              syms=[]
+              for pat in [r'/stocks/([A-Z][A-Z0-9.-]{0,8})/',r'"s":"([A-Z][A-Z0-9.-]{0,8})"']:
+                syms += re.findall(pat,h)
+              seen=[]
+              for s in syms:
+                if s not in seen: seen.append(s)
+              print(json.dumps({'url':u,'http_bytes':len(h),'symbols':seen[:100],'contains_TOPP':'TOPP' in h,'contains_SBFM':'SBFM' in h}))
+            except Exception as e:print(json.dumps({'url':u,'error':repr(e)}))
+          PY
