@@ -1,0 +1,30 @@
+name: SAG-30 v0.4.6 independent validation
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fast_path_v046_validation.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/cache/restore@v4
+        with:
+          path: research/cache/sag30_v046_validation_dataset.json.gz
+          key: sag30-v046-validation-pre-20260918-1
+          fail-on-cache-miss: true
+      - name: Compile
+        run: python -m py_compile research/fast_path_v046_validation.py
+      - name: Validate frozen activity gate
+        run: python -m research.fast_path_v046_validation
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sag30-v046-independent-validation
+          path: research/fast_path_v046_validation.json
+          retention-days: 30
