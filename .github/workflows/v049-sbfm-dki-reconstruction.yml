@@ -1,0 +1,81 @@
+name: SAG30 v0.4.9 SBFM DKI reconstruction
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/v049-sbfm-dki-reconstruction.yml']
+permissions:
+  contents: write
+jobs:
+  reconstruct:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore radar checkpoint
+        run: |
+          git init /tmp/rs; cd /tmp/rs
+          git remote add origin https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git
+          git fetch --depth=1 origin radar-state && git checkout FETCH_HEAD
+          gzip -dc radar.sqlite3.gz > /tmp/r.db
+      - name: Reconstruct pre-10 timeline under frozen v0.4.9 gates
+        run: |
+          mkdir -p reports
+          python - <<'PY'
+          import sqlite3,json,statistics
+          from datetime import datetime
+          db=sqlite3.connect('/tmp/r.db')
+          def D(s): return datetime.fromisoformat(str(s).replace('Z','+00:00'))
+          def reconstruct(sym):
+            scout=db.execute("""select retrieval_ts,change_pct,acceleration_pp_per_min,fresh_turnover_impulse_per_min,
+              turnover,rank_change,rank_acceleration,rank_impulse,rank_turnover,selected,sticky
+              from scout_history where session='2026-10-07' and symbol=? order by retrieval_ts""",(sym,)).fetchall()
+            skeys=['ts','pct','accel','turnover_impulse','turnover','rank_change','rank_accel','rank_impulse','rank_turnover','selected','sticky']
+            fast=db.execute("""select retrieval_ts,change_pct,bar_high_pct,observed_volume,bid,ask,spread_pct,
+              minute_bar_present,consecutive_minute_bar,acceleration,impulse,state
+              from fast_path_events where session='2026-10-07' and symbol=? order by retrieval_ts,id""",(sym,)).fetchall()
+            fkeys=['ts','pct','high_pct','vol','bid','ask','spread','mb','consecutive','accel','impulse','state']
+            # Exact DEV reconstruction of frozen v0.4.9 semantics on historical fast_path_events.
+            vols=[]; streak=0; prev=None; prevts=None; hit=None; evaluated=[]
+            for x in fast:
+              z=dict(zip(fkeys,x)); p=float(z['pct']); h=float(z['high_pct'] if z['high_pct'] is not None else p)
+              if h>=10:
+                evaluated.append({**z,'stop_reason':'FIRST_OBSERVED_HIGH_GE_10'})
+                break
+              v=float(z['vol'] or 0)
+              if not z['mb'] or v<=0:
+                evaluated.append({**z,'eligible':False,'reason':'NO_COMPLETED_MINUTE_OR_VOLUME'}); prev=p; prevts=z['ts']; streak=0; continue
+              med=statistics.median(vols[-20:]) if vols else 0
+              ratio=v/med if med>0 else None
+              gap=(D(z['ts'])-D(prevts)).total_seconds()/60 if prevts else None
+              positive=prev is not None and gap is not None and 0<gap<=5 and p>prev
+              streak=streak+1 if positive else 0
+              execok=z['bid'] is not None and z['ask'] is not None and z['spread'] is not None and float(z['spread'])<=2
+              gates={'entry_1_8':1<=p<=8,'positive_steps_2':streak>=2,'activity_1_5':ratio is not None and ratio>=1.5,'exec_spread_2':execok}
+              evaluated.append({**z,'activity_ratio':ratio,'positive_streak':streak,'gates':gates})
+              if all(gates.values()) and hit is None:
+                hit={'ts':z['ts'],'entry_change_pct':p,'activity_ratio':ratio,'spread_pct':float(z['spread']),'positive_streak':streak}
+                break
+              vols.append(v);prev=p;prevts=z['ts']
+            pre10_scout=[dict(zip(skeys,x)) for x in scout if x[1] is not None and float(x[1])<10]
+            first_ge10_scout=next((dict(zip(skeys,x)) for x in scout if x[1] is not None and float(x[1])>=10),None)
+            all_scout=[dict(zip(skeys,x)) for x in scout]
+            all_fast=[dict(zip(fkeys,x)) for x in fast]
+            return {'symbol':sym,'v049_replay_hit':hit,'pre10_scout':pre10_scout,'first_ge10_scout':first_ge10_scout,
+              'fast_evaluated_until_10':evaluated,'scout_all':all_scout,'fast_all':all_fast}
+          out={'status':'DEV_RECONSTRUCTION_NOT_OOS_NOT_BUY','session':'2026-10-07',
+               'gates':{'entry_pct':[1,8],'positive_steps':2,'max_step_gap_minutes':5,'activity_ratio_min':1.5,'spread_pct_max':2,'stop_before_high_pct':10},
+               'cases':{s:reconstruct(s) for s in ['SBFM','DKI']}}
+          open('reports/v049_sbfm_dki_reconstruction.json','w').write(json.dumps(out,indent=2))
+          print(json.dumps({s:{'hit':out['cases'][s]['v049_replay_hit'],'pre10_scout_n':len(out['cases'][s]['pre10_scout']),
+            'first_ge10_scout':out['cases'][s]['first_ge10_scout']} for s in out['cases']},indent=2))
+          PY
+      - name: Publish reconstruction
+        run: |
+          cp reports/v049_sbfm_dki_reconstruction.json /tmp/reconstruction.json
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git fetch origin main && git reset --hard origin/main
+          mkdir -p reports
+          cp /tmp/reconstruction.json reports/v049_sbfm_dki_reconstruction.json
+          git add reports/v049_sbfm_dki_reconstruction.json
+          git commit -m "Publish v0.4.9 SBFM DKI reconstruction" || exit 0
+          git push
