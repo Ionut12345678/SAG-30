@@ -36,7 +36,7 @@ jobs:
           set -euo pipefail
           mkdir -p state
           if git ls-remote --exit-code --heads origin radar-state; then
-            git fetch origin radar-state
+            git fetch --depth=1 origin radar-state
             if git cat-file -e FETCH_HEAD:radar.sqlite3.gz 2>/dev/null; then
               git show FETCH_HEAD:radar.sqlite3.gz | gzip -dc > state/radar.sqlite3
             elif git cat-file -e FETCH_HEAD:radar.sqlite3 2>/dev/null; then
@@ -210,26 +210,19 @@ jobs:
           if [ -f state/fast_path_report.json ]; then cp state/fast_path_report.json /tmp/radar-state/fast_path_report.json; fi
           if [ -f state/fast_path_v047_validated_report.json ]; then cp state/fast_path_v047_validated_report.json /tmp/radar-state/fast_path_v047_validated_report.json; fi
           cd /tmp/radar-state
+          # radar-state is a mutable checkpoint, not an audit-history branch. Recreate it
+          # as a one-commit snapshot so 5-minute cycles never download an ever-growing
+          # chain of large compressed SQLite blobs. Signal/audit history remains in SQLite.
           git init
           git config user.name 'SAG-30 radar'
           git config user.email 'radar@users.noreply.github.com'
           git remote add origin "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git"
           git config http.extraheader "$(git -C "$GITHUB_WORKSPACE" config --get http.https://github.com/.extraheader)"
-          if git ls-remote --exit-code --heads origin radar-state; then
-            git fetch origin radar-state
-            git reset --soft FETCH_HEAD
-          else
-            status=$?
-            if [ "$status" -ne 2 ]; then exit "$status"; fi
-          fi
-          git rm --cached --ignore-unmatch radar.sqlite3 >/dev/null 2>&1 || true
-          rm -f radar.sqlite3
           git add radar.sqlite3.gz health.json semantic_shadow_report.json candidate_v034_report.json winner_recall_report.json multi_engine_report.json
           if [ -f fast_path_report.json ]; then git add fast_path_report.json; fi
           if [ -f fast_path_v047_validated_report.json ]; then git add fast_path_v047_validated_report.json; fi
-          if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'Append prospective radar audit and heartbeat'
-          git push origin HEAD:radar-state
+          git commit -m 'Refresh prospective radar checkpoint'
+          git push --force origin HEAD:radar-state
 
       - name: Dispatch next cadence cycle
         if: ${{ always() && github.event_name != 'schedule' }}
