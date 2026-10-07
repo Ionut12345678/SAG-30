@@ -406,6 +406,12 @@ def run():
             detail=f'DEEP_MONITOR {deep_count} observations'
         if deep_count <= 0:
             raise ValueError('No deep observations recorded after routing')
+        valid_deep_count=db.execute(
+            "SELECT COUNT(*) FROM observations WHERE run_id=? AND quality='OK'",(run_id,)
+        ).fetchone()[0]
+        if int(valid_deep_count or 0) == 0:
+            run_status='MONITOR_DATA_GAP'
+            detail=detail + '; deep real-time feed has 0 valid observations'
         db.execute('UPDATE runs SET finished=?,status=?,detail=? WHERE id=?',
             (utcnow(),run_status,detail,run_id))
         db.commit()
