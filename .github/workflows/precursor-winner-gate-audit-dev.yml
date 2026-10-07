@@ -1,0 +1,49 @@
+name: SAG30 precursor winner gate audit DEV
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/precursor-winner-gate-audit-dev.yml']
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Replay frozen v049 gates on clean winners
+        run: |
+          git fetch --depth=1 origin radar-state
+          git show FETCH_HEAD:radar.sqlite3.gz > /tmp/r.gz
+          gzip -dc /tmp/r.gz > /tmp/r.db
+          python - <<'PY'
+          import sqlite3,json,statistics
+          from datetime import datetime
+          db=sqlite3.connect('/tmp/r.db')
+          winners=['SXTC','GIPR','CPHI','LGCL','NXAT','NCPL']
+          def D(s):return datetime.fromisoformat(str(s).replace('Z','+00:00'))
+          out=[]
+          for s in winners:
+            rr=db.execute("select source_ts,change_pct,bar_high_pct,bar_volume,bid,ask,spread_pct,minute_bar_present from fast_path_v047_observations where session='2026-10-07' and symbol=? order by source_ts",(s,)).fetchall()
+            vols=[];prev=None;prevts=None;streak=0;watch=None;diag={'entry_obs':0,'two_step_obs':0,'activity_obs':0,'exec_obs':0,'max_activity':None,'max_streak':0}
+            for src,p,h,v,bid,ask,sp,mb in rr:
+              if p is None:continue
+              p=float(p);h=float(h if h is not None else p)
+              if h>=10:break
+              if not mb or v is None or float(v)<=0:continue
+              med=statistics.median(vols[-20:]) if vols else 0; ratio=float(v)/med if med>0 else None
+              pos=False
+              if prev is not None and prevts is not None:
+                gap=(D(src)-D(prevts)).total_seconds()/60;pos=0<gap<=5 and p>prev
+              streak=streak+1 if pos else 0
+              entry=1<=p<=8; act=ratio is not None and ratio>=1.5; exe=bid is not None and ask is not None and sp is not None and float(sp)<=2
+              diag['entry_obs']+=int(entry);diag['two_step_obs']+=int(streak>=2);diag['activity_obs']+=int(act);diag['exec_obs']+=int(exe)
+              diag['max_streak']=max(diag['max_streak'],streak)
+              if ratio is not None:diag['max_activity']=max(diag['max_activity'] or 0,ratio)
+              if entry and streak>=2 and act and exe and watch is None:watch={'ts':src,'pct':p,'activity':ratio,'spread':float(sp)}
+              vols.append(float(v));prev=p;prevts=src
+            blockers=[]
+            if diag['entry_obs']==0:blockers.append('ENTRY')
+            if diag['max_streak']<2:blockers.append('TWO_POSITIVE_STEPS')
+            if diag['activity_obs']==0:blockers.append('ACTIVITY')
+            if diag['exec_obs']==0:blockers.append('EXECUTION')
+            out.append({'symbol':s,'v049_replay_watch':watch,'pre10_observations':len(rr),'diagnostic':diag,'structural_blockers':blockers})
+          print(json.dumps({'status':'DEV_REPLAY_NO_RETRO_CREDIT_NOT_BUY','cases':out},indent=2))
+          PY
