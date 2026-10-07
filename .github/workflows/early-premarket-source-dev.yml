@@ -1,0 +1,43 @@
+name: SAG30 early premarket source DEV
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/early-premarket-source-dev.yml']
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: |
+          python - <<'PY'
+          import json,urllib.request,datetime,time
+          symbols=['TOPP','SBFM','LGCL','GIPR','LPCN','BIYA','SXTC','NXAT','PFAI','DKI']
+          def get(s):
+            u=f'https://query1.finance.yahoo.com/v8/finance/chart/{s}?interval=1m&range=5d&includePrePost=true&events=div%2Csplits'
+            req=urllib.request.Request(u,headers={'User-Agent':'Mozilla/5.0'})
+            with urllib.request.urlopen(req,timeout=20) as r:return json.load(r)
+          out={}
+          for s in symbols:
+            try:
+              d=get(s)['chart']['result'][0]; meta=d['meta']; ts=d.get('timestamp') or []
+              q=(d.get('indicators',{}).get('quote') or [{}])[0]; closes=q.get('close') or []; vols=q.get('volume') or []
+              tz=datetime.timezone(datetime.timedelta(seconds=meta.get('gmtoffset',-14400)))
+              # infer Oct-6 regular close from chart bars, not current metadata
+              prev=[(t,c) for t,c in zip(ts,closes) if c and datetime.datetime.fromtimestamp(t,tz).date().isoformat()=='2026-10-06' and datetime.time(9,30)<=datetime.datetime.fromtimestamp(t,tz).time()<=datetime.time(16,0)]
+              base=prev[-1][1] if prev else meta.get('chartPreviousClose') or meta.get('previousClose')
+              rows=[]
+              for t,c,v in zip(ts,closes,vols):
+                dt=datetime.datetime.fromtimestamp(t,tz)
+                if c and dt.date().isoformat()=='2026-10-07' and datetime.time(4,0)<=dt.time()<datetime.time(9,30):
+                  pct=(c/base-1)*100 if base else None
+                  rows.append((dt.isoformat(),c,v or 0,pct))
+              gates={}
+              for g in [1,3,5,10,20,30,50,100]:
+                x=next((r for r in rows if r[3] is not None and r[3]>=g),None)
+                gates[str(g)]=x
+              out[s]={'base':base,'bars':len(rows),'first':rows[0] if rows else None,'gates':gates,'premarket_peak':max((r[3] for r in rows),default=None),'cum_volume':sum(r[2] for r in rows)}
+            except Exception as e: out[s]={'error':repr(e)}
+            time.sleep(.2)
+          print(json.dumps(out,indent=2))
+          PY
