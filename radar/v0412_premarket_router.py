@@ -13,7 +13,7 @@ ET=ZoneInfo('America/New_York')
 BOARD='https://www.thehotpennystocks.com/scans/premarket-penny-stocks/'
 CHART='https://query1.finance.yahoo.com/v8/finance/chart/{symbol}?interval=1m&range=5d&includePrePost=true&events=div%2Csplits'
 UA={'User-Agent':'Mozilla/5.0','Accept':'text/html,application/json'}
-ROW=re.compile(r'<tr><td class="pf-rank">(\\d+)</td><td class="pf-sym"><a[^>]*stock=([A-Z0-9.\\-]+)[^>]*>[^<]+</a></td><td class="pf-name">.*?</td><td class="pf-num">\\$([^<]+)</td><td class="pf-num pf-pos">([0-9.]+)%</td><td class="pf-num">([^<]+)</td></tr>',re.S)
+ROW=re.compile(r'<tr><td class="pf-rank">(\d+)</td><td class="pf-sym"><a[^>]*stock=([A-Z0-9.-]+)[^>]*>[^<]+</a></td><td class="pf-name">.*?</td><td class="pf-num">\$([^<]+)</td><td class="pf-num pf-pos">([0-9.]+)%</td><td class="pf-num">([^<]+)</td></tr>',re.S)
 
 def fetch(url):
     with urllib.request.urlopen(urllib.request.Request(url,headers=UA),timeout=20) as r:
