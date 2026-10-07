@@ -70,7 +70,7 @@ def fetch_news_for_date(date,symbols,headers):
 def main():
     p=argparse.ArgumentParser()
     p.add_argument("--universe",default="config/universe.csv")
-    p.add_argument("--out",default="research/cache/sag30_balanced_v044_dataset.json.gz")
+    p.add_argument("--out",default="research/cache/sag30_date_matched_v045_dataset.json.gz")
     p.add_argument("--end",default="2026-10-07T05:57:27+00:00")
     p.add_argument("--lookback-days",type=int,default=240)
     p.add_argument("--winners",type=int,default=300);p.add_argument("--nonwinners",type=int,default=300)
@@ -93,7 +93,7 @@ def main():
         print(json.dumps({"date":date,"symbols":len(syms),
           "bars":sum(len(bd.get(s,[])) for s in syms),
           "news":sum(len(nd.get(s,[])) for s in syms)},sort_keys=True),flush=True)
-    payload={"dataset_version":"SAG30-BALANCED-v044-CACHE-1","frozen_end":end.isoformat(),
+    payload={"dataset_version":"SAG30-DATE-MATCHED-v045-CACHE-1","frozen_end":end.isoformat(),
       "lookback_days":a.lookback_days,"feed":a.feed,"winner_count":len(winners),"nonwinner_count":len(non),
       "cohort":cohort,"bars":bars,"news":news,
       "metadata":{"purpose":"immutable reusable historical replay input","model_semantics":"NONE",
