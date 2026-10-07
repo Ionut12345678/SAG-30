@@ -132,7 +132,7 @@ def build(db_path, scan_rc=0, bridge_rc=0):
                 ).fetchone()
                 if sr:
                     result['fast_scout']={
-                        'status':'PASS',
+                        'status':'DATA_GAP' if int(sr[1] or 0) == 0 else 'PASS',
                         'universe_count':sr[0],
                         'eligible_count':sr[1],
                         'selected_count':sr[2],
@@ -145,6 +145,8 @@ def build(db_path, scan_rc=0, bridge_rc=0):
                 result['cadence_gap_seconds'] = round((datetime.fromisoformat(started)-datetime.fromisoformat(previous[0])).total_seconds(), 3)
             if status == 'FAILED':
                 result['health'] = 'FAIL'
+            elif status == 'MONITOR_DATA_GAP' and result['health'] == 'PASS':
+                result['health'] = 'DEGRADED'
         result['candidate_count'] = db.execute('SELECT COUNT(*) FROM candidates').fetchone()[0]
         if _table_exists(db, 'bridge_publications'):
             result['pending_bridge_events'] = db.execute(
