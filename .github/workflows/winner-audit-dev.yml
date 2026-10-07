@@ -1,0 +1,35 @@
+name: SAG30 winner audit DEV
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/winner-audit-dev.yml']
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build winner audit
+        run: |
+          git fetch --depth=1 origin radar-state
+          git show FETCH_HEAD:radar.sqlite3.gz > /tmp/r.gz
+          gzip -dc /tmp/r.gz > /tmp/r.db
+          python - <<'PY'
+          import sqlite3,json,collections
+          db=sqlite3.connect('/tmp/r.db')
+          rows=db.execute("select symbol,run_id,retrieval_ts,change_pct,rank_change,rank_acceleration,selected from scout_history where session='2026-10-07' order by run_id").fetchall()
+          g=collections.defaultdict(list)
+          for r in rows:g[r[0]].append(r)
+          peaks={s:max(float(x[3]) for x in a) for s,a in g.items()}
+          for s,p in db.execute("select symbol,max(coalesce(bar_high_pct,change_pct)) from fast_path_events where session='2026-10-07' group by symbol"):
+            if p is not None: peaks[s]=max(peaks.get(s,-999),float(p))
+          out=[]
+          for s,p in sorted(peaks.items(),key=lambda z:z[1],reverse=True):
+            if p<30:continue
+            pre=[x for x in g.get(s,[]) if 1<=float(x[3])<10]
+            rescued=[x for x in pre if int(x[4])<=25 and int(x[5])<=50]
+            routed=[x for x in pre if x[6]]
+            best=min(pre,key=lambda x:int(x[4])+int(x[5])) if pre else None
+            out.append(dict(symbol=s,peak_pct=p,pre10_n=len(pre),already_routed=bool(routed),v0410=bool(rescued),
+              best_pre10=None if not best else dict(ts=best[2],pct=best[3],rank_change=best[4],rank_accel=best[5],selected=bool(best[6]))))
+          print(json.dumps(out,indent=2))
+          PY
