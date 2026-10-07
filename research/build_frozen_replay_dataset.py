@@ -78,7 +78,23 @@ def main():
     headers={"APCA-API-KEY-ID":os.environ["ALPACA_API_KEY"],"APCA-API-SECRET-KEY":os.environ["ALPACA_SECRET_KEY"]}
     end=datetime.fromisoformat(a.end); start=end-timedelta(days=a.lookback_days)
     dm=daily_resilient(load_universe(a.universe),start.isoformat(),end.isoformat(),headers,a.feed)
-    winners,non=sessions(dm); winners=winners[:a.winners]; non=non[:a.nonwinners]
+    all_winners,all_non=sessions(dm); winners=all_winners[:a.winners]
+    need=defaultdict(int)
+    for x in winners: need[x["date"]]+=1
+    pool=defaultdict(list)
+    for x in all_non: pool[x["date"]].append(x)
+    non=[]
+    for date,count in sorted(need.items()):
+        candidates=sorted(pool.get(date,[]),key=lambda x:(x["daily_high_pct"],x["symbol"]),reverse=True)
+        if len(candidates)<count:
+            raise SystemExit(f"insufficient date-matched hard negatives on {date}: need {count}, have {len(candidates)}")
+        non.extend(candidates[:count])
+    if len(non)!=a.nonwinners:
+        raise SystemExit(f"date-matched nonwinner count {len(non)} != requested {a.nonwinners}")
+    got=defaultdict(int)
+    for x in non: got[x["date"]]+=1
+    if dict(got)!=dict(need):
+        raise SystemExit(f"date-match integrity failure: winner dates={dict(need)} nonwinner dates={dict(got)}")
     cohort=[{**x,"label":"winner"} for x in winners]+[{**x,"label":"nonwinner"} for x in non]
     bydate=defaultdict(set)
     for x in cohort:bydate[x["date"]].add(x["symbol"])
