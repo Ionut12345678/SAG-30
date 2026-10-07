@@ -1,0 +1,35 @@
+name: SAG30 benchmark probe
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/benchmark-probe.yml']
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore checkpoint
+        run: |
+          git init /tmp/rs
+          cd /tmp/rs
+          git remote add origin https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git
+          git fetch --depth=1 origin radar-state
+          git checkout FETCH_HEAD
+          gzip -dc radar.sqlite3.gz > /tmp/radar.sqlite3
+      - name: Probe historical evidence
+        run: |
+          python - <<'PY'
+          import sqlite3,json
+          db=sqlite3.connect('/tmp/radar.sqlite3')
+          tabs=[r[0] for r in db.execute("select name from sqlite_master where type='table' order by name")]
+          for t in tabs:
+              try:
+                  cols=[r[1] for r in db.execute("pragma table_info("+t+")")]
+                  n=db.execute("select count(*) from "+t).fetchone()[0]
+                  if any(x in t for x in ['observation','winner','scout','fast_path','candidate','milestone','shadow']):
+                      print("PROBE_TABLE="+json.dumps({"table":t,"rows":n,"cols":cols}))
+              except: pass
+          for t,col in [('observations','retrieval_ts'),('fast_path_events','retrieval_ts'),('scout_universe_history','retrieval_ts'),('candidate_v034_signals','retrieval_ts')]:
+              try: print("PROBE_RANGE="+json.dumps({"table":t,"range":db.execute(f"select min({col}),max({col}),count(distinct substr({col},1,10)) from {t}").fetchone()}))
+              except Exception as e: print("PROBE_RANGE_ERR="+t+":"+str(e))
+          PY
