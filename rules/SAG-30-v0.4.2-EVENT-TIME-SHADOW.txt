@@ -19,3 +19,5 @@ Evaluation
 Same balanced 300 winner + 300 >=+5%/<+30% non-winner design.
 Compare recall, precision, false-positive rates, lead time, exact-1m coverage and event-time usable coverage.
 Promotion gates are NOT changed. Historical success cannot authorize BUY or alter v0.3.3 FROZEN.
+
+Freeze record: hypothesis and 5-minute DATA_GAP boundary were committed before replay outcome inspection.
