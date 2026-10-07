@@ -247,8 +247,32 @@ def scout_discovery(db, run_id, universe, market_caps, headers, config, now):
         limit=config.get('multi_engine_retained_limit',15),
         min_seen=config.get('multi_engine_min_seen',2),
     )
+    # v0.4.10 RAPID-MOVER ROUTING RESCUE — routing only, prospective SHADOW / NOT BUY.
+    # Cross-sectional dual-rank lane prevents a fast +1..<+10 mover from being crowded
+    # out by the diversified shortlist. It does not alter any semantic/model gate.
+    symbols=list(features)
+    rank_change={s:i+1 for i,s in enumerate(sorted(symbols,key=lambda x:(float(features[x].get('change_pct') or 0),x),reverse=True))}
+    rank_accel={s:i+1 for i,s in enumerate(sorted(symbols,key=lambda x:(float(features[x].get('acceleration') or 0),x),reverse=True))}
+    rescue=[
+      s for s in symbols
+      if 1.0 <= float(features[s].get('change_pct') or 0) < 10.0
+      and rank_change[s] <= 25 and rank_accel[s] <= 50
+      and s not in base_selected
+    ]
+    rescue=sorted(rescue,key=lambda s:(rank_change[s]+rank_accel[s],rank_change[s],rank_accel[s],s))[:2]
+    db.execute("""CREATE TABLE IF NOT EXISTS v0410_routing_rescue(
+      session TEXT NOT NULL, run_id INTEGER NOT NULL, symbol TEXT NOT NULL, retrieval_ts TEXT NOT NULL,
+      change_pct REAL NOT NULL, acceleration REAL NOT NULL, rank_change INTEGER NOT NULL,
+      rank_acceleration INTEGER NOT NULL, status TEXT NOT NULL,
+      PRIMARY KEY(session,run_id,symbol))""")
+    for s in rescue:
+        db.execute("INSERT OR REPLACE INTO v0410_routing_rescue VALUES(?,?,?,?,?,?,?,?,?)",
+          (session,run_id,s,features[s]['retrieval_ts'],float(features[s]['change_pct']),
+           float(features[s].get('acceleration') or 0),rank_change[s],rank_accel[s],'RAPID_MOVER_RESCUE_SHADOW'))
+
     selected=list(base_selected)
-    for symbol in list(retained)+list(challenger_extras):
+    # Rescue gets priority over retained/challenger extras but is capped at two slots.
+    for symbol in list(rescue)+list(retained)+list(challenger_extras):
         if symbol in features and symbol not in selected:
             selected.append(symbol)
     multi_engine_record(db,run_id,session,features,scores,base_selected,challenger_extras)

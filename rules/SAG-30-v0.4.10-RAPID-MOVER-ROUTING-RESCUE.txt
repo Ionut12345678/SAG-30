@@ -1,0 +1,26 @@
+# SAG-30 v0.4.10 RAPID-MOVER ROUTING RESCUE
+
+Status: PROSPECTIVE SHADOW / ROUTING ONLY / NOT BUY
+
+Activation is the first live radar cycle after this file and implementation land on main.
+
+Purpose: prevent fast early movers from being crowded out of deep FAST-PATH routing.
+
+Frozen routing gates:
+- broad-scout change >= +1.00% and < +10.00%
+- cross-sectional rank_change <= 25
+- cross-sectional rank_acceleration <= 50
+- maximum 2 rescue symbols per scout cycle
+- rescue candidates are prioritized into deep routing before retained/challenger extras
+
+Semantics:
+- This is routing only. It emits no BUY and no model signal.
+- SAG-30 v0.3.3 FROZEN is unchanged.
+- v0.4.7, v0.4.8 and v0.4.9 semantics/gates are unchanged.
+- A rescued symbol must still pass the normal deep evidence and v0.4.9/v0.4.8 gates.
+- No retrospective credit and no backfill.
+- SBFM/DKI reconstruction is DEV evidence only.
+- Do not retune these gates from individual prospective cases.
+
+DEV basis (2026-10-07 checkpoint):
+R25_A50 caught SBFM before its observed explosion; 32/431 hard negatives met the routing rescue condition (7.42% routing FPR), and historical incremental load was max 1 extra symbol per affected cycle. These are routing-study metrics, not trading precision.
