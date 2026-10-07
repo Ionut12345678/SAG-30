@@ -1,0 +1,45 @@
+SAG-30 v0.4.7 VALIDATED — ACCELERATED OPERATIONAL READINESS PROTOCOL
+Status: PRE-REGISTERED EVALUATION ONLY / SHADOW / NOT BUY
+Date frozen: 2026-10-07 before first complete prospective OOS session.
+Production control: SAG-30 v0.3.3 FROZEN unchanged.
+Model semantics: v0.4.7 VALIDATED unchanged. EVENT, base FLOW and ACTIVITY_RATIO >=1.50 are not modified.
+
+PURPOSE
+Shorten calendar time to an OPERATIONAL SHADOW verdict by using evidence-count stopping rather than waiting an arbitrary 10 sessions. This protocol does NOT authorize real-money deployment and does not weaken the later execution/pilot validation requirement.
+
+PROSPECTIVE EVIDENCE
+Use only signal history recorded prospectively after the frozen prospective start. No backfill may create or alter a signal.
+At session maturity, label outcomes across the frozen eligible U.S. universe using session data:
+- winner: reaches >=+30% versus previous regular close;
+- hard negative: reaches >=+5% but remains <+30%;
+- for each session select the same number of highest-moving hard negatives as winners when enough exist;
+- retain the exact signal history, source/data-quality status and first-signal execution telemetry.
+A winner never routed into the live v0.4.7 observation path counts as an operational miss when full-universe discovery data was healthy; otherwise classify the reason as DATA/CADENCE and report separately.
+
+ACCELERATED STOPPING RULE
+Earliest evaluation: after 3 COMPLETE prospective sessions.
+Early OPERATIONAL-SHADOW PASS is allowed only when ALL are true:
+1) >=100 eligible prospective winners total;
+2) >=100 same-date matched hard negatives total;
+3) combined EVENT OR FILTERED_FLOW point recall >=35%;
+4) combined FPR <=35%;
+5) balanced precision >=50%;
+6) median lead to +30 >=3 minutes among detected winners;
+7) no unresolved material source/cadence/infrastructure failure that invalidates the denominator;
+8) first-signal execution telemetry is recorded for the great majority of signals; bid/ask/spread must be reported, never imputed.
+
+If 100+100 evidence is not reached after 3 sessions, continue until it is reached, with a target cap of 5 complete sessions for the accelerated OPERATIONAL SHADOW decision.
+If after 5 sessions evidence remains insufficient, status = INSUFFICIENT EVIDENCE, not FAIL, and collection continues.
+
+FAIL / HOLD
+- recall <35%, FPR >35%, precision <50%, or median lead <3m after the evidence minimum => HOLD/FAIL for accelerated operational status;
+- material data/cadence failure => DATA HOLD, repair infrastructure without changing model semantics, then restart/extend evidence collection as pre-registered;
+- no threshold retuning from prospective cases.
+
+SEPARATE REAL-MONEY GATE
+An accelerated OPERATIONAL SHADOW PASS means the radar/model is operational enough for continued paper/live-shadow use. It does NOT authorize BUY or real capital. Real-money pilot requires the longer prospective/execution-realism evidence block and explicit separate approval criteria.
+
+REPORT EACH SESSION
+Cumulative sessions; eligible winners; matched hard negatives; EVENT detections; FILTERED_FLOW detections; overlap; recall; FPR; precision; median lead; source/data coverage; ask availability; median spread; spread distribution; unresolved execution unknowns.
+
+SHADOW never implies BUY. v0.3.3 FROZEN remains unchanged.
