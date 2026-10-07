@@ -309,12 +309,34 @@ def refresh_shadow_volume_baseline(db, symbols, headers, feed, now):
         return 0
 
 
-def prime_selected_after_discovery(db, run_id, selected, headers, config, evidence):
+def select_deep_feed(selected, headers, config, now):
+    """Prefer real-time SIP when entitled; otherwise preserve configured evidence feed.
+
+    Delayed SIP is never returned here and therefore can never become model evidence.
+    """
+    configured=config['feed']
+    preferred=config.get('deep_preferred_feed')
+    before=int(config.get('deep_preferred_before_et_hour',0) or 0)
+    local_hour=now.astimezone(ZoneInfo('America/New_York')).hour
+    if not selected or not preferred or local_hour >= before or preferred == configured:
+        return configured
+    probe=selected[0]
+    try:
+        url='https://data.alpaca.markets/v2/stocks/' + probe + '/snapshot?' + urlencode({'feed': preferred})
+        request(url,headers)
+        log.info('SAG30_DEEP_FEED preferred=%s status=AVAILABLE probe=%s',preferred,probe)
+        return preferred
+    except RuntimeError as exc:
+        log.info('SAG30_DEEP_FEED preferred=%s status=UNAVAILABLE fallback=%s reason=%s',preferred,configured,str(exc))
+        return configured
+
+def prime_selected_after_discovery(db, run_id, selected, headers, config, evidence, feed=None):
     """Prospective second snapshot after shortlist selection and baseline backfill."""
     if not selected:
         return 0
     started=utcnow()
-    url='https://data.alpaca.markets/v2/stocks/snapshots?' + urlencode({'symbols': ','.join(selected), 'feed': config['feed']})
+    evidence_feed=feed or config['feed']
+    url='https://data.alpaca.markets/v2/stocks/snapshots?' + urlencode({'symbols': ','.join(selected), 'feed': evidence_feed})
     result,retrieved=request(url,headers)
     ok=0
     states={}
@@ -333,7 +355,7 @@ def prime_selected_after_discovery(db, run_id, selected, headers, config, eviden
         states["R2:"+state_r2]=states.get("R2:"+state_r2,0)+1
         ok += int(quality=='OK')
     db.commit()
-    log.info('SAG30_POST_DISCOVERY_PRIME selected=%s ok=%s candidate_states=%s',len(selected),ok,sorted(states.items()))
+    log.info('SAG30_POST_DISCOVERY_PRIME feed=%s selected=%s ok=%s candidate_states=%s',evidence_feed,len(selected),ok,sorted(states.items()))
     return len(selected)
 
 
@@ -378,8 +400,9 @@ def run():
                 # never backfill, and never change frozen/candidate model semantics.
                 if not candidates:
                     raise ValueError('FAST SCOUT found no fresh routing-eligible snapshots and no existing shortlist is available')
-                refresh_shadow_volume_baseline(db,candidates,headers,config['feed'],now)
-                deep_count=prime_selected_after_discovery(db,run_id,candidates,headers,config,evidence)
+                deep_feed=select_deep_feed(candidates,headers,config,now)
+                refresh_shadow_volume_baseline(db,candidates,headers,deep_feed,now)
+                deep_count=prime_selected_after_discovery(db,run_id,candidates,headers,config,evidence,deep_feed)
                 if deep_count <= 0:
                     raise ValueError('FAST SCOUT data gap and fallback shortlist produced no observations')
                 run_status='MONITOR_DATA_GAP'
@@ -392,16 +415,18 @@ def run():
                       'INSERT INTO candidates VALUES(?,?,?,?) ON CONFLICT(symbol) DO UPDATE SET last_seen=excluded.last_seen,expires=excluded.expires',
                       (symbol,now.isoformat(),now.isoformat(),(now+timedelta(hours=24)).isoformat())
                     )
-                refresh_shadow_volume_baseline(db,selected,headers,config['feed'],now)
+                deep_feed=select_deep_feed(selected,headers,config,now)
+                refresh_shadow_volume_baseline(db,selected,headers,deep_feed,now)
                 db.execute('DELETE FROM shadow_volume_baseline WHERE symbol NOT IN ('+marks+')',selected)
-                deep_count=prime_selected_after_discovery(db,run_id,selected,headers,config,evidence)
+                deep_count=prime_selected_after_discovery(db,run_id,selected,headers,config,evidence,deep_feed)
                 run_status='DISCOVERY_OK'
                 detail=f'FAST_SCOUT {len(universe)} universe -> {deep_count} deep observations'
         else:
             if not candidates:
                 raise ValueError('No shortlist candidates available for deep monitor')
-            refresh_shadow_volume_baseline(db,candidates,headers,config['feed'],now)
-            deep_count=prime_selected_after_discovery(db,run_id,candidates,headers,config,evidence)
+            deep_feed=select_deep_feed(candidates,headers,config,now)
+            refresh_shadow_volume_baseline(db,candidates,headers,deep_feed,now)
+            deep_count=prime_selected_after_discovery(db,run_id,candidates,headers,config,evidence,deep_feed)
             run_status='MONITOR_OK'
             detail=f'DEEP_MONITOR {deep_count} observations'
         if deep_count <= 0:
