@@ -1,0 +1,37 @@
+SAG-30 v0.4.3 PATH-OBSERVABILITY DIAGNOSTIC SHADOW
+Status: PRE-REGISTERED RESEARCH / NOT BUY
+Parent: v0.4.2 EVENT-TIME FLOW SHADOW
+Production control: SAG-30 v0.3.3 FROZEN unchanged.
+
+Evidence motivating this version
+v0.4.2 balanced replay completed on 300 winners + 300 >=+5%/<+30% non-winners.
+Winner PRE-ARM recall was 12.0%; among winners with >=80% event-time usable intervals it was 28/203 = 13.8%.
+Therefore sparse IEX event-time coverage alone cannot explain the recall failure.
+The v0.4.2 signal semantics are NOT changed in this diagnostic version.
+
+Pre-registered hypothesis
+The remaining recall loss can be separated into:
+A. PATH-UNOBSERVABLE: insufficient sub-10 event-time observations before first +30 for the v0.4.2 persistence rule to be capable of firing.
+B. PERSISTENCE-MISS: at least two positive eligible intervals exist, but they are not consecutive.
+C. FLOW-MISS: the path is observable but does not contain enough positive FLOW evidence under +10.
+This taxonomy determines the next smallest challenger; it does not promote or tune a signal.
+
+Fixed definitions
+- Same balanced 300 winner + 300 near-miss cohort.
+- Same IEX 1-minute feed and 0 < dt <= 5 minute usable event-time interval.
+- Same first +30 censoring and <+10 eligibility.
+- PATH-OBSERVABLE means >=2 usable event-time intervals whose current observation is 0<pct<10 before first +30.
+- Positive interval means eligible current observation 0<pct<10, event-time acceleration >0 and volume >0.
+- PERSISTENCE-MISS means no v0.4.2 PRE-ARM, PATH-OBSERVABLE true, and >=2 positive eligible intervals total.
+- FLOW-MISS means no v0.4.2 PRE-ARM, PATH-OBSERVABLE true, and <2 positive eligible intervals total.
+- PATH-UNOBSERVABLE means PATH-OBSERVABLE false.
+- Report first +30 before 09:30 ET separately; do not redefine it away.
+
+Decision rule for next version
+- If PERSISTENCE-MISS is the largest actionable missed-winner class, next challenger may test a bounded non-consecutive persistence rule (for example 2-of-3), pre-registered before outcome inspection.
+- If FLOW-MISS dominates, do NOT merely relax persistence; investigate a discriminative impulse/volume or EVENT feature on a development/holdout split.
+- If PATH-UNOBSERVABLE dominates, FLOW cannot solve the class; develop EVENT coverage separately.
+- Promotion gates remain unchanged. Historical replay never authorizes BUY.
+
+Freeze record
+This taxonomy and decision rule are committed before the v0.4.3 replay result is inspected.
