@@ -78,6 +78,9 @@ jobs:
               --db state/radar.sqlite3 \
               --config config/radar.json \
               --out state/fast_path_report.json
+            python -m radar.fast_path_v048_overlay \
+              --db state/radar.sqlite3 \
+              --out state/fast_path_v048_report.json
           done
 
       - name: Publish pending signal batch to ChatGPT bridge
@@ -203,6 +206,7 @@ jobs:
           cp state/winner_recall_report.json /tmp/radar-state/winner_recall_report.json
           cp state/multi_engine_report.json /tmp/radar-state/multi_engine_report.json
           if [ -f state/fast_path_report.json ]; then cp state/fast_path_report.json /tmp/radar-state/fast_path_report.json; fi
+          if [ -f state/fast_path_v048_report.json ]; then cp state/fast_path_v048_report.json /tmp/radar-state/fast_path_v048_report.json; fi
           cd /tmp/radar-state
           git init
           git config user.name 'SAG-30 radar'
@@ -220,6 +224,7 @@ jobs:
           rm -f radar.sqlite3
           git add radar.sqlite3.gz health.json semantic_shadow_report.json candidate_v034_report.json winner_recall_report.json multi_engine_report.json
           if [ -f fast_path_report.json ]; then git add fast_path_report.json; fi
+          if [ -f fast_path_v048_report.json ]; then git add fast_path_v048_report.json; fi
           if git diff --cached --quiet; then exit 0; fi
           git commit -m 'Append prospective radar audit and heartbeat'
           git push origin HEAD:radar-state
