@@ -1,4 +1,4 @@
-SAG-30 v0.4.6 FLOW ACTIVITY GATE SHADOW
+SUPERSEDED NUMBERING NOTICE: This activity-gate study was independently validated successfully, but its version label collided with a separately pre-existing v0.4.6 FLOW pair-progress challenger. The exact activity-gate semantics and frozen threshold are carried forward unchanged as SAG-30 v0.4.7 VALIDATED FLOW ACTIVITY GATE SHADOW. Do not treat this numbering correction as a new test or threshold change.\n\nSAG-30 v0.4.6 FLOW ACTIVITY GATE SHADOW
 Status: FROZEN VALIDATION CANDIDATE / NOT BUY
 Parent: v0.4.5 date-matched baseline
 Production control: SAG-30 v0.3.3 FROZEN unchanged.
