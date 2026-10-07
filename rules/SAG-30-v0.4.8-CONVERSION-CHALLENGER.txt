@@ -1,0 +1,9 @@
+SAG-30 v0.4.8 CONVERSION CHALLENGER — FROZEN CANDIDATE
+Status: prospective SHADOW / NOT BUY
+Parent control: v0.4.7 VALIDATED prospective/OOS unchanged. v0.3.3 FROZEN unchanged.
+No signal before activated_at receives prospective v0.4.8 credit.
+
+STAGE1: future v0.4.7 FILTERED_FLOW; entry +1.50..+8.00%; ACTIVITY_RATIO >=2.00; bid+ask available; spread <=2.00%; completed minute bar.
+STAGE2 within 2..10 event minutes: new observed high; advance >=2.00pp; >=2 positive price steps; median subsequent minute volume >=50% Stage1 minute volume; giveback <=40%.
+States: STAGE1_WATCH / STAGE2_CONVERSION_SHADOW / EXPIRED_NO_CONVERSION.
+Never BUY. No backfill. No historical retuning.
