@@ -1,0 +1,33 @@
+name: SAG-30 v0.4.5 date-matched baseline
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'research/fast_path_v045_date_matched.py'
+      - 'rules/SAG-30-v0.4.5-DATE-MATCHED-BASELINE-SHADOW.txt'
+      - '.github/workflows/fast_path_v045_date_matched.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  score:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Restore frozen dataset
+        uses: actions/cache/restore@v4
+        with:
+          path: research/cache/sag30_date_matched_v045_dataset.json.gz
+          key: sag30-date-matched-v045-cache-2
+          fail-on-cache-miss: true
+      - name: Compile
+        run: python -m py_compile research/fast_path_v045_date_matched.py
+      - name: Score unchanged v0.4.4 semantics
+        run: python -m research.fast_path_v045_date_matched
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sag30-v045-date-matched-baseline
+          path: research/fast_path_v045_date_matched.json
+          retention-days: 30
