@@ -3,6 +3,8 @@ on:
   push:
     branches: [main]
     paths: ['.github/workflows/benchmark-probe.yml']
+permissions:
+  contents: write
 jobs:
   probe:
     runs-on: ubuntu-latest
@@ -16,20 +18,29 @@ jobs:
           git fetch --depth=1 origin radar-state
           git checkout FETCH_HEAD
           gzip -dc radar.sqlite3.gz > /tmp/radar.sqlite3
-      - name: Probe historical evidence
+      - name: Build probe report
         run: |
+          mkdir -p reports
           python - <<'PY'
           import sqlite3,json
           db=sqlite3.connect('/tmp/radar.sqlite3')
+          out={}
           tabs=[r[0] for r in db.execute("select name from sqlite_master where type='table' order by name")]
           for t in tabs:
-              try:
+              if any(x in t for x in ['observation','winner','scout','fast_path','candidate','milestone','shadow']):
                   cols=[r[1] for r in db.execute("pragma table_info("+t+")")]
                   n=db.execute("select count(*) from "+t).fetchone()[0]
-                  if any(x in t for x in ['observation','winner','scout','fast_path','candidate','milestone','shadow']):
-                      print("PROBE_TABLE="+json.dumps({"table":t,"rows":n,"cols":cols}))
-              except: pass
-          for t,col in [('observations','retrieval_ts'),('fast_path_events','retrieval_ts'),('scout_universe_history','retrieval_ts'),('candidate_v034_signals','retrieval_ts')]:
-              try: print("PROBE_RANGE="+json.dumps({"table":t,"range":db.execute(f"select min({col}),max({col}),count(distinct substr({col},1,10)) from {t}").fetchone()}))
-              except Exception as e: print("PROBE_RANGE_ERR="+t+":"+str(e))
+                  out[t]={"rows":n,"cols":cols}
+                  for col in ('retrieval_ts','source_ts','session','created_at','started'):
+                      if col in cols:
+                          try: out[t]["range_"+col]=db.execute(f"select min({col}),max({col}),count(distinct substr({col},1,10)) from {t}").fetchone()
+                          except: pass
+          open('reports/benchmark_probe.json','w').write(json.dumps(out,indent=2,sort_keys=True))
           PY
+      - name: Publish probe report
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add reports/benchmark_probe.json
+          git commit -m "Publish benchmark probe" || exit 0
+          git push
