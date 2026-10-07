@@ -1,0 +1,34 @@
+name: SAG30 scout fastpath handoff DEV
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/scout-fastpath-handoff-dev.yml']
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Measure handoff
+        run: |
+          git fetch --depth=1 origin radar-state
+          git show FETCH_HEAD:radar.sqlite3.gz > /tmp/r.gz
+          gzip -dc /tmp/r.gz > /tmp/r.db
+          python - <<'PY'
+          import sqlite3,json
+          from datetime import datetime
+          db=sqlite3.connect('/tmp/r.db')
+          W=['SXTC','GIPR','CPHI','LGCL','NXAT','NCPL','SBFM']
+          def D(s):return datetime.fromisoformat(str(s).replace('Z','+00:00'))
+          out=[]
+          for s in W:
+            q=db.execute("select retrieval_ts,change_pct,rank_change,rank_acceleration from scout_history where session='2026-10-07' and symbol=? and selected=1 and change_pct>=1 and change_pct<10 order by retrieval_ts limit 1",(s,)).fetchone()
+            if not q:
+              q=db.execute("select retrieval_ts,change_pct,rank_change,rank_acceleration from scout_history where session='2026-10-07' and symbol=? and change_pct>=1 and change_pct<10 order by retrieval_ts limit 1",(s,)).fetchone()
+            f=None
+            if q:
+              f=db.execute("select retrieval_ts,source_ts,change_pct,bar_high_pct,minute_bar_present,spread_pct from fast_path_v047_observations where session='2026-10-07' and symbol=? and retrieval_ts>=? order by retrieval_ts limit 1",(s,q[0])).fetchone()
+            out.append({'symbol':s,'scout':None if not q else {'ts':q[0],'pct':q[1],'rc':q[2],'ra':q[3]},
+              'first_deep':None if not f else {'retrieval_ts':f[0],'source_ts':f[1],'pct':f[2],'high':f[3],'minute':f[4],'spread':f[5],
+              'handoff_sec':(D(f[0])-D(q[0])).total_seconds()}})
+          print(json.dumps(out,indent=2))
+          PY
