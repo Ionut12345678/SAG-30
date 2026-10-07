@@ -1,0 +1,27 @@
+name: SAG30 v048 replay benchmark
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/v048-replay-benchmark.yml']
+permissions:
+  contents: write
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          git init /tmp/rs
+          cd /tmp/rs
+          git remote add origin https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git
+          git fetch --depth=1 origin radar-state
+          git checkout FETCH_HEAD
+          gzip -dc radar.sqlite3.gz > /tmp/radar.sqlite3
+      - run: mkdir -p reports && python radar/v048_replay_benchmark.py
+      - run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git pull --rebase origin main
+          git add reports/v048_replay_benchmark.json
+          git commit -m "Publish v0.4.8 replay benchmark" || exit 0
+          git push
