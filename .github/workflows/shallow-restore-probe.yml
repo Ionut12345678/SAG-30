@@ -1,0 +1,35 @@
+name: SAG-30 shallow restore probe
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/shallow-restore-probe.yml'
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Probe bounded checkpoint restore
+        shell: bash
+        run: |
+          set -euo pipefail
+          start=$(date +%s)
+          git fetch --depth=1 origin radar-state
+          git show FETCH_HEAD:radar.sqlite3.gz | gzip -dc > /tmp/radar.sqlite3
+          elapsed=$(( $(date +%s) - start ))
+          bytes=$(stat -c%s /tmp/radar.sqlite3)
+          integrity=$(python - <<'PY'
+          import sqlite3
+          db=sqlite3.connect('/tmp/radar.sqlite3')
+          print(db.execute('PRAGMA quick_check').fetchone()[0])
+          db.close()
+          PY
+          )
+          echo "SAG30_SHALLOW_RESTORE_SECONDS=$elapsed"
+          echo "SAG30_SQLITE_BYTES=$bytes"
+          echo "SAG30_SQLITE_QUICK_CHECK=$integrity"
