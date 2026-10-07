@@ -1,0 +1,41 @@
+SAG-30 SHADOW EVIDENCE MAP — through v0.4.6
+Status: RESEARCH MEMORY / NOT BUY
+Production control: SAG-30 v0.3.3 FROZEN unchanged.
+Inherits rules/SAG-30-SHADOW-EVIDENCE-MAP-v0.4.5.txt and earlier maps.
+
+v0.4.6 RESULT — FLOW PAIR-PROGRESS
+Frozen temporal split:
+- DEV 2026-09-18..2026-09-25: 149 winners +149 matched nonwinners.
+- HOLDOUT 2026-09-28..2026-10-06: 151 +151.
+
+Unchanged baseline on DEV:
+- combined recall 31.54%
+- combined FPR 42.95%
+- EVENT recall 22.82%
+- FLOW recall 10.07%
+- median combined lead 200m.
+Because unchanged DEV recall itself was below the pre-registered >=35% gate, no positive PAIR_PROGRESS threshold could be eligible. Selected threshold = NONE. HOLDOUT was not used for threshold tuning.
+Unchanged HOLDOUT baseline:
+- combined recall 47.68%
+- combined FPR 48.34%
+- EVENT recall 35.76%
+- FLOW recall 13.91%
+- median combined lead 197.98m.
+
+REJECT / DO NOT RETEST WITHOUT NEW EVIDENCE
+- PAIR_PROGRESS_PP magnitude filter as v0.4.6 defined it. No threshold selection is authorized from this study.
+
+NEW EVIDENCE
+- Aggregate v0.4.5 recall 39.67% is temporally unstable: 31.54% on early DEV versus 47.68% on later HOLDOUT under identical semantics.
+- A filter-only DEV study cannot satisfy an absolute 35% recall gate when its unchanged baseline is already below 35%.
+- Raw source diagnostic: winner sessions have nonzero Alpaca news in 68.46% of DEV versus 82.12% of HOLDOUT; all 600 sessions have IEX bars. This does not prove source failure, but source/regime variation must be reported separately from feature discrimination.
+- Across 13 matched dates, median union recall is 39.13%, median union FPR 46.15%; recall exceeds FPR on only 5/13 dates. Historical architecture is not yet stable enough for promotion.
+
+METHODOLOGY FOR NEXT FILTER FAMILY
+Do not move or reselect the frozen v0.4.6 split after seeing its result.
+For a new causal filter family, DEV selection may use RELATIVE recall retention because absolute >=35 is impossible for the unchanged DEV baseline:
+- retain >=90% of unchanged DEV combined recall,
+- precision >=8%, lead >=3m,
+- maximize FPR reduction.
+Final HOLDOUT still requires absolute combined recall >=35%, precision >=8%, lead >=3m and >=5pp absolute FPR reduction versus unchanged HOLDOUT baseline.
+This methodology change is forward-looking for NEW feature families only; it cannot rehabilitate v0.4.6 PAIR_PROGRESS.
