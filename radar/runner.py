@@ -435,8 +435,14 @@ def run():
             "SELECT COUNT(*) FROM observations WHERE run_id=? AND quality='OK'",(run_id,)
         ).fetchone()[0]
         if int(valid_deep_count or 0) == 0:
-            run_status='MONITOR_DATA_GAP'
-            detail=detail + '; deep real-time feed has 0 valid observations'
+            local_hour=now.astimezone(ZoneInfo('America/New_York')).hour
+            preferred=config.get('deep_preferred_feed')
+            if local_hour < int(config.get('deep_preferred_before_et_hour',0) or 0) and deep_feed == config['feed'] and preferred:
+                run_status='PREMARKET_ROUTING_ONLY'
+                detail=detail + '; routing active; entitled premarket real-time evidence feed unavailable, frozen model evidence remains blocked'
+            else:
+                run_status='MONITOR_DATA_GAP'
+                detail=detail + '; deep real-time feed has 0 valid observations'
         db.execute('UPDATE runs SET finished=?,status=?,detail=? WHERE id=?',
             (utcnow(),run_status,detail,run_id))
         db.commit()
