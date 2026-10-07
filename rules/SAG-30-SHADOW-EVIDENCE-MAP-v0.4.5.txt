@@ -1,0 +1,31 @@
+SAG-30 SHADOW EVIDENCE MAP — through v0.4.5
+Status: RESEARCH MEMORY / NOT BUY
+Production control: SAG-30 v0.3.3 FROZEN unchanged.
+Inherits every KEEP / LANE-SPECIFIC / REJECT item from rules/SAG-30-SHADOW-EVIDENCE-MAP-v0.4.4.txt unless explicitly corrected below.
+
+v0.4.5 DENOMINATOR CORRECTION
+Immutable dataset SHA256: 22891b1f8148bd0616abee603c196b453c229350c185452bb937e9da50b780ff
+Cohort: 300 winners + 300 date-matched hard-negative nonwinners, identical date distribution across classes.
+Signal semantics: unchanged v0.4.4 EVENT + v0.4.2 event-time FLOW.
+
+Corrected baseline:
+- EVENT winner recall 29.33% (88/300)
+- EVENT nonwinner FPR 17.00% (51/300)
+- EVENT balanced precision 63.31%
+- FLOW winner recall 12.00% (36/300)
+- FLOW nonwinner FPR 34.33% (103/300)
+- FLOW balanced precision 25.90%
+- EVENT OR FLOW winner recall 39.67% (119/300): PASS >=35%
+- EVENT OR FLOW nonwinner FPR 45.67% (137/300)
+- EVENT OR FLOW balanced precision 46.48%: PASS >=8%
+- EVENT incremental winners over FLOW 83
+- EVENT/FLOW winner overlap 5
+- FLOW-only winners 31
+- FLOW-only nonwinners 86
+- median EVENT lead to +30 227.15m
+
+INTERPRETATION
+Changes in FPR/precision versus v0.4.4 are denominator correction, NOT model improvement. EVENT remains KEEP. FLOW remains LANE-SPECIFIC. Corrected FLOW FPR is lower than the temporally imbalanced estimate but remains the dominant discrimination bottleneck: 103/300 nonwinners fire FLOW versus 51/300 EVENT.
+
+NEXT RESEARCH
+Filter FLOW only; EVENT must remain unchanged. Candidate discriminants must exist at or before FLOW PRE-ARM. Use deterministic temporal DEV/HOLDOUT separation before threshold selection. Reject a family that fails to generalize rather than retuning on HOLDOUT.
