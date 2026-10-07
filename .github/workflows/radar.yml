@@ -79,6 +79,10 @@ jobs:
           et_hour=$((10#$et_hour))
           if [ "$et_hour" -lt "$realtime_start" ]; then
             echo "SAG30_FAST_PATH_SKIPPED_PREMARKET_ROUTING_ONLY et_hour=$et_hour realtime_start=$realtime_start"
+            # Keep the v0.4.7 report interface current without fabricating new evidence.
+            python -m radar.fast_path_v047_validated_overlay \
+              --db state/radar.sqlite3 \
+              --out state/fast_path_v047_validated_report.json
           else
             for i in $(seq 1 "$iterations"); do
               sleep "$sleep_seconds"
