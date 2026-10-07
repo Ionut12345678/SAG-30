@@ -25,3 +25,5 @@ jobs:
           git add reports/v048_replay_benchmark.json
           git commit -m "Publish v0.4.8 replay benchmark" || exit 0
           git push
+
+# eligibility audit v2
