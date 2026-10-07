@@ -1,0 +1,27 @@
+name: SAG30 TOPP cross session DEV
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/topp-cross-session-dev.yml']
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          git fetch --depth=1 origin radar-state
+          git show FETCH_HEAD:radar.sqlite3.gz > /tmp/r.gz
+          gzip -dc /tmp/r.gz > /tmp/r.db
+          python - <<'PY'
+          import sqlite3,json
+          db=sqlite3.connect('/tmp/r.db')
+          out={}
+          for t in ['scout_history','fast_path_events','fast_path_v047_observations']:
+            try:
+              cols=[x[1] for x in db.execute('pragma table_info('+t+')')]
+              use=[c for c in ['session','run_id','retrieval_ts','source_ts','change_pct','bar_high_pct','acceleration','rank_change','rank_acceleration','selected','bid','ask','spread_pct'] if c in cols]
+              rows=db.execute('select '+','.join(use)+' from '+t+" where symbol='TOPP' order by "+('retrieval_ts' if 'retrieval_ts' in use else use[0])).fetchall()
+              out[t]={'columns':use,'first20':[dict(zip(use,r)) for r in rows[:20]],'last20':[dict(zip(use,r)) for r in rows[-20:]],'count':len(rows)}
+            except Exception as e:out[t]={'error':str(e)}
+          print(json.dumps(out,indent=2))
+          PY
