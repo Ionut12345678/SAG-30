@@ -1,0 +1,38 @@
+SAG-30 v0.4.8 FLOW MOVE-CONSUMED FLOOR SHADOW
+Status: PRE-REGISTERED DEV/HOLDOUT FEATURE STUDY / NOT BUY
+Parent: v0.4.5 unchanged EVENT/FLOW baseline; prior rejected features remain rejected.
+Production: SAG-30 v0.3.3 FROZEN unchanged. EVENT unchanged.
+
+Hypothesis
+Base FLOW permits PRE-ARM immediately above 0%. Very small positive drift can satisfy two positive intervals without representing meaningful directional conversion. A minimum MOVE_CONSUMED at the exact base FLOW PRE-ARM may reduce false positives while preserving incremental winners.
+
+Feature
+MOVE_CONSUMED_PP = close_pct versus previous regular close at the exact timestamp base FLOW PRE-ARM first becomes true.
+Causal and known at PRE-ARM. No future/session outcome data.
+
+Frozen split
+DEV: 2026-09-18,09-21,09-22,09-23,09-24,09-25 (149+149).
+HOLDOUT: 2026-09-28,09-29,09-30,10-01,10-02,10-05,10-06 (151+151).
+
+Frozen DEV grid
+Filtered FLOW requires MOVE_CONSUMED_PP >= 0.50, 1.00, 2.00, 3.00, 4.00, or 5.00.
+The existing <+10 early boundary remains unchanged.
+
+DEV selection
+Candidate eligible only if:
+- combined recall >=90% of unchanged DEV combined recall,
+- precision >=8%,
+- median combined lead >=3m,
+- combined FPR improves >=3pp absolute vs unchanged DEV.
+Choose lowest FPR; tie-break higher recall, higher precision, lower floor.
+If none eligible => DEV FAIL; no threshold-specific HOLDOUT inspection.
+
+One-shot HOLDOUT PASS
+Apply only DEV-selected floor once. PASS requires:
+- combined recall >=35%
+- precision >=8%
+- median combined lead >=3m
+- combined FPR improves >=5pp absolute versus unchanged HOLDOUT.
+No HOLDOUT retuning.
+
+PASS may support this FLOW discriminator for further OOS/execution work. FAIL adds this exact feature/gate to REJECT. Historical SHADOW never BUY.
