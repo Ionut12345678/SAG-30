@@ -142,6 +142,7 @@ def view(snap):
         return None
     mb=snap.get("minuteBar") or {}
     price=mb.get("c")
+    high=mb.get("h")
     ts=mb.get("t")
     vol=mb.get("v")
     quote=snap.get("latestQuote") or {}
