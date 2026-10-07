@@ -1,0 +1,29 @@
+name: SAG30 v049 precursor dev
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/v049-precursor-dev.yml']
+permissions:
+  contents: write
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          git init /tmp/rs
+          cd /tmp/rs
+          git remote add origin https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git
+          git fetch --depth=1 origin radar-state
+          git checkout FETCH_HEAD
+          gzip -dc radar.sqlite3.gz > /tmp/radar.sqlite3
+      - run: mkdir -p reports && python radar/v049_precursor_research.py
+      - run: |
+          cp reports/v049_rolling_precursor_dev.json /tmp/r.json
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git fetch origin main && git reset --hard origin/main
+          mkdir -p reports && cp /tmp/r.json reports/v049_rolling_precursor_dev.json
+          git add reports/v049_rolling_precursor_dev.json
+          git commit -m "Publish v0.4.9 rolling precursor DEV replay" || exit 0
+          git push
