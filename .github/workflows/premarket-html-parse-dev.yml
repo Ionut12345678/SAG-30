@@ -1,0 +1,17 @@
+name: SAG30 premarket html parse DEV
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/premarket-html-parse-dev.yml']
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          python - <<'PY'
+          import urllib.request
+          u='https://www.thehotpennystocks.com/scans/premarket-penny-stocks/'
+          h=urllib.request.urlopen(urllib.request.Request(u,headers={'User-Agent':'Mozilla/5.0'}),timeout=20).read().decode('utf8','ignore')
+          for s in ['TOPP','SBFM','LGCL']:
+            i=h.find(s);print('\n###',s,'\n',h[max(0,i-700):i+1200])
+          PY
