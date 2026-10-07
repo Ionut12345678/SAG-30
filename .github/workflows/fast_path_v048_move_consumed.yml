@@ -1,0 +1,31 @@
+name: SAG-30 v0.4.8 FLOW move-consumed
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'research/fast_path_v048_move_consumed.py'
+      - 'rules/SAG-30-v0.4.8-FLOW-MOVE-CONSUMED-FLOOR-SHADOW.txt'
+      - '.github/workflows/fast_path_v048_move_consumed.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  study:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/cache/restore@v4
+        with:
+          path: research/cache/sag30_date_matched_v045_dataset.json.gz
+          key: sag30-date-matched-v045-cache-2
+          fail-on-cache-miss: true
+      - run: python -m py_compile research/fast_path_v041_replay.py research/fast_path_v048_move_consumed.py
+      - run: python -m research.fast_path_v048_move_consumed
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sag30-v048-flow-move-consumed
+          path: research/fast_path_v048_move_consumed.json
+          retention-days: 30
