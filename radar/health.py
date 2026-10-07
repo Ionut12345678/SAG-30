@@ -145,11 +145,16 @@ def build(db_path, scan_rc=0, bridge_rc=0):
                 result['cadence_gap_seconds'] = round((datetime.fromisoformat(started)-datetime.fromisoformat(previous[0])).total_seconds(), 3)
             if status == 'FAILED':
                 result['health'] = 'FAIL'
+            elif status == 'PREMARKET_ROUTING_ONLY':
+                # Expected provider limitation: discovery/routing is alive, but frozen model evidence
+                # remains intentionally blocked until an entitled real-time feed is available.
+                if result['health'] == 'PASS':
+                    result['health'] = 'DEGRADED'
+                result['evidence_health'] = 'EXPECTED_PREMARKET_ROUTING_ONLY'
             elif status == 'MONITOR_DATA_GAP' and result['health'] == 'PASS':
                 result['health'] = 'DEGRADED'
+                result['evidence_health'] = 'UNEXPECTED_MODEL_DATA_GAP'
             elif total > 0 and ok == 0 and result['health'] == 'PASS':
-                # Routing may be healthy while the authoritative evidence feed is unavailable
-                # (notably IEX before 08:00 ET). Never report full PASS without valid observations.
                 result['health'] = 'DEGRADED'
                 result['evidence_health'] = 'ROUTING_ONLY_NO_VALID_MODEL_OBSERVATIONS'
         result['candidate_count'] = db.execute('SELECT COUNT(*) FROM candidates').fetchone()[0]
