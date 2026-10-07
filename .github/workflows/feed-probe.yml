@@ -1,4 +1,5 @@
 name: SAG-30 feed entitlement probe
+# isolated entitlement check; no radar state writes
 on:
   workflow_dispatch:
   push:
