@@ -147,6 +147,11 @@ def build(db_path, scan_rc=0, bridge_rc=0):
                 result['health'] = 'FAIL'
             elif status == 'MONITOR_DATA_GAP' and result['health'] == 'PASS':
                 result['health'] = 'DEGRADED'
+            elif total > 0 and ok == 0 and result['health'] == 'PASS':
+                # Routing may be healthy while the authoritative evidence feed is unavailable
+                # (notably IEX before 08:00 ET). Never report full PASS without valid observations.
+                result['health'] = 'DEGRADED'
+                result['evidence_health'] = 'ROUTING_ONLY_NO_VALID_MODEL_OBSERVATIONS'
         result['candidate_count'] = db.execute('SELECT COUNT(*) FROM candidates').fetchone()[0]
         if _table_exists(db, 'bridge_publications'):
             result['pending_bridge_events'] = db.execute(
