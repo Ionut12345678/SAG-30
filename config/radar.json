@@ -20,5 +20,7 @@
   "fast_path_sleep_seconds": 55,
   "discovery_fallback_feed": "delayed_sip",
   "discovery_fallback_before_et_hour": 8,
-  "discovery_fallback_max_age_seconds": 1200
+  "discovery_fallback_max_age_seconds": 1200,
+  "deep_preferred_feed": "sip",
+  "deep_preferred_before_et_hour": 8
 }
