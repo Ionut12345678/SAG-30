@@ -28,7 +28,7 @@ jobs:
         env:
           ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
           ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
-        run: python -m research.fast_path_v042_replay --winners 300 --nonwinners 300 --lookback-days 240 --feed iex --workers 6 --out research/fast_path_v042_replay.json
+        run: python -m research.fast_path_v042_replay --winners 300 --nonwinners 300 --lookback-days 240 --feed iex --workers 2 --out research/fast_path_v042_replay.json
       - uses: actions/upload-artifact@v4
         with:
           name: sag30-v042-event-time-replay
