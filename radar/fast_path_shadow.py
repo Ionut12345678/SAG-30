@@ -152,7 +152,7 @@ def view(snap):
         if mid>0:
             spread_pct=(float(ask)-float(bid))/mid*100.0
     if isinstance(price,(int,float)) and price>0 and ts and isinstance(vol,(int,float)):
-        return float(price),float((price/prev-1)*100),float(vol),ts,bid,ask,spread_pct,1
+        pct=float((price/prev-1)*100)\n        high_pct=float((high/prev-1)*100) if isinstance(high,(int,float)) and high>0 else pct\n        return float(price),pct,float(vol),ts,bid,ask,spread_pct,1,high_pct
     # Price-only fallback is allowed for EVENT observation, but cannot create
     # FLOW persistence because volume is zero and source timestamp is trade time.
     trade=snap.get("latestTrade") or {}
@@ -160,10 +160,10 @@ def view(snap):
     ts=trade.get("t")
     if not isinstance(price,(int,float)) or price<=0 or not ts:
         return None
-    return float(price),float((price/prev-1)*100),0.0,ts,bid,ask,spread_pct,0
+    pct=float((price/prev-1)*100)\n    return float(price),pct,0.0,ts,bid,ask,spread_pct,0,pct
 
 def evaluate_one(db, session, symbol, source, catalyst, obs, now):
-    price,pct,vol,source_ts,bid,ask,spread_pct,minute_bar_present=obs
+    price,pct,vol,source_ts,bid,ask,spread_pct,minute_bar_present,bar_high_pct=obs
     row=db.execute(
       "SELECT first_seen_ts,last_seen_ts,seen_count,positive_flow_count,peak_change_pct,last_change_pct,last_volume,last_price,last_source_ts,last_state,last_catalyst "
       "FROM fast_path_state WHERE session=? AND symbol=?",(session,symbol)
@@ -215,7 +215,7 @@ def evaluate_one(db, session, symbol, source, catalyst, obs, now):
        float(bid) if isinstance(bid,(int,float)) else None,
        float(ask) if isinstance(ask,(int,float)) else None,
        float(spread_pct) if isinstance(spread_pct,(int,float)) else None,
-       int(minute_bar_present),int(consecutive_minute_bar))
+       int(minute_bar_present),int(consecutive_minute_bar),float(bar_high_pct),float(vol))
     )
     db.execute(
       "INSERT INTO fast_path_state(session,symbol,first_seen_ts,last_seen_ts,seen_count,positive_flow_count,peak_change_pct,last_change_pct,last_volume,last_price,last_source_ts,last_state,last_catalyst) "
@@ -228,7 +228,7 @@ def evaluate_one(db, session, symbol, source, catalyst, obs, now):
     )
     return {"symbol":symbol,"state":state,"change_pct":pct,"acceleration":accel,"impulse":impulse,
             "source":source,"catalyst":catalyst or [],"bid":bid,"ask":ask,"spread_pct":spread_pct,
-            "minute_bar_present":bool(minute_bar_present),"consecutive_minute_bar":bool(consecutive_minute_bar)}
+            "minute_bar_present":bool(minute_bar_present),"consecutive_minute_bar":bool(consecutive_minute_bar),\n            "bar_high_pct":bar_high_pct,"observed_volume":vol}
 
 def build_report(db, session, out):
     states={}
