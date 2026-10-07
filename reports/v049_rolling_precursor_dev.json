@@ -1,0 +1,704 @@
+{
+  "metrics": {
+    "ROLL_A15_S1": {
+      "detected_pre10": 1,
+      "detected_pre10_50": 1,
+      "detected_winner50": 1,
+      "detected_winners": 1,
+      "eligible_recall30": 0.3333333333333333,
+      "eligible_recall50": 0.3333333333333333,
+      "false_hits": 23,
+      "fpr": 0.1619718309859155,
+      "hard_negatives": 142,
+      "pre10_winner50": 3,
+      "pre10_winners": 3,
+      "precision": 0.041666666666666664,
+      "winner50": 25,
+      "winners": 33
+    },
+    "ROLL_A15_S2": {
+      "detected_pre10": 1,
+      "detected_pre10_50": 1,
+      "detected_winner50": 1,
+      "detected_winners": 1,
+      "eligible_recall30": 0.3333333333333333,
+      "eligible_recall50": 0.3333333333333333,
+      "false_hits": 13,
+      "fpr": 0.09154929577464789,
+      "hard_negatives": 142,
+      "pre10_winner50": 3,
+      "pre10_winners": 3,
+      "precision": 0.07142857142857142,
+      "winner50": 25,
+      "winners": 33
+    },
+    "ROLL_A20_S1": {
+      "detected_pre10": 1,
+      "detected_pre10_50": 1,
+      "detected_winner50": 1,
+      "detected_winners": 1,
+      "eligible_recall30": 0.3333333333333333,
+      "eligible_recall50": 0.3333333333333333,
+      "false_hits": 22,
+      "fpr": 0.15492957746478872,
+      "hard_negatives": 142,
+      "pre10_winner50": 3,
+      "pre10_winners": 3,
+      "precision": 0.043478260869565216,
+      "winner50": 25,
+      "winners": 33
+    },
+    "ROLL_A20_S2": {
+      "detected_pre10": 1,
+      "detected_pre10_50": 1,
+      "detected_winner50": 1,
+      "detected_winners": 1,
+      "eligible_recall30": 0.3333333333333333,
+      "eligible_recall50": 0.3333333333333333,
+      "false_hits": 13,
+      "fpr": 0.09154929577464789,
+      "hard_negatives": 142,
+      "pre10_winner50": 3,
+      "pre10_winners": 3,
+      "precision": 0.07142857142857142,
+      "winner50": 25,
+      "winners": 33
+    }
+  },
+  "note": "DEV replay only. Stops at first observed >=10 to prevent late/dip hindsight. No changes to v0.3.3/v0.4.7/v0.4.8.",
+  "specs": {
+    "ROLL_A15_S1": {
+      "act": 1.5,
+      "steps": 1
+    },
+    "ROLL_A15_S2": {
+      "act": 1.5,
+      "steps": 2
+    },
+    "ROLL_A20_S1": {
+      "act": 2.0,
+      "steps": 1
+    },
+    "ROLL_A20_S2": {
+      "act": 2.0,
+      "steps": 2
+    }
+  },
+  "status": "V0.4.9_ROLLING_PRECURSOR_DEV_REPLAY_NOT_OOS_NOT_BUY",
+  "winner_detail": [
+    {
+      "ROLL_A15_S1": {
+        "hit": false
+      },
+      "ROLL_A15_S2": {
+        "hit": false
+      },
+      "ROLL_A20_S1": {
+        "hit": false
+      },
+      "ROLL_A20_S2": {
+        "hit": false
+      },
+      "first_change": 59.02,
+      "peak": 59.02,
+      "session": "2026-10-06",
+      "symbol": "APUS"
+    },
+    {
+      "ROLL_A15_S1": {
+        "hit": false
+      },
+      "ROLL_A15_S2": {
+        "hit": false
+      },
+      "ROLL_A20_S1": {
+        "hit": false
+      },
+      "ROLL_A20_S2": {
+        "hit": false
+      },
+      "first_change": 30.79,
+      "peak": 30.79,
+      "session": "2026-10-06",
+      "symbol": "FRGT"
+    },
+    {
+      "ROLL_A15_S1": {
+        "hit": false
+      },
+      "ROLL_A15_S2": {
+        "hit": false
+      },
+      "ROLL_A20_S1": {
+        "hit": false
+      },
+      "ROLL_A20_S2": {
+        "hit": false
+      },
+      "first_change": 53.36,
+      "peak": 53.36,
+      "session": "2026-10-06",
+      "symbol": "IPDN"
+    },
+    {
+      "ROLL_A15_S1": {
+        "hit": false
+      },
+      "ROLL_A15_S2": {
+        "hit": false
+      },
+      "ROLL_A20_S1": {
+        "hit": false
+      },
+      "ROLL_A20_S2": {
+        "hit": false
+      },
+      "first_change": 66.59,
+      "peak": 66.59,
+      "session": "2026-10-06",
+      "symbol": "MOBX"
+    },
+    {
+      "ROLL_A15_S1": {
+        "hit": false
+      },
+      "ROLL_A15_S2": {
+        "hit": false
+      },
+      "ROLL_A20_S1": {
+        "hit": false
+      },
+      "ROLL_A20_S2": {
+        "hit": false
+      },
+      "first_change": 99.89,
+      "peak": 99.89,
+      "session": "2026-10-06",
+      "symbol": "OLB"
+    },
+    {
+      "ROLL_A15_S1": {
+        "hit": false
+      },
+      "ROLL_A15_S2": {
+        "hit": false
+      },
+      "ROLL_A20_S1": {
+        "hit": false
+      },
+      "ROLL_A20_S2": {
+        "hit": false
+      },
+      "first_change": 42.34,
+      "peak": 57.63,
+      "session": "2026-10-06",
+      "symbol": "OLOX"
+    },
+    {
+      "ROLL_A15_S1": {
+        "hit": false
+      },
+      "ROLL_A15_S2": {
+        "hit": false
+      },
+      "ROLL_A20_S1": {
+        "hit": false
+      },
+      "ROLL_A20_S2": {
+        "hit": false
+      },
+      "first_change": 34.11,
+      "peak": 34.11,
+      "session": "2026-10-06",
+      "symbol": "PMI"
+    },
+    {
+      "ROLL_A15_S1": {
+        "hit": false
+      },
+      "ROLL_A15_S2": {
+        "hit": false
+      },
+      "ROLL_A20_S1": {
+        "hit": false
+      },
+      "ROLL_A20_S2": {
+        "hit": false
+      },
+      "first_change": 54.63,
+      "peak": 54.63,
+      "session": "2026-10-06",
+      "symbol": "SMXT"
+    },
+    {
+      "ROLL_A15_S1": {
+        "hit": false
+      },
+      "ROLL_A15_S2": {
+        "hit": false
+      },
+      "ROLL_A20_S1": {
+        "hit": false
+      },
+      "ROLL_A20_S2": {
+        "hit": false
+      },
+      "first_change": 94.51,
+      "peak": 102.2,
+      "session": "2026-10-06",
+      "symbol": "VCIG"
+    },
+    {
+      "ROLL_A15_S1": {
+        "hit": false
+      },
+      "ROLL_A15_S2": {
+        "hit": false
+      },
+      "ROLL_A20_S1": {
+        "hit": false
+      },
+      "ROLL_A20_S2": {
+        "hit": false
+      },
+      "first_change": 49.08,
+      "peak": 49.08,
+      "session": "2026-10-06",
+      "symbol": "XHLD"
+    },
+    {
+      "ROLL_A15_S1": {
+        "hit": false
+      },
+      "ROLL_A15_S2": {
+        "hit": false
+      },
+      "ROLL_A20_S1": {
+        "hit": false
+      },
+      "ROLL_A20_S2": {
+        "hit": false
+      },
+      "first_change": 59.02,
+      "peak": 65.53,
+      "session": "2026-10-07",
+      "symbol": "APUS"
+    },
+    {
+      "ROLL_A15_S1": {
+        "hit": false
+      },
+      "ROLL_A15_S2": {
+        "hit": false
+      },
+      "ROLL_A20_S1": {
+        "hit": false
+      },
+      "ROLL_A20_S2": {
+        "hit": false
+      },
+      "first_change": 26.32,
+      "peak": 293.81,
+      "session": "2026-10-07",
+      "symbol": "BIYA"
+    },
+    {
+      "ROLL_A15_S1": {
+        "hit": false
+      },
+      "ROLL_A15_S2": {
+        "hit": false
+      },
+      "ROLL_A20_S1": {
+        "hit": false
+      },
+      "ROLL_A20_S2": {
+        "hit": false
+      },
+      "first_change": 63.64,
+      "peak": 156.0,
+      "session": "2026-10-07",
+      "symbol": "DKI"
+    },
+    {
+      "ROLL_A15_S1": {
+        "hit": false
+      },
+      "ROLL_A15_S2": {
+        "hit": false
+      },
+      "ROLL_A20_S1": {
+        "hit": false
+      },
+      "ROLL_A20_S2": {
+        "hit": false
+      },
+      "first_change": 17.69,
+      "peak": 32.85,
+      "session": "2026-10-07",
+      "symbol": "FFR"
+    },
+    {
+      "ROLL_A15_S1": {
+        "hit": false
+      },
+      "ROLL_A15_S2": {
+        "hit": false
+      },
+      "ROLL_A20_S1": {
+        "hit": false
+      },
+      "ROLL_A20_S2": {
+        "hit": false
+      },
+      "first_change": 327.59,
+      "peak": 334.04,
+      "session": "2026-10-07",
+      "symbol": "GCDT"
+    },
+    {
+      "ROLL_A15_S1": {
+        "hit": false
+      },
+      "ROLL_A15_S2": {
+        "hit": false
+      },
+      "ROLL_A20_S1": {
+        "hit": false
+      },
+      "ROLL_A20_S2": {
+        "hit": false
+      },
+      "first_change": 22.94,
+      "peak": 83.15,
+      "session": "2026-10-07",
+      "symbol": "GIPR"
+    },
+    {
+      "ROLL_A15_S1": {
+        "hit": false
+      },
+      "ROLL_A15_S2": {
+        "hit": false
+      },
+      "ROLL_A20_S1": {
+        "hit": false
+      },
+      "ROLL_A20_S2": {
+        "hit": false
+      },
+      "first_change": 53.36,
+      "peak": 54.36,
+      "session": "2026-10-07",
+      "symbol": "IPDN"
+    },
+    {
+      "ROLL_A15_S1": {
+        "hit": false
+      },
+      "ROLL_A15_S2": {
+        "hit": false
+      },
+      "ROLL_A20_S1": {
+        "hit": false
+      },
+      "ROLL_A20_S2": {
+        "hit": false
+      },
+      "first_change": 37.9,
+      "peak": 90.0,
+      "session": "2026-10-07",
+      "symbol": "LGCL"
+    },
+    {
+      "ROLL_A15_S1": {
+        "hit": false
+      },
+      "ROLL_A15_S2": {
+        "hit": false
+      },
+      "ROLL_A20_S1": {
+        "hit": false
+      },
+      "ROLL_A20_S2": {
+        "hit": false
+      },
+      "first_change": 68.19,
+      "peak": 70.6,
+      "session": "2026-10-07",
+      "symbol": "LPCN"
+    },
+    {
+      "ROLL_A15_S1": {
+        "hit": false
+      },
+      "ROLL_A15_S2": {
+        "hit": false
+      },
+      "ROLL_A20_S1": {
+        "hit": false
+      },
+      "ROLL_A20_S2": {
+        "hit": false
+      },
+      "first_change": -77.19,
+      "peak": 43.44,
+      "session": "2026-10-07",
+      "symbol": "MI"
+    },
+    {
+      "ROLL_A15_S1": {
+        "hit": false
+      },
+      "ROLL_A15_S2": {
+        "hit": false
+      },
+      "ROLL_A20_S1": {
+        "hit": false
+      },
+      "ROLL_A20_S2": {
+        "hit": false
+      },
+      "first_change": 66.59,
+      "peak": 66.59,
+      "session": "2026-10-07",
+      "symbol": "MOBX"
+    },
+    {
+      "ROLL_A15_S1": {
+        "hit": false
+      },
+      "ROLL_A15_S2": {
+        "hit": false
+      },
+      "ROLL_A20_S1": {
+        "hit": false
+      },
+      "ROLL_A20_S2": {
+        "hit": false
+      },
+      "first_change": 4.87,
+      "peak": 68.21,
+      "session": "2026-10-07",
+      "symbol": "MTEN"
+    },
+    {
+      "ROLL_A15_S1": {
+        "hit": false
+      },
+      "ROLL_A15_S2": {
+        "hit": false
+      },
+      "ROLL_A20_S1": {
+        "hit": false
+      },
+      "ROLL_A20_S2": {
+        "hit": false
+      },
+      "first_change": -16.79,
+      "peak": 32.11,
+      "session": "2026-10-07",
+      "symbol": "NCPL"
+    },
+    {
+      "ROLL_A15_S1": {
+        "activity": 2.640449438202247,
+        "entry": 3.575450450450446,
+        "hit": true,
+        "index": 7,
+        "spread": 0.040543279951343596,
+        "ts": "2026-10-07T13:48:26.985659+00:00"
+      },
+      "ROLL_A15_S2": {
+        "activity": 2.640449438202247,
+        "entry": 3.575450450450446,
+        "hit": true,
+        "index": 7,
+        "spread": 0.040543279951343596,
+        "ts": "2026-10-07T13:48:26.985659+00:00"
+      },
+      "ROLL_A20_S1": {
+        "activity": 2.640449438202247,
+        "entry": 3.575450450450446,
+        "hit": true,
+        "index": 7,
+        "spread": 0.040543279951343596,
+        "ts": "2026-10-07T13:48:26.985659+00:00"
+      },
+      "ROLL_A20_S2": {
+        "activity": 2.640449438202247,
+        "entry": 3.575450450450446,
+        "hit": true,
+        "index": 7,
+        "spread": 0.040543279951343596,
+        "ts": "2026-10-07T13:48:26.985659+00:00"
+      },
+      "first_change": -18.95,
+      "peak": 56.25,
+      "session": "2026-10-07",
+      "symbol": "NXAT"
+    },
+    {
+      "ROLL_A15_S1": {
+        "hit": false
+      },
+      "ROLL_A15_S2": {
+        "hit": false
+      },
+      "ROLL_A20_S1": {
+        "hit": false
+      },
+      "ROLL_A20_S2": {
+        "hit": false
+      },
+      "first_change": 75.91,
+      "peak": 75.91,
+      "session": "2026-10-07",
+      "symbol": "OLB"
+    },
+    {
+      "ROLL_A15_S1": {
+        "hit": false
+      },
+      "ROLL_A15_S2": {
+        "hit": false
+      },
+      "ROLL_A20_S1": {
+        "hit": false
+      },
+      "ROLL_A20_S2": {
+        "hit": false
+      },
+      "first_change": 57.63,
+      "peak": 57.63,
+      "session": "2026-10-07",
+      "symbol": "OLOX"
+    },
+    {
+      "ROLL_A15_S1": {
+        "hit": false
+      },
+      "ROLL_A15_S2": {
+        "hit": false
+      },
+      "ROLL_A20_S1": {
+        "hit": false
+      },
+      "ROLL_A20_S2": {
+        "hit": false
+      },
+      "first_change": 0.32,
+      "peak": 51.95,
+      "session": "2026-10-07",
+      "symbol": "PFAI"
+    },
+    {
+      "ROLL_A15_S1": {
+        "hit": false
+      },
+      "ROLL_A15_S2": {
+        "hit": false
+      },
+      "ROLL_A20_S1": {
+        "hit": false
+      },
+      "ROLL_A20_S2": {
+        "hit": false
+      },
+      "first_change": 34.11,
+      "peak": 34.11,
+      "session": "2026-10-07",
+      "symbol": "PMI"
+    },
+    {
+      "ROLL_A15_S1": {
+        "hit": false
+      },
+      "ROLL_A15_S2": {
+        "hit": false
+      },
+      "ROLL_A20_S1": {
+        "hit": false
+      },
+      "ROLL_A20_S2": {
+        "hit": false
+      },
+      "first_change": -6.17,
+      "peak": 290.66,
+      "session": "2026-10-07",
+      "symbol": "SBFM"
+    },
+    {
+      "ROLL_A15_S1": {
+        "hit": false
+      },
+      "ROLL_A15_S2": {
+        "hit": false
+      },
+      "ROLL_A20_S1": {
+        "hit": false
+      },
+      "ROLL_A20_S2": {
+        "hit": false
+      },
+      "first_change": 18.62,
+      "peak": 159.43,
+      "session": "2026-10-07",
+      "symbol": "SXTC"
+    },
+    {
+      "ROLL_A15_S1": {
+        "hit": false
+      },
+      "ROLL_A15_S2": {
+        "hit": false
+      },
+      "ROLL_A20_S1": {
+        "hit": false
+      },
+      "ROLL_A20_S2": {
+        "hit": false
+      },
+      "first_change": -4.61,
+      "peak": 122.97,
+      "session": "2026-10-07",
+      "symbol": "TOPP"
+    },
+    {
+      "ROLL_A15_S1": {
+        "hit": false
+      },
+      "ROLL_A15_S2": {
+        "hit": false
+      },
+      "ROLL_A20_S1": {
+        "hit": false
+      },
+      "ROLL_A20_S2": {
+        "hit": false
+      },
+      "first_change": 50.55,
+      "peak": 50.55,
+      "session": "2026-10-07",
+      "symbol": "VCIG"
+    },
+    {
+      "ROLL_A15_S1": {
+        "hit": false
+      },
+      "ROLL_A15_S2": {
+        "hit": false
+      },
+      "ROLL_A20_S1": {
+        "hit": false
+      },
+      "ROLL_A20_S2": {
+        "hit": false
+      },
+      "first_change": 49.08,
+      "peak": 49.08,
+      "session": "2026-10-07",
+      "symbol": "XHLD"
+    }
+  ]
+}
