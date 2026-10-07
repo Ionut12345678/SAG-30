@@ -1,0 +1,28 @@
+name: SAG-30 checkpoint compression benchmark
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/compression-probe.yml'
+permissions:
+  contents: read
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Benchmark checkpoint compression
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --depth=1 origin radar-state
+          git show FETCH_HEAD:radar.sqlite3.gz | gzip -dc > /tmp/radar.sqlite3
+          for level in 1 3 6 9; do
+            start=$(date +%s%N)
+            gzip -"$level" -c /tmp/radar.sqlite3 > "/tmp/radar.$level.gz"
+            end=$(date +%s%N)
+            ms=$(( (end-start)/1000000 ))
+            bytes=$(stat -c%s "/tmp/radar.$level.gz")
+            echo "SAG30_GZIP_LEVEL=$level MS=$ms BYTES=$bytes"
+          done
