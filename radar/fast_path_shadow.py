@@ -82,7 +82,8 @@ def init(db):
     cols={r[1] for r in db.execute("PRAGMA table_info(fast_path_events)")}
     for name,typ in [
       ("bid","REAL"),("ask","REAL"),("spread_pct","REAL"),
-      ("minute_bar_present","INTEGER"),("consecutive_minute_bar","INTEGER")
+      ("minute_bar_present","INTEGER"),("consecutive_minute_bar","INTEGER"),
+      ("bar_high_pct","REAL"),("observed_volume","REAL")
     ]:
         if name not in cols:
             db.execute(f"ALTER TABLE fast_path_events ADD COLUMN {name} {typ}")
