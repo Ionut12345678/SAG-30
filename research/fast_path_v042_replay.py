@@ -93,6 +93,5 @@ def main():
     payload={"status":"CALIBRATION_ONLY","version":"v0.4.2-SHADOW","authoritative":False,"buy":False,"generated_at":datetime.now(timezone.utc).isoformat(),
       "hypothesis":"event-time FLOW across observed gaps <=5m recovers sparse-IEX recall without uncontrolled false positives","max_event_gap_min":5,
       "summary":s,"gates":gates,"limitations":["retrospective/in-sample","current-universe survivorship bias","IEX partial-market coverage","bar replay cannot prove fills/spreads","FLOW-only"],"winners":wr,"nonwinners":nr}
-    Path(a.out).write_text(json.dumps(payload,indent=2,sort_keys=True)+"
-");print(json.dumps({"summary":s,"gates":gates},sort_keys=True))
+    Path(a.out).write_text(json.dumps(payload,indent=2,sort_keys=True)+"\\n");print(json.dumps({"summary":s,"gates":gates},sort_keys=True))
 if __name__=="__main__":main()
