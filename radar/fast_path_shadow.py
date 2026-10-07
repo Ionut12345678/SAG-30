@@ -212,8 +212,8 @@ def evaluate_one(db, session, symbol, source, catalyst, obs, now):
     peak=max(pct,float(row[4])) if row and row[4] is not None else pct
     cats=",".join(catalyst or [])
     db.execute(
-      "INSERT INTO fast_path_events(session,symbol,retrieval_ts,source,state,change_pct,acceleration,impulse,evidence,catalyst,bid,ask,spread_pct,minute_bar_present,consecutive_minute_bar) "
-      "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+      "INSERT INTO fast_path_events(session,symbol,retrieval_ts,source,state,change_pct,acceleration,impulse,evidence,catalyst,bid,ask,spread_pct,minute_bar_present,consecutive_minute_bar,bar_high_pct,observed_volume) "
+      "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
       (session,symbol,now.isoformat(),source,state,pct,accel,impulse,"; ".join(evidence),cats,
        float(bid) if isinstance(bid,(int,float)) else None,
        float(ask) if isinstance(ask,(int,float)) else None,
