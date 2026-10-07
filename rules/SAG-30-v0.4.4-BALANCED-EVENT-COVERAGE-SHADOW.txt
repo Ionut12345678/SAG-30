@@ -26,7 +26,7 @@ Fixed cohort and timing
 - Same 240-day/current-universe retrospective design and IEX feed.
 - News search begins previous calendar day at 16:00 ET.
 - For a session that reaches +10%, EVENT is early only when the classified news created_at is strictly before the first observed +10% high timestamp.
-- For a non-winner that never reaches +10%, use 16:00 ET session cutoff; this is conservative for false positives.
+- For a non-winner that never reaches +10%, use 20:00 ET session cutoff; this deliberately gives EVENT the full session in the false-positive denominator.
 - EVENT_DISCOVERY is routing/research evidence, not PRE-ARM and never BUY.
 
 Required reporting
