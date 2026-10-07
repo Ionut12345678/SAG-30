@@ -1,0 +1,479 @@
+{
+  "candidate_v034_events": {
+    "cols": [
+      "observation_id",
+      "evaluated_ts",
+      "symbol",
+      "session",
+      "state",
+      "lane",
+      "change_pct",
+      "rvol",
+      "baseline_samples",
+      "detail",
+      "spec_sha256"
+    ],
+    "range_session": [
+      "2026-10-06",
+      "2026-10-07",
+      2
+    ],
+    "rows": 14386
+  },
+  "candidate_v034_milestones": {
+    "cols": [
+      "signal_id",
+      "target",
+      "observation_id",
+      "retrieval_ts"
+    ],
+    "range_retrieval_ts": [
+      null,
+      null,
+      0
+    ],
+    "rows": 0
+  },
+  "candidate_v034_signals": {
+    "cols": [
+      "id",
+      "symbol",
+      "observation_id",
+      "retrieval_ts",
+      "lane",
+      "state",
+      "change_pct",
+      "baseline_close",
+      "proof",
+      "spec_sha256"
+    ],
+    "range_retrieval_ts": [
+      "2026-10-06T16:54:38.410071+00:00",
+      "2026-10-07T16:05:00.389442+00:00",
+      2
+    ],
+    "rows": 92
+  },
+  "candidate_v034_state": {
+    "cols": [
+      "symbol",
+      "session",
+      "state",
+      "lane",
+      "first_watch_ts",
+      "first_watch_pct",
+      "memory"
+    ],
+    "range_session": [
+      "2026-10-06",
+      "2026-10-07",
+      2
+    ],
+    "rows": 3185
+  },
+  "candidate_v034r2_events": {
+    "cols": [
+      "observation_id",
+      "evaluated_ts",
+      "symbol",
+      "session",
+      "state",
+      "lane",
+      "change_pct",
+      "rvol",
+      "baseline_samples",
+      "detail",
+      "spec_sha256"
+    ],
+    "range_session": [
+      "2026-10-06",
+      "2026-10-07",
+      2
+    ],
+    "rows": 4647
+  },
+  "candidate_v034r2_milestones": {
+    "cols": [
+      "signal_id",
+      "target",
+      "observation_id",
+      "retrieval_ts"
+    ],
+    "range_retrieval_ts": [
+      null,
+      null,
+      0
+    ],
+    "rows": 0
+  },
+  "candidate_v034r2_signals": {
+    "cols": [
+      "id",
+      "symbol",
+      "observation_id",
+      "retrieval_ts",
+      "lane",
+      "state",
+      "change_pct",
+      "baseline_close",
+      "proof",
+      "spec_sha256"
+    ],
+    "range_retrieval_ts": [
+      "2026-10-06T18:10:58.945153+00:00",
+      "2026-10-07T16:05:00.389442+00:00",
+      2
+    ],
+    "rows": 105
+  },
+  "candidate_v034r2_state": {
+    "cols": [
+      "symbol",
+      "session",
+      "state",
+      "lane",
+      "first_watch_ts",
+      "first_watch_pct",
+      "memory"
+    ],
+    "range_session": [
+      "2026-10-06",
+      "2026-10-07",
+      2
+    ],
+    "rows": 722
+  },
+  "candidates": {
+    "cols": [
+      "symbol",
+      "first_seen",
+      "last_seen",
+      "expires"
+    ],
+    "rows": 68
+  },
+  "fast_path_events": {
+    "cols": [
+      "id",
+      "session",
+      "symbol",
+      "retrieval_ts",
+      "source",
+      "state",
+      "change_pct",
+      "acceleration",
+      "impulse",
+      "evidence",
+      "catalyst",
+      "bid",
+      "ask",
+      "spread_pct",
+      "minute_bar_present",
+      "consecutive_minute_bar",
+      "bar_high_pct",
+      "observed_volume"
+    ],
+    "range_retrieval_ts": [
+      "2026-10-06T20:09:51.643127+00:00",
+      "2026-10-07T16:09:09.052900+00:00",
+      2
+    ],
+    "range_session": [
+      "2026-10-06",
+      "2026-10-07",
+      2
+    ],
+    "rows": 19125
+  },
+  "fast_path_state": {
+    "cols": [
+      "session",
+      "symbol",
+      "first_seen_ts",
+      "last_seen_ts",
+      "seen_count",
+      "positive_flow_count",
+      "peak_change_pct",
+      "last_change_pct",
+      "last_volume",
+      "last_price",
+      "last_source_ts",
+      "last_state",
+      "last_catalyst"
+    ],
+    "range_session": [
+      "2026-10-06",
+      "2026-10-07",
+      2
+    ],
+    "rows": 719
+  },
+  "fast_path_v047_observations": {
+    "cols": [
+      "session",
+      "symbol",
+      "source_ts",
+      "retrieval_ts",
+      "change_pct",
+      "bar_high_pct",
+      "bar_volume",
+      "bid",
+      "ask",
+      "spread_pct",
+      "minute_bar_present",
+      "catalyst"
+    ],
+    "range_retrieval_ts": [
+      "2026-10-07T06:40:38.414042+00:00",
+      "2026-10-07T16:09:09.052900+00:00",
+      1
+    ],
+    "range_session": [
+      "2026-10-07",
+      "2026-10-07",
+      1
+    ],
+    "range_source_ts": [
+      "2026-09-24T19:55:00Z",
+      "2026-10-07T16:08:00Z",
+      8
+    ],
+    "rows": 5811
+  },
+  "fast_path_v047_state": {
+    "cols": [
+      "session",
+      "symbol",
+      "first_seen_ts",
+      "last_seen_ts",
+      "flow_positive_count",
+      "max_high_pct",
+      "base_flow_decided",
+      "event_seen",
+      "event_first_ts",
+      "event_first_change",
+      "filtered_flow_seen",
+      "flow_first_ts",
+      "flow_first_change",
+      "flow_activity_ratio",
+      "first_signal_ts",
+      "first_signal_source_ts",
+      "first_signal_type",
+      "first_signal_change",
+      "signal_bid",
+      "signal_ask",
+      "signal_spread_pct",
+      "signal_minute_bar_present"
+    ],
+    "range_session": [
+      "2026-10-07",
+      "2026-10-07",
+      1
+    ],
+    "rows": 578
+  },
+  "fast_path_v048_observations": {
+    "cols": [
+      "session",
+      "symbol",
+      "source_ts",
+      "retrieval_ts",
+      "change_pct",
+      "bar_volume",
+      "bid",
+      "ask",
+      "spread_pct",
+      "minute_bar_present",
+      "consecutive_minute_bar",
+      "catalyst"
+    ],
+    "range_retrieval_ts": [
+      "2026-10-07T06:20:25.741351+00:00",
+      "2026-10-07T06:20:25.741351+00:00",
+      1
+    ],
+    "range_session": [
+      "2026-10-07",
+      "2026-10-07",
+      1
+    ],
+    "range_source_ts": [
+      "2026-10-06T19:59:00Z",
+      "2026-10-06T20:59:00Z",
+      1
+    ],
+    "rows": 64
+  },
+  "fast_path_v048_state": {
+    "cols": [
+      "session",
+      "symbol",
+      "first_seen_ts",
+      "last_seen_ts",
+      "base_flow_decided",
+      "event_seen",
+      "event_first_ts",
+      "event_first_change",
+      "filtered_flow_seen",
+      "flow_first_ts",
+      "flow_first_change",
+      "flow_activity_ratio",
+      "first_signal_ts",
+      "first_signal_type",
+      "first_signal_change"
+    ],
+    "range_session": [
+      "2026-10-07",
+      "2026-10-07",
+      1
+    ],
+    "rows": 64
+  },
+  "milestones": {
+    "cols": [
+      "signal_id",
+      "target",
+      "observation_id",
+      "retrieval_ts"
+    ],
+    "range_retrieval_ts": [
+      null,
+      null,
+      0
+    ],
+    "rows": 0
+  },
+  "observations": {
+    "cols": [
+      "id",
+      "run_id",
+      "symbol",
+      "retrieval_ts",
+      "source_ts",
+      "request_started_ts",
+      "quality",
+      "reason",
+      "price",
+      "change_pct",
+      "band",
+      "payload",
+      "payload_hash"
+    ],
+    "range_retrieval_ts": [
+      "2026-10-05T20:16:38.159410+00:00",
+      "2026-10-07T16:05:00.389442+00:00",
+      3
+    ],
+    "range_source_ts": [
+      "2026-02-12T15:52:19.878119341Z",
+      "2026-10-07T16:04:59.842245955Z",
+      46
+    ],
+    "rows": 110503
+  },
+  "scout_history": {
+    "cols": [
+      "run_id",
+      "session",
+      "symbol",
+      "retrieval_ts",
+      "change_pct",
+      "acceleration_pp_per_min",
+      "fresh_turnover_impulse_per_min",
+      "turnover",
+      "route_source",
+      "rank_change",
+      "rank_acceleration",
+      "rank_impulse",
+      "rank_turnover",
+      "selected",
+      "sticky"
+    ],
+    "range_retrieval_ts": [
+      "2026-10-06T18:10:55.192312+00:00",
+      "2026-10-07T16:04:55.463498+00:00",
+      2
+    ],
+    "range_session": [
+      "2026-10-06",
+      "2026-10-07",
+      2
+    ],
+    "rows": 54803
+  },
+  "scout_promotions": {
+    "cols": [
+      "run_id",
+      "symbol",
+      "scout_retrieval_ts",
+      "change_pct",
+      "acceleration_pp_per_min",
+      "fresh_turnover_impulse_per_min",
+      "route_source",
+      "sticky"
+    ],
+    "rows": 4583
+  },
+  "scout_runs": {
+    "cols": [
+      "run_id",
+      "started_ts",
+      "finished_ts",
+      "universe_count",
+      "eligible_count",
+      "selected_count",
+      "sticky_count",
+      "fetch_seconds",
+      "total_seconds"
+    ],
+    "rows": 95
+  },
+  "scout_state": {
+    "cols": [
+      "symbol",
+      "session",
+      "first_seen_ts",
+      "first_seen_pct",
+      "retrieval_ts",
+      "source_ts",
+      "price",
+      "change_pct",
+      "cumulative_volume",
+      "route_source"
+    ],
+    "range_retrieval_ts": [
+      "2026-10-06T17:23:04.746171+00:00",
+      "2026-10-07T16:04:55.463498+00:00",
+      2
+    ],
+    "range_session": [
+      "2026-10-06",
+      "2026-10-07",
+      2
+    ],
+    "range_source_ts": [
+      "2026-10-06T17:08:36.762410593Z",
+      "2026-10-07T16:04:55.402802742Z",
+      2
+    ],
+    "rows": 2768
+  },
+  "semantic_shadow": {
+    "cols": [
+      "observation_id",
+      "recorded_ts",
+      "payload"
+    ],
+    "rows": 20816
+  },
+  "shadow_volume_baseline": {
+    "cols": [
+      "symbol",
+      "session_date",
+      "bucket_et",
+      "cumulative_volume",
+      "source"
+    ],
+    "rows": 49789
+  }
+}
