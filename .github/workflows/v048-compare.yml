@@ -1,0 +1,39 @@
+name: v048 descriptive compare
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/v048-compare.yml']
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore checkpoint
+        shell: bash
+        run: |
+          git init /tmp/rs
+          cd /tmp/rs
+          git remote add origin https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git
+          git fetch --depth=1 origin radar-state
+          git checkout FETCH_HEAD
+          gzip -dc radar.sqlite3.gz > /tmp/radar.sqlite3
+      - name: Compare v047 versus v048 Stage1 descriptively
+        shell: bash
+        run: |
+          python - <<'PY'
+          import sqlite3, json
+          db=sqlite3.connect('/tmp/radar.sqlite3')
+          sig=db.execute("""SELECT symbol,first_signal_ts,first_signal_source_ts,first_signal_change,flow_activity_ratio,signal_bid,signal_ask,signal_spread_pct,signal_minute_bar_present FROM fast_path_v047_state WHERE session='2026-10-07' AND first_signal_type='FILTERED_FLOW' ORDER BY first_signal_ts""").fetchall()
+          out=[]
+          for s,ts,src,p,a,bid,ask,sp,mb in sig:
+              stage1=bool(p is not None and a is not None and bid is not None and ask is not None and sp is not None and 1.5<=p<=8 and a>=2 and sp<=2 and int(mb or 0)==1)
+              rr=db.execute("""SELECT change_pct FROM fast_path_v047_observations WHERE session='2026-10-07' AND symbol=? AND source_ts>=? AND change_pct IS NOT NULL""",(s,src)).fetchall()
+              vals=[float(x[0]) for x in rr]
+              mfe=max(vals) if vals else None
+              out.append(dict(symbol=s,entry=round(p,3),stage1=stage1,activity=round(a,3),spread=round(sp,3),mfe=round(mfe,3) if mfe is not None else None,advance=round(mfe-p,3) if mfe is not None else None,hit10=bool(mfe is not None and mfe>=10),hit20=bool(mfe is not None and mfe>=20),hit30=bool(mfe is not None and mfe>=30),hit50=bool(mfe is not None and mfe>=50)))
+          def stats(rows):
+              return dict(n=len(rows),hit10=sum(x['hit10'] for x in rows),hit20=sum(x['hit20'] for x in rows),hit30=sum(x['hit30'] for x in rows),hit50=sum(x['hit50'] for x in rows),median_advance=(__import__('statistics').median([x['advance'] for x in rows if x['advance'] is not None]) if rows else None))
+          kept=[x for x in out if x['stage1']]; dropped=[x for x in out if not x['stage1']]
+          print('COMPARE_SUMMARY='+json.dumps(dict(v047=stats(out),v048_stage1=stats(kept),dropped=stats(dropped)),sort_keys=True))
+          print('COMPARE_ROWS='+json.dumps(out,sort_keys=True))
+          PY
