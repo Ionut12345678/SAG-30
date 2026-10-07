@@ -253,7 +253,24 @@ jobs:
           if [ -f v048_conversion_challenger_report.json ]; then git add v048_conversion_challenger_report.json; fi
           if [ -f v049_rolling_precursor_report.json ]; then git add v049_rolling_precursor_report.json; fi
           git commit -m 'Refresh prospective radar checkpoint'
-          git push --force origin HEAD:radar-state
+          # GitHub occasionally returns a transient 5xx while accepting a large checkpoint
+          # ref update. Retry the same immutable snapshot; do not rescan or alter history.
+          pushed=0
+          for attempt in 1 2 3 4; do
+            echo "SAG30_CHECKPOINT_PUSH_ATTEMPT=$attempt bytes=$compressed_bytes"
+            if git push --force origin HEAD:radar-state; then
+              pushed=1
+              break
+            fi
+            if [ "$attempt" -lt 4 ]; then
+              sleep $((attempt * 5))
+            fi
+          done
+          if [ "$pushed" -ne 1 ]; then
+            echo "SAG30_CHECKPOINT_PUSH_FAILED_AFTER_RETRIES"
+            exit 1
+          fi
+          echo "SAG30_CHECKPOINT_PUSH_PASS bytes=$compressed_bytes"
 
       - name: Dispatch next cadence cycle
         if: ${{ always() && github.event_name != 'schedule' }}
@@ -292,7 +309,19 @@ jobs:
             echo "SAG30_CADENCE_WAIT_SECONDS=$wait_seconds"
             sleep "$wait_seconds"
           fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/dispatches" -f event_type='sag30-cadence'
+          dispatched=0
+          for attempt in 1 2 3; do
+            echo "SAG30_DISPATCH_ATTEMPT=$attempt"
+            if gh api --method POST "repos/$GITHUB_REPOSITORY/dispatches" -f event_type='sag30-cadence'; then
+              dispatched=1
+              break
+            fi
+            sleep $((attempt * 3))
+          done
+          if [ "$dispatched" -ne 1 ]; then
+            echo "SAG30_NEXT_CYCLE_DISPATCH_FAILED"
+            exit 1
+          fi
           echo "SAG30_NEXT_CYCLE_DISPATCHED"
 
       - name: Enforce cycle result after persistence
