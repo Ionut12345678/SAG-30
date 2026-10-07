@@ -207,7 +207,7 @@ jobs:
           set -euo pipefail
           if [ ! -f state/radar.sqlite3 ]; then exit 1; fi
           mkdir -p /tmp/radar-state
-          gzip -9 -c state/radar.sqlite3 > /tmp/radar-state/radar.sqlite3.gz
+          gzip -1 -c state/radar.sqlite3 > /tmp/radar-state/radar.sqlite3.gz
           compressed_bytes="$(stat -c%s /tmp/radar-state/radar.sqlite3.gz)"
           if [ "$compressed_bytes" -ge $((95 * 1024 * 1024)) ]; then
             echo "Compressed radar state is too large: ${compressed_bytes} bytes"
