@@ -96,6 +96,14 @@ jobs:
             done
           fi
 
+      - name: Run v0.4.9 ROLLING PRECURSOR SHADOW
+        if: ${{ always() && steps.restore.outcome == 'success' }}
+        shell: bash
+        run: |
+          python -m radar.v049_rolling_precursor \
+            --db state/radar.sqlite3 \
+            --out state/v049_rolling_precursor_report.json
+
       - name: Run v0.4.8 CONVERSION CHALLENGER SHADOW
         if: ${{ always() && steps.restore.outcome == 'success' }}
         shell: bash
@@ -229,6 +237,7 @@ jobs:
           if [ -f state/fast_path_report.json ]; then cp state/fast_path_report.json /tmp/radar-state/fast_path_report.json; fi
           if [ -f state/fast_path_v047_validated_report.json ]; then cp state/fast_path_v047_validated_report.json /tmp/radar-state/fast_path_v047_validated_report.json; fi
           if [ -f state/v048_conversion_challenger_report.json ]; then cp state/v048_conversion_challenger_report.json /tmp/radar-state/v048_conversion_challenger_report.json; fi
+          if [ -f state/v049_rolling_precursor_report.json ]; then cp state/v049_rolling_precursor_report.json /tmp/radar-state/v049_rolling_precursor_report.json; fi
           cd /tmp/radar-state
           # radar-state is a mutable checkpoint, not an audit-history branch. Recreate it
           # as a one-commit snapshot so 5-minute cycles never download an ever-growing
@@ -242,6 +251,7 @@ jobs:
           if [ -f fast_path_report.json ]; then git add fast_path_report.json; fi
           if [ -f fast_path_v047_validated_report.json ]; then git add fast_path_v047_validated_report.json; fi
           if [ -f v048_conversion_challenger_report.json ]; then git add v048_conversion_challenger_report.json; fi
+          if [ -f v049_rolling_precursor_report.json ]; then git add v049_rolling_precursor_report.json; fi
           git commit -m 'Refresh prospective radar checkpoint'
           git push --force origin HEAD:radar-state
 

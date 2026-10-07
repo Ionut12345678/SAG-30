@@ -91,7 +91,10 @@ def init(db):
 def candidate_pool(db, session, limit=80):
     pool=[]
     seen=set()
+    # Broad-scout promotions are routing only: maximize early recall, never a BUY/signal.
+    # Latest full-universe scout runs before FAST-PATH, so put its selected names first.
     for q,args in [
+      ("SELECT symbol FROM scout_history WHERE session=? AND run_id=(SELECT MAX(run_id) FROM scout_history WHERE session=?) AND selected=1 ORDER BY MIN(COALESCE(rank_acceleration,999999),COALESCE(rank_impulse,999999),COALESCE(rank_change,999999)) ASC LIMIT ?",(session,session,limit)),
       ("SELECT symbol FROM multi_engine_watchpool WHERE session=? ORDER BY peak_score DESC,last_seen_ts DESC LIMIT ?",(session,limit)),
       ("SELECT symbol FROM candidates ORDER BY symbol",( )),
     ]:

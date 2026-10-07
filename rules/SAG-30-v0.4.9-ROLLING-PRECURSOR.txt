@@ -1,0 +1,24 @@
+SAG-30 v0.4.9 ROLLING PRECURSOR - PROSPECTIVE SHADOW - NOT BUY
+Status: challenger only. v0.3.3 FROZEN, v0.4.7 and v0.4.8 unchanged.
+
+Purpose:
+Recover early winners missed by one-shot FILTERED_FLOW routing/decision.
+
+Routing:
+Latest broad-universe scout selected names are prioritized into deep FAST-PATH.
+Scout rank is routing only and never a signal.
+
+Rolling precursor gates, future-only:
+- completed deduplicated minute bars
+- before first observed bar high >= +10%
+- entry change +1.0% through +8.0%
+- two positive price steps, each no more than 5 event minutes apart
+- event-time Activity Ratio >= 1.50
+- bid and ask available
+- spread <= 2.00%
+
+State:
+ROLLING_PRECURSOR_WATCH only. Never BUY.
+A watch may later be evaluated against v0.4.8 conversion logic, but v0.4.8 itself remains unchanged.
+No backfill, no retroactive credit, no threshold changes from individual winners/misses.
+Data/baseline inconsistencies are classified separately and cannot be used to tune gates.
