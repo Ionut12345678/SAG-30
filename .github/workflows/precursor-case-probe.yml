@@ -1,0 +1,36 @@
+name: SAG30 precursor case probe
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/precursor-case-probe.yml']
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          git init /tmp/rs; cd /tmp/rs
+          git remote add origin https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git
+          git fetch --depth=1 origin radar-state && git checkout FETCH_HEAD
+          gzip -dc radar.sqlite3.gz > /tmp/r.db
+      - run: |
+          mkdir -p reports
+          python - <<'PY'
+          import sqlite3,json
+          db=sqlite3.connect('/tmp/r.db');o={}
+          for s in ['NXAT','MTEN','PFAI']:
+            rr=db.execute("""select retrieval_ts,change_pct,bar_high_pct,observed_volume,bid,ask,spread_pct,minute_bar_present,consecutive_minute_bar,acceleration,impulse,state
+              from fast_path_events where session='2026-10-07' and symbol=? order by retrieval_ts,id limit 80""",(s,)).fetchall()
+            o[s]=[dict(zip(['ts','pct','high_pct','vol','bid','ask','spread','mb','consecutive','accel','impulse','state'],x)) for x in rr]
+          open('reports/precursor_case_probe.json','w').write(json.dumps(o,indent=2))
+          PY
+      - run: |
+          cp reports/precursor_case_probe.json /tmp/r.json
+          git config user.name github-actions; git config user.email actions@github.com
+          git fetch origin main && git reset --hard origin/main
+          mkdir -p reports; cp /tmp/r.json reports/precursor_case_probe.json
+          git add reports/precursor_case_probe.json
+          git commit -m "Publish precursor winner case probe" || exit 0
+          git push
