@@ -14,7 +14,7 @@ jobs:
           ET=ZoneInfo('America/New_York'); UA={'User-Agent':'Mozilla/5.0'}
           u='https://www.thehotpennystocks.com/scans/premarket-penny-stocks/'
           h=urllib.request.urlopen(urllib.request.Request(u,headers=UA),timeout=20).read().decode('utf8','ignore')
-          row=re.compile(r'<tr><td class="pf-rank">(\\d+)</td><td class="pf-sym"><a[^>]*stock=([A-Z0-9.\\-]+)[^>]*>[^<]+</a></td><td class="pf-name">.*?</td><td class="pf-num">\\$([^<]+)</td><td class="pf-num pf-pos">([0-9.]+)%</td><td class="pf-num">([^<]+)</td></tr>',re.S)
+          row=re.compile(r'<tr><td class="pf-rank">(\d+)</td><td class="pf-sym"><a[^>]*stock=([A-Z0-9.-]+)[^>]*>[^<]+</a></td><td class="pf-name">.*?</td><td class="pf-num">\$([^<]+)</td><td class="pf-num pf-pos">([0-9.]+)%</td><td class="pf-num">([^<]+)</td></tr>',re.S)
           sy=[]
           for rank,s,price,pct,vol in row.findall(h):
             if int(rank)<=20 and s not in sy:sy.append(s)
