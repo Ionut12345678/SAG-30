@@ -1,0 +1,48 @@
+SAG-30 v0.4.7 CAUSAL ACTIVITY-IMPULSE FLOW FILTER SHADOW
+Status: PRE-REGISTERED DEV/HOLDOUT FEATURE STUDY / NOT BUY
+Parent: v0.4.5 unchanged EVENT/FLOW baseline; methodology follows evidence map v0.4.6.
+Production control: SAG-30 v0.3.3 FROZEN unchanged.
+EVENT remains unchanged. PAIR_PROGRESS is not reused.
+
+Hypothesis
+Some FLOW false positives satisfy two positive price intervals on ordinary IEX activity. Requiring the two PRE-ARM-forming bars to show a causal volume impulse versus only PRIOR observed bars may improve FLOW discrimination.
+
+Feature
+At base FLOW PRE-ARM:
+- V1,V2 = IEX 1m volumes on the exact two consecutive positive event-time intervals that create PRE-ARM.
+- BASE = median volume of up to the 20 most recent observed bars strictly BEFORE the first of those two intervals.
+- Require at least 5 prior observed bars. Otherwise ACTIVITY_IMPULSE is UNKNOWN.
+- ACTIVITY_IMPULSE = mean(V1,V2) / BASE when BASE>0.
+No bar at/after PRE-ARM and no session outcome data may enter BASE.
+
+Frozen split
+DEV dates: 2026-09-18,09-21,09-22,09-23,09-24,09-25 (149+149).
+HOLDOUT dates: 2026-09-28,09-29,09-30,10-01,10-02,10-05,10-06 (151+151).
+Do not move dates.
+
+Frozen DEV grid
+ACTIVITY_IMPULSE >= 1.00, 1.25, 1.50, 2.00, 3.00, 5.00.
+UNKNOWN does not pass filtered FLOW.
+
+DEV selection
+Unchanged DEV combined recall is 31.54%; therefore absolute 35% cannot be a filter-selection gate.
+A candidate is DEV-eligible only if:
+- combined recall >=90% of unchanged DEV combined recall,
+- combined precision >=8%,
+- median combined lead >=3m,
+- combined nonwinner FPR improves by at least 3 percentage points absolute versus unchanged DEV baseline.
+Choose eligible threshold with lowest combined FPR; tie-break higher recall, higher precision, lower threshold.
+If none eligible: DEV FAIL, do not inspect threshold-specific HOLDOUT results.
+
+One-shot HOLDOUT PASS
+Apply only the DEV-selected threshold once.
+PASS requires:
+- combined EVENT OR filtered-FLOW recall >=35%
+- combined precision >=8%
+- median combined lead >=3m
+- combined nonwinner FPR improves >=5pp absolute versus unchanged HOLDOUT baseline.
+Report filtered FLOW recall/FPR, union recall/FPR/precision/lead, incremental FLOW winners, EVENT overlap, unknown feature counts, and baseline comparison.
+
+Decision
+PASS => activity impulse is a supported FLOW discriminator candidate; no historical BUY.
+FAIL => add this feature definition to REJECT and proceed to the next pre-registered family, not threshold retuning.
