@@ -1,0 +1,33 @@
+name: SAG-30 v0.4.7 causal activity impulse
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'research/fast_path_v047_activity_impulse.py'
+      - 'rules/SAG-30-v0.4.7-CAUSAL-ACTIVITY-IMPULSE-SHADOW.txt'
+      - '.github/workflows/fast_path_v047_activity_impulse.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  study:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/cache/restore@v4
+        with:
+          path: research/cache/sag30_date_matched_v045_dataset.json.gz
+          key: sag30-date-matched-v045-cache-2
+          fail-on-cache-miss: true
+      - name: Compile
+        run: python -m py_compile research/fast_path_v041_replay.py research/fast_path_v047_activity_impulse.py
+      - name: Run frozen DEV/HOLDOUT study
+        run: python -m research.fast_path_v047_activity_impulse
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sag30-v047-causal-activity-impulse
+          path: research/fast_path_v047_activity_impulse.json
+          retention-days: 30
