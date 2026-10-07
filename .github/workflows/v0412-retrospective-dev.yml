@@ -1,0 +1,43 @@
+name: SAG30 v0412 retrospective DEV
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/v0412-retrospective-dev.yml']
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          python - <<'PY'
+          import urllib.request,re,json,datetime,time
+          from zoneinfo import ZoneInfo
+          ET=ZoneInfo('America/New_York'); UA={'User-Agent':'Mozilla/5.0'}
+          u='https://www.thehotpennystocks.com/scans/premarket-penny-stocks/'
+          h=urllib.request.urlopen(urllib.request.Request(u,headers=UA),timeout=20).read().decode('utf8','ignore')
+          row=re.compile(r'<tr><td class="pf-rank">(\\d+)</td><td class="pf-sym"><a[^>]*stock=([A-Z0-9.\\-]+)[^>]*>[^<]+</a></td><td class="pf-name">.*?</td><td class="pf-num">\\$([^<]+)</td><td class="pf-num pf-pos">([0-9.]+)%</td><td class="pf-num">([^<]+)</td></tr>',re.S)
+          sy=[]
+          for rank,s,price,pct,vol in row.findall(h):
+            if int(rank)<=20 and s not in sy:sy.append(s)
+          out=[]
+          for s in sy:
+            try:
+              url=f'https://query1.finance.yahoo.com/v8/finance/chart/{s}?interval=1m&range=5d&includePrePost=true'
+              d=json.load(urllib.request.urlopen(urllib.request.Request(url,headers=UA),timeout=20))['chart']['result'][0]
+              ts=d.get('timestamp') or []; q=(d.get('indicators',{}).get('quote') or [{}])[0]; closes=q.get('close') or []; highs=q.get('high') or closes
+              prev=[]; pre=[]; reg=[]
+              for t,c,hi in zip(ts,closes,highs):
+                if not c:continue
+                dt=datetime.datetime.fromtimestamp(t,ET)
+                if dt.date().isoformat()<'2026-10-07' and datetime.time(9,30)<=dt.time()<=datetime.time(16,0):prev.append(float(c))
+                if dt.date().isoformat()=='2026-10-07' and datetime.time(4,0)<=dt.time()<datetime.time(9,30):pre.append((dt,float(c)))
+                if dt.date().isoformat()=='2026-10-07' and datetime.time(9,30)<=dt.time()<=datetime.time(16,0):reg.append((dt,float(hi or c)))
+              if not prev:continue
+              base=prev[-1]; early=next(((dt.isoformat(),(c/base-1)*100) for dt,c in pre if 1<=(c/base-1)*100<20),None)
+              peak=max(((hi/base-1)*100 for _,hi in reg),default=None)
+              cls='WIN30' if peak is not None and peak>=30 else ('HARD_NEG_5_30' if peak is not None and 5<=peak<30 else 'OTHER')
+              out.append({'symbol':s,'early_route':early,'regular_peak_pct':peak,'class':cls})
+            except Exception as e:out.append({'symbol':s,'error':repr(e)})
+            time.sleep(.15)
+          w=[x for x in out if x.get('class')=='WIN30']; n=[x for x in out if x.get('class')=='HARD_NEG_5_30']
+          print(json.dumps({'rows':out,'metrics':{'winners':len(w),'winner_early_routes':sum(bool(x.get('early_route')) for x in w),'hard_negatives':len(n),'hard_negative_early_routes':sum(bool(x.get('early_route')) for x in n)}},indent=2))
+          PY
