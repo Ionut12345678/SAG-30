@@ -15,5 +15,5 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh api --method POST "repos/$GITHUB_REPOSITORY/actions/runs/37601560368/cancel" || true
-          echo "SAG30_STALE_RESTORE_CANCEL_REQUESTED=37601560368"
+          gh api --method POST "repos/$GITHUB_REPOSITORY/actions/runs/37601560368/force-cancel" || true
+          echo "SAG30_STALE_RESTORE_FORCE_CANCEL_REQUESTED=37601560368"
