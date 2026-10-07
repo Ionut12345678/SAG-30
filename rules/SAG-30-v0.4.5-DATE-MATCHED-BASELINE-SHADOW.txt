@@ -1,0 +1,21 @@
+SAG-30 v0.4.5 DATE-MATCHED BASELINE SHADOW
+Status: PRE-REGISTERED EVALUATION CORRECTION / NOT BUY
+Parent signal semantics: v0.4.4 unchanged.
+Production control: SAG-30 v0.3.3 FROZEN unchanged.
+
+Problem discovered before v0.4.5 outcome
+The v0.4.1-v0.4.4 balanced cohorts were balanced by count but not by session date. In v0.4.4, winners span 13 sessions, while non-winners are 274/300 from 2026-10-06 and 26/300 from 2026-10-05. This can confound FPR/precision with session regime.
+
+Pre-registered correction
+- Keep the exact 300 winner selection rule.
+- For each winner session date, select the same number of hard-negative non-winner sessions from that SAME date.
+- Hard negative = highest daily high percentage >=+5% and <+30% on that date, deterministic tie-break by symbol.
+- Total target remains 300 winners + 300 non-winners.
+- Freeze raw IEX 1m bars and Alpaca historical news once; reuse locally.
+- Do not change EVENT classifier, FLOW event-time <=5m rule, two-positive persistence, <+10 early boundary, or first +30 censoring.
+
+Required comparison
+Report EVENT, FLOW, EVENT OR FLOW recall/precision/FPR/lead and overlap using date-matched controls. Winner-side recall should reproduce v0.4.4 because winner cohort and signal semantics are unchanged. Any change in precision/FPR is interpreted as denominator correction, not model improvement.
+
+Decision
+Only after this corrected baseline is complete may FLOW false-positive discriminants be developed. Do not tune v0.4.5 itself. Historical replay never authorizes BUY.
