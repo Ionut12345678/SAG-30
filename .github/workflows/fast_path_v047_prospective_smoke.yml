@@ -1,0 +1,46 @@
+name: SAG-30 v0.4.7 prospective overlay smoke
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'radar/fast_path_shadow.py'
+      - 'radar/fast_path_v047_validated_overlay.py'
+      - '.github/workflows/fast_path_v047_prospective_smoke.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Compile
+        run: python -m py_compile radar/fast_path_shadow.py radar/fast_path_v047_validated_overlay.py
+      - name: Synthetic SQLite smoke
+        shell: bash
+        run: |
+          python - <<'PY'
+          import sqlite3,tempfile
+          from datetime import datetime,timezone
+          from radar.fast_path_shadow import init as base_init,view,evaluate_one
+          from radar.fast_path_v047_validated_overlay import init as val_init,process,report
+          db=sqlite3.connect(":memory:");base_init(db);val_init(db)
+          session="2026-10-07";now=datetime(2026,10,7,8,0,tzinfo=timezone.utc)
+          def snap(c,h,v,t):
+              return {"prevDailyBar":{"c":10.0},"minuteBar":{"c":c,"h":h,"v":v,"t":t},
+                      "latestQuote":{"bp":c-.01,"ap":c+.01}}
+          for i,(c,h,v) in enumerate([(10.2,10.3,100),(10.4,10.5,120),(10.7,10.8,300)]):
+              obs=view(snap(c,h,v,f"2026-10-07T08:0{i}:00Z"))
+              assert len(obs)==9 and obs[-1] is not None
+              evaluate_one(db,session,"TEST","WATCHPOOL",[],obs,now)
+              db.commit();process(db,session);db.commit()
+          cols={r[1] for r in db.execute("PRAGMA table_info(fast_path_events)")}
+          assert {"bar_high_pct","observed_volume"} <= cols
+          with tempfile.NamedTemporaryFile(suffix=".json") as f:
+              payload=report(db,session,f.name)
+              assert payload["status"]=="SAG-30-v0.4.7-VALIDATED-PROSPECTIVE-OOS-SHADOW"
+              assert payload["authoritative"] is False and payload["buy"] is False
+          print("SMOKE_PASS")
+          PY
