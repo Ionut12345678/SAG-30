@@ -1,5 +1,6 @@
 """Research report for SAG-30 v0.3.4 CANDIDATE SHADOW."""
 import argparse, json, sqlite3
+from bisect import bisect_right
 from datetime import datetime, timedelta
 from pathlib import Path
 from statistics import median
@@ -18,7 +19,31 @@ def _band(pct):
     if pct < 20: return "SALVAGE"
     return "LATE"
 
-def _outcome_windows(db, rows):
+def _observation_timeline(db):
+    """Load valid prospective observations once; avoid thousands of repeated SQLite range scans."""
+    timeline={}
+    for symbol,ts,pct in db.execute(
+        "SELECT symbol,retrieval_ts,change_pct FROM observations "
+        "WHERE quality='OK' AND change_pct IS NOT NULL ORDER BY symbol,retrieval_ts"
+    ):
+        dt=datetime.fromisoformat(ts.replace("Z","+00:00"))
+        bucket=timeline.setdefault(symbol,{"times":[],"values":[],"raw":[]})
+        bucket["times"].append(dt)
+        bucket["values"].append(float(pct))
+        bucket["raw"].append(ts)
+    return timeline
+
+def _future_window(timeline, symbol, retrieval_ts, minutes):
+    bucket=timeline.get(symbol)
+    if not bucket:
+        return []
+    start=datetime.fromisoformat(retrieval_ts.replace("Z","+00:00"))
+    end=start+timedelta(minutes=minutes)
+    lo=bisect_right(bucket["times"],start)
+    hi=bisect_right(bucket["times"],end)
+    return list(zip(bucket["raw"][lo:hi],bucket["values"][lo:hi]))
+
+def _outcome_windows(rows, timeline):
     result={}
     for state in ("C34-WATCH","C34-CONVERSION","C34-ACCEPTED","C34-HOT-SHADOW"):
         subset=[r for r in rows if r["state"]==state]
@@ -27,14 +52,9 @@ def _outcome_windows(db, rows):
             maxima=[]
             hit30=hit50=0
             for r in subset:
-                start=datetime.fromisoformat(r["retrieval_ts"].replace("Z","+00:00"))
-                end=start+timedelta(minutes=minutes)
-                vals=[x[0] for x in db.execute(
-                    "SELECT change_pct FROM observations WHERE symbol=? AND retrieval_ts>? AND retrieval_ts<=? AND quality='OK' AND change_pct IS NOT NULL",
-                    (r["symbol"],r["retrieval_ts"],end.isoformat())
-                ).fetchall()]
-                if vals:
-                    m=max(float(v) for v in vals)
+                follow=_future_window(timeline,r["symbol"],r["retrieval_ts"],minutes)
+                if follow:
+                    m=max(v for _,v in follow)
                     maxima.append(m)
                     hit30 += int(m>=30)
                     hit50 += int(m>=50)
@@ -47,8 +67,8 @@ def _outcome_windows(db, rows):
         result[state]=stats
     return result
 
-def _winner_path_audit(db, rows):
-    """Identify WATCH events that subsequently reached +30/+50 and reconstruct their prospective path."""
+def _winner_path_audit(rows, timeline):
+    """Identify WATCH events that subsequently reached +30/+50 without repeated DB scans."""
     winners=[]
     by_symbol_session={}
     for r in rows:
@@ -56,18 +76,10 @@ def _winner_path_audit(db, rows):
     for r in rows:
         if r["state"]!="C34-WATCH":
             continue
-        start=datetime.fromisoformat(r["retrieval_ts"].replace("Z","+00:00"))
-        end=start+timedelta(minutes=60)
-        follow=[
-            (x[0],x[1]) for x in db.execute(
-                "SELECT retrieval_ts,change_pct FROM observations WHERE symbol=? AND retrieval_ts>? AND retrieval_ts<=? "
-                "AND quality='OK' AND change_pct IS NOT NULL ORDER BY retrieval_ts",
-                (r["symbol"],r["retrieval_ts"],end.isoformat())
-            ).fetchall()
-        ]
+        follow=_future_window(timeline,r["symbol"],r["retrieval_ts"],60)
         if not follow:
             continue
-        max_pct=max(float(x[1]) for x in follow)
+        max_pct=max(v for _,v in follow)
         if max_pct < 30:
             continue
         path=[
@@ -78,8 +90,8 @@ def _winner_path_audit(db, rows):
             for p in by_symbol_session.get((r["symbol"],r["session"]),[])
             if p["retrieval_ts"]>=r["retrieval_ts"]
         ]
-        first30=next((ts for ts,pct in follow if float(pct)>=30),None)
-        first50=next((ts for ts,pct in follow if float(pct)>=50),None)
+        first30=next((ts for ts,pct in follow if pct>=30),None)
+        first50=next((ts for ts,pct in follow if pct>=50),None)
         winners.append({
           "symbol":r["symbol"],
           "watch_retrieval_ts":r["retrieval_ts"],
@@ -226,6 +238,8 @@ def build(db_path):
           "FROM candidate_v034_events"
         ).fetchone()
 
+        timeline=_observation_timeline(db)
+
         return {
           "status":"CANDIDATE_SHADOW_ONLY",
           "authoritative":False,
@@ -251,8 +265,8 @@ def build(db_path):
             "median_pct":median(first_watch_pcts) if first_watch_pcts else None,
             "bands":first_watch_bands
           },
-          "forward_outcomes":_outcome_windows(db,event_rows),
-          "winner_path_audit":_winner_path_audit(db,event_rows),
+          "forward_outcomes":_outcome_windows(event_rows,timeline),
+          "winner_path_audit":_winner_path_audit(event_rows,timeline),
           "signals":{
             "total":len(signals),
             "plus_30_reached":milestone_counts[30],
