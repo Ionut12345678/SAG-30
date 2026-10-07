@@ -8,7 +8,7 @@ Signals at/after first +30% are ineligible (prevents post-explosion credit).
 """
 import argparse, json
 from research.fast_path_v041_replay import load_universe,daily,sessions,bounds,request_json,median
-import os,time
+import os,time,random\nfrom urllib.error import HTTPError
 from datetime import datetime,timedelta,timezone
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor,as_completed
@@ -65,7 +65,7 @@ def summarize(win,non):
 def main():
     p=argparse.ArgumentParser(); p.add_argument("--universe",default="config/universe.csv");p.add_argument("--out",default="research/fast_path_v042_replay.json")
     p.add_argument("--winners",type=int,default=300);p.add_argument("--nonwinners",type=int,default=300);p.add_argument("--lookback-days",type=int,default=240)
-    p.add_argument("--feed",default="iex");p.add_argument("--workers",type=int,default=6);a=p.parse_args()
+    p.add_argument("--feed",default="iex");p.add_argument("--workers",type=int,default=2);a=p.parse_args()
     h={"APCA-API-KEY-ID":os.environ["ALPACA_API_KEY"],"APCA-API-SECRET-KEY":os.environ["ALPACA_SECRET_KEY"]}
     end=datetime.now(timezone.utc);start=end-timedelta(days=a.lookback_days); dm=daily(load_universe(a.universe),start.isoformat(),end.isoformat(),h,a.feed)
     winners,non=sessions(dm); winners=winners[:a.winners];non=non[:a.nonwinners]
