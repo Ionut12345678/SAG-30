@@ -50,3 +50,18 @@ UNPROVEN / NEXT RESEARCH FAMILIES
 
 DISCIPLINE
 Any new threshold/family must be pre-registered and evaluated on dev/holdout or prospective data. v0.3.3 FROZEN remains unchanged. SHADOW never implies BUY.
+
+
+VALIDATED UPDATE — v0.4.6
+A separate historical validation cohort ending before 2026-09-18 used 300 winners + 300 same-date hard negatives. The FLOW activity gate was frozen before validation:
+ACTIVITY_RATIO at base FLOW PRE-ARM = current observed 1m volume / median of up to prior 20 observed valid 1m bar volumes; require >=1.50.
+Validation result:
+- unfiltered EVENT OR FLOW: recall 45.33%, FPR 43.33%, balanced precision 51.13%.
+- v0.4.6 EVENT OR FILTERED_FLOW: recall 39.00%, FPR 27.00%, balanced precision 59.09%.
+- relative FPR reduction 37.69%: PASS target >=25%.
+- recall PASS >=35%; precision PASS >=8%.
+Interpretation: causal activity impulse at FLOW PRE-ARM is now KEEP as a validated SHADOW discriminator. It removed 49/130 combined nonwinner alerts while retaining 117/136 combined winners on the independent validation cohort. Threshold 1.50 must not be retuned on this validation set.
+
+CURRENT BEST-SUPPORTED HISTORICAL SHADOW
+EVENT + v0.4.6 FILTERED_FLOW.
+This is still historical/research-only. Next priority is prospective/OOS stability and execution realism, not further retrospective threshold tuning.
