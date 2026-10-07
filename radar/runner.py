@@ -270,10 +270,26 @@ def scout_discovery(db, run_id, universe, market_caps, headers, config, now):
           (session,run_id,s,features[s]['retrieval_ts'],float(features[s]['change_pct']),
            float(features[s].get('acceleration') or 0),rank_change[s],rank_accel[s],'RAPID_MOVER_RESCUE_SHADOW'))
 
+    # v0.4.12 EARLY-PREMARKET ROUTING SHADOW — external discovery is routing only.
+    # It may promote a universe symbol even before delayed SIP has a fresh routing snapshot.
+    # Deep/model evidence remains entirely on the existing entitled feed and frozen gates.
+    external_premarket=[]
+    if 4 <= now.astimezone(ZoneInfo('America/New_York')).hour < 10:
+        exists=db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='v0412_premarket_route'").fetchone()
+        if exists:
+            cutoff=(now-timedelta(minutes=20)).isoformat()
+            rows=db.execute(
+              "SELECT symbol,MAX(observed_ts) FROM v0412_premarket_route "
+              "WHERE session=? AND status='EARLY_PREMARKET_ROUTE_SHADOW' AND observed_ts>=? "
+              "GROUP BY symbol ORDER BY MAX(observed_ts) DESC LIMIT 5",
+              (session,cutoff)
+            ).fetchall()
+            external_premarket=[r[0] for r in rows]
+
     selected=list(base_selected)
-    # Rescue gets priority over retained/challenger extras but is capped at two slots.
-    for symbol in list(rescue)+list(retained)+list(challenger_extras):
-        if symbol in features and symbol not in selected:
+    # External premarket and rapid-mover rescue get priority over retained/challenger extras.
+    for symbol in list(external_premarket)+list(rescue)+list(retained)+list(challenger_extras):
+        if symbol not in selected and (symbol in features or symbol in external_premarket):
             selected.append(symbol)
     multi_engine_record(db,run_id,session,features,scores,base_selected,challenger_extras)
 
@@ -289,8 +305,8 @@ def scout_discovery(db, run_id, universe, market_caps, headers, config, now):
     top_impulse=sorted(impulses.items(),key=lambda x:x[1],reverse=True)[:8]
     early_selected=[(s,routing_changes.get(s),accelerations.get(s),impulses.get(s)) for s in selected if isinstance(routing_changes.get(s),(int,float)) and routing_changes[s] < 20]
     log.info(
-      'SAG30_FAST_SCOUT feed=%s universe=%s eligible=%s selected=%s base_selected=%s challenger_extra=%s retained=%s high_recall=%s sticky=%s fetch_seconds=%.3f total_seconds=%.3f minute_fallbacks=%s top_accel=%s top_impulse=%s early_selected=%s',
-      discovery_feed,len(universe),eligible,len(selected),len(base_selected),len(challenger_extras),len(retained),len(high_recall),
+      'SAG30_FAST_SCOUT feed=%s universe=%s eligible=%s selected=%s base_selected=%s external_premarket=%s challenger_extra=%s retained=%s high_recall=%s sticky=%s fetch_seconds=%.3f total_seconds=%.3f minute_fallbacks=%s top_accel=%s top_impulse=%s early_selected=%s',
+      discovery_feed,len(universe),eligible,len(selected),len(base_selected),len(external_premarket),len(challenger_extras),len(retained),len(high_recall),
       sum(s in set(sticky) for s in selected),fetch_seconds,time.monotonic()-wall_started,
       fallbacks,top_accel,top_impulse,early_selected[:15]
     )
