@@ -1,0 +1,44 @@
+SAG-30 v0.4.8 PROSPECTIVE OOS SHADOW
+Status: PRE-REGISTERED PROSPECTIVE / NOT BUY
+Parent: v0.4.7 validated EVENT + FILTERED_FLOW
+Production control: SAG-30 v0.3.3 FROZEN unchanged.
+
+Frozen signal architecture
+EVENT unchanged.
+Base FLOW unchanged.
+FILTERED_FLOW requires ACTIVITY_RATIO >=1.50 at the original FLOW PRE-ARM timestamp, using current observed 1m volume divided by median of up to prior 20 valid observed 1m bar volumes. No later bars may alter the first decision.
+Combined candidate = EVENT OR FILTERED_FLOW.
+No threshold changes during the prospective block.
+
+Prospective start
+The first complete live radar cycle after this file is committed and the v0.4.8 telemetry is deployed. No prior session/event receives prospective credit.
+
+Required immutable telemetry per first qualifying signal
+session, symbol, retrieval_ts, source_ts, first signal type EVENT/FILTERED_FLOW, price/change_pct, ACTIVITY_RATIO or UNKNOWN, catalyst category/source when EVENT, minute-bar continuity, bid, ask, spread_pct, halt/execution status when available.
+FIRST_SIGNAL timestamp is immutable.
+
+Comparator
+Log unfiltered base FLOW in parallel for research comparison, but it is not the v0.4.8 candidate. Keep EVENT and FLOW outcomes separable.
+
+Prospective maturity / minimum sample
+Do not promote based on a handful of cases.
+Formal review requires the existing calibration discipline where obtainable:
+- >=40 new prospective winner sessions,
+- >=15 U.S. market sessions,
+- >=200 total mature PRE-ARM/candidate outcomes,
+- data-quality usable rate >=80% and continuity telemetry reported,
+- execution ask availability target >=80% on candidate observations.
+Until minimum sample is reached, report descriptive metrics only.
+
+Frozen performance gates
+- winner recall before +10 >=35% among prospectively evaluable winners,
+- balanced/denominator precision >=8% for PRE-ARM/candidate and >=12% for trigger if trigger is evaluated,
+- median lead to +30 >=3 minutes,
+- compare candidate FPR/load with unfiltered FLOW,
+- no hidden backfill or retrospective FIRST_SIGNAL improvement.
+
+Execution realism
+For candidate observations record bid/ask and spread when available. Classify halts, missing ask, stale/absent minute bars, and non-executable observations separately from model misses. Do not infer fill or profitability from a signal.
+
+Decision
+Historical v0.4.7 remains best-supported until v0.4.8 prospective evidence matures. v0.4.8 never authorizes BUY and cannot modify v0.3.3 FROZEN.
