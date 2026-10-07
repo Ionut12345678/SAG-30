@@ -13,9 +13,19 @@ from datetime import datetime,timedelta,timezone
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor,as_completed
 
+def request_json_resilient(path, params, headers, attempts=8):
+    """Infrastructure-only: retry HTTP 429 with bounded exponential backoff."""
+    for attempt in range(attempts):
+        try:
+            return request_json(path, params, headers)
+        except HTTPError as exc:
+            if exc.code != 429 or attempt == attempts - 1:
+                raise
+            time.sleep(min(60.0, 2.0 ** attempt) + random.uniform(0.0, 0.75))
+
 def replay_one(e,headers,feed,max_gap=5.0):
     start,end=bounds(e["date"])
-    d=request_json(f'/v2/stocks/{e["symbol"]}/bars',{"timeframe":"1Min","start":start,"end":end,"feed":feed,"limit":10000,"adjustment":"all"},headers)
+    d=request_json_resilient(f'/v2/stocks/{e["symbol"]}/bars',{"timeframe":"1Min","start":start,"end":end,"feed":feed,"limit":10000,"adjustment":"all"},headers)
     bars=sorted(d.get("bars") or [],key=lambda x:x["t"]); prev=e["prev_close"]
     prior_pct=prior_ts=None; positive_count=0; prearm=trigger=first30=first50=None
     intervals=usable=consecutive=gaps=0
