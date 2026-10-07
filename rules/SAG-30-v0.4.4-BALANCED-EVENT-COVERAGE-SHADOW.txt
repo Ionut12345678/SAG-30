@@ -1,0 +1,49 @@
+SAG-30 v0.4.4 BALANCED EVENT-COVERAGE SHADOW
+Status: PRE-REGISTERED RESEARCH / NOT BUY
+Parent: v0.4.3 PATH-OBSERVABILITY DIAGNOSTIC SHADOW
+Production control: SAG-30 v0.3.3 FROZEN unchanged.
+
+Evidence before freeze
+v0.4.3 on 300 winners + 300 near-miss non-winners found:
+- v0.4.2 FLOW detected 36/300 winners = 12.0%.
+- PATH_UNOBSERVABLE dominated: 233/300 winners.
+- PERSISTENCE_MISS was only 13/300.
+- Among 67 path-observable winners, FLOW recall was 36/67 = 53.7%.
+Therefore relaxing FLOW persistence is not the supported next change.
+A prior winner-only stress test found classified pre-30 catalyst categories in 111/300 winners, but lacked a non-winner denominator and cannot establish precision.
+
+Pre-registered hypothesis
+A timestamped classified catalyst can provide early discovery for a material subset of FLOW-path-unobservable winners before the first +10% print, while a balanced non-winner denominator will reveal whether that coverage is discriminative enough to be useful.
+
+Fixed EVENT classifier
+Use the existing live FAST-PATH catalyst families and keywords unchanged:
+ANTI_DILUTION_BUYBACK, MNA, CONTRACT, FDA_CLINICAL, GOV_DEFENSE, EARNINGS, PATENT_TECH.
+Do not add or remove keywords after seeing this replay.
+
+Fixed cohort and timing
+- Same 300 winners: session high >=+30%.
+- Same 300 near-miss non-winners: session high >=+5% and <+30%.
+- Same 240-day/current-universe retrospective design and IEX feed.
+- News search begins previous calendar day at 16:00 ET.
+- For a session that reaches +10%, EVENT is early only when the classified news created_at is strictly before the first observed +10% high timestamp.
+- For a non-winner that never reaches +10%, use 16:00 ET session cutoff; this is conservative for false positives.
+- EVENT_DISCOVERY is routing/research evidence, not PRE-ARM and never BUY.
+
+Required reporting
+- EVENT winner recall overall.
+- EVENT recall on v0.4.3 PATH_UNOBSERVABLE winners.
+- EVENT false-positive rate on balanced non-winners.
+- EVENT precision to +30%.
+- Median EVENT lead to first +30%.
+- FLOW/EVENT overlap and incremental winner recall.
+- Combined EVENT OR v0.4.2 FLOW recall, precision and non-winner false-positive rate.
+- Pre-09:30 +30 winner EVENT coverage separately.
+
+Decision rule
+- If EVENT materially raises combined recall while balanced precision remains >=8%, preserve EVENT as a routing engine and next test execution/prospective observability.
+- If EVENT recall is useful but precision <8%, do not promote; next challenger must add a pre-registered discriminant without weakening v0.3.3.
+- If EVENT adds little coverage to PATH_UNOBSERVABLE winners, historical headline EVENT is not the main solution; investigate market microstructure/impulse data or a broader data source.
+- Unchanged production/promotion gates remain authoritative. Historical replay cannot authorize BUY.
+
+Freeze record
+Hypothesis, classifier, timing, cohort and decision rule committed before v0.4.4 outcome inspection.
