@@ -1,5 +1,11 @@
 name: SAG-30 v0.4.2 event-time replay
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'research/fast_path_v042_replay.py'
+      - 'rules/SAG-30-v0.4.2-EVENT-TIME-SHADOW.txt'
+      - '.github/workflows/fast_path_v042_replay.yml'
   pull_request:
     paths:
       - 'research/fast_path_v042_replay.py'
