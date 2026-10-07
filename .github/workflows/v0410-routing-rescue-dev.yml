@@ -1,0 +1,87 @@
+name: SAG30 v0.4.10 routing rescue DEV
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/v0410-routing-rescue-dev.yml']
+permissions:
+  contents: write
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          git init /tmp/rs; cd /tmp/rs
+          git remote add origin https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git
+          git fetch --depth=1 origin radar-state && git checkout FETCH_HEAD
+          gzip -dc radar.sqlite3.gz > /tmp/r.db
+      - name: Test routing rescue variants
+        run: |
+          mkdir -p reports
+          python - <<'PY'
+          import sqlite3,json,collections,statistics
+          db=sqlite3.connect('/tmp/r.db')
+          rows=db.execute("""select session,symbol,run_id,retrieval_ts,change_pct,rank_change,rank_acceleration,rank_impulse,rank_turnover,selected
+            from scout_history order by session,run_id,symbol""").fetchall()
+          G=collections.defaultdict(list)
+          for r in rows:G[(r[0],r[1])].append(r)
+          # Outcome uses the broad scout itself, plus any later FAST-PATH high, so routing misses are not erased.
+          peak={}
+          for k,rr in G.items(): peak[k]=max(float(x[4]) for x in rr)
+          for se,sy,pk in db.execute("select session,symbol,max(coalesce(bar_high_pct,change_pct)) from fast_path_events group by session,symbol"):
+            if pk is not None: peak[(se,sy)]=max(peak.get((se,sy),-1e9),float(pk))
+          specs={
+            'R25_A50':lambda p,rc,ra: 1<=p<10 and rc<=25 and ra<=50,
+            'R30_A60':lambda p,rc,ra: 1<=p<10 and rc<=30 and ra<=60,
+            'R40_A60':lambda p,rc,ra: 1<=p<10 and rc<=40 and ra<=60,
+            'R50_A50':lambda p,rc,ra: 1<=p<10 and rc<=50 and ra<=50,
+            'R50_A75':lambda p,rc,ra: 1<=p<10 and rc<=50 and ra<=75,
+          }
+          cases=[]
+          for k,rr in G.items():
+            pk=peak[k]
+            if pk<5: continue
+            c={'session':k[0],'symbol':k[1],'peak':pk,'existing_selected_pre10':False}
+            for n in specs:c[n]=False
+            for x in rr:
+              p=float(x[4]); rc=int(x[5]); ra=int(x[6])
+              if p>=10: break
+              if 1<=p<10 and x[9]: c['existing_selected_pre10']=True
+              for n,fn in specs.items():
+                if fn(p,rc,ra): c[n]=True
+            cases.append(c)
+          def metrics(n):
+            w=[x for x in cases if x['peak']>=30]; w50=[x for x in cases if x['peak']>=50]
+            h=[x for x in cases if 5<=x['peak']<30]
+            return {'winners30':len(w),'winners50':len(w50),'hard_negatives':len(h),
+              'hits30':sum(x[n] for x in w),'hits50':sum(x[n] for x in w50),'false_hits':sum(x[n] for x in h),
+              'recall30':sum(x[n] for x in w)/len(w) if w else None,
+              'recall50':sum(x[n] for x in w50)/len(w50) if w50 else None,
+              'hard_negative_fpr':sum(x[n] for x in h)/len(h) if h else None}
+          # Incremental deep-load: unique rescue names per scout run not already selected.
+          load={}
+          for n,fn in specs.items():
+            per=collections.Counter()
+            for r in rows:
+              se,sy,run,ts,p,rc,ra,ri,rt,sel=r
+              if fn(float(p),int(rc),int(ra)) and not sel: per[(se,run)]+=1
+            vals=list(per.values())
+            load[n]={'runs_with_extra':len(vals),'max_extra':max(vals) if vals else 0,'median_extra':statistics.median(vals) if vals else 0,
+                     'mean_extra_on_affected_runs':sum(vals)/len(vals) if vals else 0}
+          sb=[x for x in cases if x['symbol']=='SBFM']
+          dki=[x for x in cases if x['symbol']=='DKI']
+          out={'status':'V0.4.10_ROUTING_RESCUE_DEV_NOT_OOS_NOT_BUY','metrics':{n:metrics(n) for n in specs},
+               'incremental_load':load,'SBFM':sb,'DKI':dki,
+               'note':'DEV routing study. v0.4.9 semantics unchanged. Broad-scout outcomes include routing misses. No BUY.'}
+          open('reports/v0410_routing_rescue_dev.json','w').write(json.dumps(out,indent=2,sort_keys=True))
+          print(json.dumps(out,indent=2,sort_keys=True))
+          PY
+      - name: Publish
+        run: |
+          cp reports/v0410_routing_rescue_dev.json /tmp/r.json
+          git config user.name github-actions; git config user.email actions@github.com
+          git fetch origin main && git reset --hard origin/main
+          mkdir -p reports; cp /tmp/r.json reports/v0410_routing_rescue_dev.json
+          git add reports/v0410_routing_rescue_dev.json
+          git commit -m "Publish v0.4.10 routing rescue DEV study" || exit 0
+          git push
