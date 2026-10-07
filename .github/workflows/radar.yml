@@ -1,9 +1,11 @@
 name: SAG-30 radar
 on:
   schedule:
-    # Five-minute cadence, offset from top-of-hour load; runner remains authoritative.
-    - cron: '2/5 4-19 * * 1-5'
+    # Watchdog only. Primary cadence self-chains through repository_dispatch.
+    - cron: '12,42 4-19 * * 1-5'
       timezone: 'America/New_York'
+  repository_dispatch:
+    types: [sag30-cadence]
   workflow_dispatch:
   push:
     branches: [main]
@@ -228,6 +230,27 @@ jobs:
           if git diff --cached --quiet; then exit 0; fi
           git commit -m 'Append prospective radar audit and heartbeat'
           git push origin HEAD:radar-state
+
+      - name: Dispatch next cadence cycle
+        if: ${{ always() && github.event_name != 'schedule' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          should_chain="$(python - <<'PY'
+          from datetime import datetime
+          from zoneinfo import ZoneInfo
+          now=datetime.now(ZoneInfo('America/New_York'))
+          print('1' if now.weekday() < 5 and 4 <= now.hour < 20 else '0')
+          PY
+          )"
+          if [ "$should_chain" != "1" ]; then
+            echo "Outside U.S. observation window; cadence chain stops."
+            exit 0
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/dispatches" -f event_type='sag30-cadence'
+          echo "SAG30_NEXT_CYCLE_DISPATCHED"
 
       - name: Enforce cycle result after persistence
         if: ${{ always() }}
