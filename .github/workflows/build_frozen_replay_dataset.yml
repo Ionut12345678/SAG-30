@@ -26,12 +26,12 @@ jobs:
       - name: Save immutable cache
         uses: actions/cache/save@v4
         with:
-          path: research/cache/sag30_balanced_v044_dataset.json.gz
-          key: sag30-balanced-v044-cache-1
+          path: research/cache/sag30_date_matched_v045_dataset.json.gz
+          key: sag30-date-matched-v045-cache-1
       - uses: actions/upload-artifact@v4
         with:
-          name: sag30-balanced-v044-frozen-dataset
+          name: sag30-date-matched-v045-frozen-dataset
           path: |
-            research/cache/sag30_balanced_v044_dataset.json.gz
-            research/cache/sag30_balanced_v044_dataset.json.gz.manifest.json
+            research/cache/sag30_date_matched_v045_dataset.json.gz
+            research/cache/sag30_date_matched_v045_dataset.json.gz.manifest.json
           retention-days: 30
