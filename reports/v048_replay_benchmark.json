@@ -1,0 +1,406 @@
+{
+  "cohort": {
+    "cases": 175,
+    "sessions": [
+      "2026-10-06",
+      "2026-10-07"
+    ]
+  },
+  "hard_negative_stage2": [],
+  "metrics": {
+    "stage1": {
+      "fpr": 0.02097902097902098,
+      "hard_negative_detected": 3,
+      "hard_negatives": 143,
+      "precision": 0.0,
+      "recall30": 0.0,
+      "recall50": 0.0,
+      "winner50_detected": 0,
+      "winner_detected": 0,
+      "winners": 32,
+      "winners50": 24
+    },
+    "stage2": {
+      "fpr": 0.0,
+      "hard_negative_detected": 0,
+      "hard_negatives": 143,
+      "precision": null,
+      "recall30": 0.0,
+      "recall50": 0.0,
+      "winner50_detected": 0,
+      "winner_detected": 0,
+      "winners": 32,
+      "winners50": 24
+    },
+    "v047": {
+      "fpr": 0.04195804195804196,
+      "hard_negative_detected": 6,
+      "hard_negatives": 143,
+      "precision": 0.0,
+      "recall30": 0.0,
+      "recall50": 0.0,
+      "winner50_detected": 0,
+      "winner_detected": 0,
+      "winners": 32,
+      "winners50": 24
+    }
+  },
+  "note": "Frozen current v0.4.8 gates; retrieval-time replay proxy; no retuning or OOS credit.",
+  "status": "DESCRIPTIVE_REPLAY_PROXY_NOT_OOS_NOT_BUY",
+  "winner_lost_stage1": [],
+  "winner_lost_stage2": [],
+  "winners": [
+    {
+      "activity": null,
+      "entry": null,
+      "peak": 59.02,
+      "session": "2026-10-06",
+      "spread": null,
+      "stage1": false,
+      "stage2": false,
+      "symbol": "APUS",
+      "v047": false
+    },
+    {
+      "activity": null,
+      "entry": null,
+      "peak": 30.79,
+      "session": "2026-10-06",
+      "spread": null,
+      "stage1": false,
+      "stage2": false,
+      "symbol": "FRGT",
+      "v047": false
+    },
+    {
+      "activity": null,
+      "entry": null,
+      "peak": 53.36,
+      "session": "2026-10-06",
+      "spread": null,
+      "stage1": false,
+      "stage2": false,
+      "symbol": "IPDN",
+      "v047": false
+    },
+    {
+      "activity": null,
+      "entry": null,
+      "peak": 66.59,
+      "session": "2026-10-06",
+      "spread": null,
+      "stage1": false,
+      "stage2": false,
+      "symbol": "MOBX",
+      "v047": false
+    },
+    {
+      "activity": null,
+      "entry": null,
+      "peak": 99.89,
+      "session": "2026-10-06",
+      "spread": null,
+      "stage1": false,
+      "stage2": false,
+      "symbol": "OLB",
+      "v047": false
+    },
+    {
+      "activity": null,
+      "entry": null,
+      "peak": 57.63,
+      "session": "2026-10-06",
+      "spread": null,
+      "stage1": false,
+      "stage2": false,
+      "symbol": "OLOX",
+      "v047": false
+    },
+    {
+      "activity": null,
+      "entry": null,
+      "peak": 34.11,
+      "session": "2026-10-06",
+      "spread": null,
+      "stage1": false,
+      "stage2": false,
+      "symbol": "PMI",
+      "v047": false
+    },
+    {
+      "activity": null,
+      "entry": null,
+      "peak": 54.63,
+      "session": "2026-10-06",
+      "spread": null,
+      "stage1": false,
+      "stage2": false,
+      "symbol": "SMXT",
+      "v047": false
+    },
+    {
+      "activity": null,
+      "entry": null,
+      "peak": 102.2,
+      "session": "2026-10-06",
+      "spread": null,
+      "stage1": false,
+      "stage2": false,
+      "symbol": "VCIG",
+      "v047": false
+    },
+    {
+      "activity": null,
+      "entry": null,
+      "peak": 49.08,
+      "session": "2026-10-06",
+      "spread": null,
+      "stage1": false,
+      "stage2": false,
+      "symbol": "XHLD",
+      "v047": false
+    },
+    {
+      "activity": null,
+      "entry": null,
+      "peak": 65.53,
+      "session": "2026-10-07",
+      "spread": null,
+      "stage1": false,
+      "stage2": false,
+      "symbol": "APUS",
+      "v047": false
+    },
+    {
+      "activity": null,
+      "entry": null,
+      "peak": 293.81,
+      "session": "2026-10-07",
+      "spread": null,
+      "stage1": false,
+      "stage2": false,
+      "symbol": "BIYA",
+      "v047": false
+    },
+    {
+      "activity": null,
+      "entry": null,
+      "peak": 156.0,
+      "session": "2026-10-07",
+      "spread": null,
+      "stage1": false,
+      "stage2": false,
+      "symbol": "DKI",
+      "v047": false
+    },
+    {
+      "activity": null,
+      "entry": null,
+      "peak": 32.85,
+      "session": "2026-10-07",
+      "spread": null,
+      "stage1": false,
+      "stage2": false,
+      "symbol": "FFR",
+      "v047": false
+    },
+    {
+      "activity": null,
+      "entry": null,
+      "peak": 334.04,
+      "session": "2026-10-07",
+      "spread": null,
+      "stage1": false,
+      "stage2": false,
+      "symbol": "GCDT",
+      "v047": false
+    },
+    {
+      "activity": null,
+      "entry": null,
+      "peak": 83.15,
+      "session": "2026-10-07",
+      "spread": null,
+      "stage1": false,
+      "stage2": false,
+      "symbol": "GIPR",
+      "v047": false
+    },
+    {
+      "activity": null,
+      "entry": null,
+      "peak": 54.36,
+      "session": "2026-10-07",
+      "spread": null,
+      "stage1": false,
+      "stage2": false,
+      "symbol": "IPDN",
+      "v047": false
+    },
+    {
+      "activity": null,
+      "entry": null,
+      "peak": 90.0,
+      "session": "2026-10-07",
+      "spread": null,
+      "stage1": false,
+      "stage2": false,
+      "symbol": "LGCL",
+      "v047": false
+    },
+    {
+      "activity": null,
+      "entry": null,
+      "peak": 70.6,
+      "session": "2026-10-07",
+      "spread": null,
+      "stage1": false,
+      "stage2": false,
+      "symbol": "LPCN",
+      "v047": false
+    },
+    {
+      "activity": null,
+      "entry": null,
+      "peak": 43.44,
+      "session": "2026-10-07",
+      "spread": null,
+      "stage1": false,
+      "stage2": false,
+      "symbol": "MI",
+      "v047": false
+    },
+    {
+      "activity": null,
+      "entry": null,
+      "peak": 66.59,
+      "session": "2026-10-07",
+      "spread": null,
+      "stage1": false,
+      "stage2": false,
+      "symbol": "MOBX",
+      "v047": false
+    },
+    {
+      "activity": null,
+      "entry": null,
+      "peak": 68.21,
+      "session": "2026-10-07",
+      "spread": null,
+      "stage1": false,
+      "stage2": false,
+      "symbol": "MTEN",
+      "v047": false
+    },
+    {
+      "activity": null,
+      "entry": null,
+      "peak": 32.11,
+      "session": "2026-10-07",
+      "spread": null,
+      "stage1": false,
+      "stage2": false,
+      "symbol": "NCPL",
+      "v047": false
+    },
+    {
+      "activity": null,
+      "entry": null,
+      "peak": 56.25,
+      "session": "2026-10-07",
+      "spread": null,
+      "stage1": false,
+      "stage2": false,
+      "symbol": "NXAT",
+      "v047": false
+    },
+    {
+      "activity": null,
+      "entry": null,
+      "peak": 75.91,
+      "session": "2026-10-07",
+      "spread": null,
+      "stage1": false,
+      "stage2": false,
+      "symbol": "OLB",
+      "v047": false
+    },
+    {
+      "activity": null,
+      "entry": null,
+      "peak": 57.63,
+      "session": "2026-10-07",
+      "spread": null,
+      "stage1": false,
+      "stage2": false,
+      "symbol": "OLOX",
+      "v047": false
+    },
+    {
+      "activity": null,
+      "entry": null,
+      "peak": 34.11,
+      "session": "2026-10-07",
+      "spread": null,
+      "stage1": false,
+      "stage2": false,
+      "symbol": "PMI",
+      "v047": false
+    },
+    {
+      "activity": null,
+      "entry": null,
+      "peak": 290.66,
+      "session": "2026-10-07",
+      "spread": null,
+      "stage1": false,
+      "stage2": false,
+      "symbol": "SBFM",
+      "v047": false
+    },
+    {
+      "activity": null,
+      "entry": null,
+      "peak": 159.43,
+      "session": "2026-10-07",
+      "spread": null,
+      "stage1": false,
+      "stage2": false,
+      "symbol": "SXTC",
+      "v047": false
+    },
+    {
+      "activity": null,
+      "entry": null,
+      "peak": 122.97,
+      "session": "2026-10-07",
+      "spread": null,
+      "stage1": false,
+      "stage2": false,
+      "symbol": "TOPP",
+      "v047": false
+    },
+    {
+      "activity": null,
+      "entry": null,
+      "peak": 50.55,
+      "session": "2026-10-07",
+      "spread": null,
+      "stage1": false,
+      "stage2": false,
+      "symbol": "VCIG",
+      "v047": false
+    },
+    {
+      "activity": null,
+      "entry": null,
+      "peak": 49.08,
+      "session": "2026-10-07",
+      "spread": null,
+      "stage1": false,
+      "stage2": false,
+      "symbol": "XHLD",
+      "v047": false
+    }
+  ]
+}
