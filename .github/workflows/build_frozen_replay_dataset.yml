@@ -27,10 +27,10 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: research/cache/sag30_date_matched_v045_dataset.json.gz
-          key: sag30-date-matched-v045-cache-1
+          key: sag30-date-matched-v045-cache-2
       - uses: actions/upload-artifact@v4
         with:
-          name: sag30-date-matched-v045-frozen-dataset
+          name: sag30-date-matched-v045-frozen-dataset-v2
           path: |
             research/cache/sag30_date_matched_v045_dataset.json.gz
             research/cache/sag30_date_matched_v045_dataset.json.gz.manifest.json
