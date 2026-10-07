@@ -1,0 +1,19 @@
+name: SAG-30 cancel stale restore
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/cancel-stale-restore.yml'
+permissions:
+  actions: write
+  contents: read
+jobs:
+  cancel:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel known stale restore-only run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api --method POST "repos/$GITHUB_REPOSITORY/actions/runs/37601560368/cancel" || true
+          echo "SAG30_STALE_RESTORE_CANCEL_REQUESTED=37601560368"
