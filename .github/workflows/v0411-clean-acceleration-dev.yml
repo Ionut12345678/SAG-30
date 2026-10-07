@@ -1,0 +1,57 @@
+name: SAG30 v0411 clean acceleration DEV
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/v0411-clean-acceleration-dev.yml']
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore state and test clean transitions
+        run: |
+          git fetch --depth=1 origin radar-state
+          git show FETCH_HEAD:radar.sqlite3.gz > /tmp/r.gz
+          gzip -dc /tmp/r.gz > /tmp/r.db
+          python - <<'PY'
+          import sqlite3,json,collections,statistics
+          db=sqlite3.connect('/tmp/r.db')
+          rows=db.execute("select session,symbol,run_id,retrieval_ts,change_pct,rank_change,rank_acceleration,selected from scout_history order by session,run_id").fetchall()
+          by=collections.defaultdict(list)
+          for r in rows: by[(r[0],r[1])].append(r)
+          specs={
+            'V0410_R25_A50':lambda p,rc,ra:1<=p<10 and rc<=25 and ra<=50,
+            'A10_R60':lambda p,rc,ra:1<=p<10 and ra<=10 and rc<=60,
+            'A5_R100':lambda p,rc,ra:1<=p<10 and ra<=5 and rc<=100,
+            'A10_R100':lambda p,rc,ra:1<=p<10 and ra<=10 and rc<=100}
+          cases=[]
+          for (se,sy),a in by.items():
+            pre=[x for x in a if 1<=float(x[4])<10]
+            if not pre: continue
+            first_pre=pre[0]
+            later=[x for x in a if x[2]>=first_pre[2]]
+            peak=max(float(x[4]) for x in later)
+            if peak<5: continue
+            c={'session':se,'symbol':sy,'peak':peak,'existing':any(bool(x[7]) for x in pre)}
+            for n,fn in specs.items(): c[n]=any(fn(float(x[4]),int(x[5]),int(x[6])) for x in pre)
+            cases.append(c)
+          winners30=[x for x in cases if x['peak']>=30]
+          winners50=[x for x in cases if x['peak']>=50]
+          neg=[x for x in cases if 5<=x['peak']<30]
+          def M(n):
+            hit30=sum(x[n] for x in winners30); hit50=sum(x[n] for x in winners50); fp=sum(x[n] for x in neg)
+            inc30=sum(x[n] and not x['V0410_R25_A50'] for x in winners30)
+            incfp=sum(x[n] and not x['V0410_R25_A50'] for x in neg)
+            return {'w30':len(winners30),'w50':len(winners50),'hard_neg':len(neg),
+              'hit30':hit30,'hit50':hit50,'fpr':fp/len(neg) if neg else None,
+              'incremental_vs_v0410_w30':inc30,'incremental_vs_v0410_false':incfp}
+          # incremental deep-load if lane were added to current selection
+          load={}
+          for n,fn in specs.items():
+            ctr=collections.Counter()
+            for se,sy,run,ts,p,rc,ra,sel in rows:
+              if fn(float(p),int(rc),int(ra)) and not sel: ctr[(se,run)]+=1
+            v=list(ctr.values()); load[n]={'affected_runs':len(v),'max_extra':max(v) if v else 0,'median_extra':statistics.median(v) if v else 0}
+          useful=sorted([x for x in winners30 if x['A10_R60'] or x['A5_R100']],key=lambda z:z['peak'],reverse=True)
+          print(json.dumps({'status':'DEV_CLEAN_TRANSITION_NOT_OOS_NOT_BUY','definition':'same scout session observed +1..<+10 then later >=30; no FAST-PATH peak used for winner label','metrics':{n:M(n) for n in specs},'load':load,'useful_winners':useful},indent=2))
+          PY
