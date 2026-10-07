@@ -249,6 +249,25 @@ jobs:
             echo "Outside U.S. observation window; cadence chain stops."
             exit 0
           fi
+          wait_seconds="$(python - <<'PY'
+          import json, sqlite3
+          from datetime import datetime, timezone
+          target=int(json.load(open('config/radar.json')).get('cadence_target_seconds',300))
+          db=sqlite3.connect('state/radar.sqlite3')
+          row=db.execute('SELECT started FROM runs ORDER BY id DESC LIMIT 1').fetchone()
+          db.close()
+          if not row:
+              print(0)
+          else:
+              started=datetime.fromisoformat(row[0])
+              elapsed=(datetime.now(timezone.utc)-started).total_seconds()
+              print(max(0,int(target-elapsed)))
+          PY
+          )"
+          if [ "$wait_seconds" -gt 0 ]; then
+            echo "SAG30_CADENCE_WAIT_SECONDS=$wait_seconds"
+            sleep "$wait_seconds"
+          fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/dispatches" -f event_type='sag30-cadence'
           echo "SAG30_NEXT_CYCLE_DISPATCHED"
 
