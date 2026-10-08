@@ -179,9 +179,12 @@ def build(db_path, scan_rc=0, bridge_rc=0):
             signal = db.execute('SELECT id,symbol,retrieval_ts,lane,band,change_pct,early_credit FROM signals WHERE replay=0 ORDER BY id DESC LIMIT 1').fetchone()
             if signal:
                 result['last_signal'] = dict(zip(('id','symbol','retrieval_ts','lane','band','change_pct','early_credit'), signal))
-        if not observation_window and not result['checkpoint_is_current_cycle'] and result['health'] != 'FAIL':
-            result['health']='OUTSIDE_SESSION_STALE_CHECKPOINT'
-            result['evidence_health']='LAST_STORED_RUN_ONLY_NOT_CURRENT_CYCLE'
+        if not observation_window and not result['checkpoint_is_current_cycle']:
+            # Keep the established health enum and evidence diagnostics intact.
+            # Freshness is orthogonal to provider/data health.
+            result['checkpoint_freshness']='STALE_OUTSIDE_SESSION'
+        else:
+            result['checkpoint_freshness']='CURRENT' if result['checkpoint_is_current_cycle'] else 'STALE'
         if result['pending_bridge_events'] and result['health'] == 'PASS':
             result['health'] = 'DEGRADED'
     finally:
