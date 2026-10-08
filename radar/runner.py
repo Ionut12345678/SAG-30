@@ -274,14 +274,19 @@ def scout_discovery(db, run_id, universe, market_caps, headers, config, now):
     # It may promote a universe symbol even before delayed SIP has a fresh routing snapshot.
     # Deep/model evidence remains entirely on the existing entitled feed and frozen gates.
     external_premarket=[]
-    if (lambda et: (et.hour, et.minute) >= (4, 0) and (et.hour, et.minute) < (9, 30))(now.astimezone(ZoneInfo('America/New_York'))):
+    # Carry today's early confirmed routes forward into the entitled IEX window.
+    # This is shortlist retention only, not external price evidence or BUY.
+    # Once the 08:00 ET transition arrives, keep the early routes eligible
+    # for downstream checks instead of expiring them after 20 minutes.
+    et=now.astimezone(ZoneInfo('America/New_York'))
+    if (4, 0) <= (et.hour, et.minute) < (16, 0):
         exists=db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='v0412_premarket_route'").fetchone()
         if exists:
-            cutoff=(now-timedelta(minutes=20)).isoformat()
+            cutoff=(now-timedelta(minutes=20)).isoformat() if et.hour < 8 else et.replace(hour=4,minute=0,second=0,microsecond=0).isoformat()
             rows=db.execute(
-              "SELECT symbol,MAX(observed_ts) FROM v0412_premarket_route "
+              "SELECT symbol,MIN(observed_ts) AS first_route FROM v0412_premarket_route "
               "WHERE session=? AND status='EARLY_PREMARKET_ROUTE_SHADOW' AND observed_ts>=? "
-              "GROUP BY symbol ORDER BY MAX(observed_ts) DESC LIMIT 5",
+              "GROUP BY symbol ORDER BY first_route ASC,symbol ASC LIMIT 5",
               (session,cutoff)
             ).fetchall()
             external_premarket=[r[0] for r in rows]
