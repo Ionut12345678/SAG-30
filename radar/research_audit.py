@@ -92,6 +92,7 @@ def semantic_blockers(db, limit=500):
     counts=Counter()
     quality=Counter()
     reasons=Counter()
+    readiness=Counter()
     for oid,q in obs:
         quality[q]+=1
         if q!='OK':
@@ -126,11 +127,26 @@ def semantic_blockers(db, limit=500):
                 p=json.loads(shadow[0])
                 if int(p.get("same_clock_volume_sample_count") or 0)==0:
                     counts["no_same_clock_history"]+=1
-                if not isinstance(p.get("observed_same_clock_volume_ratio"),(float,int)):
+                ratio=p.get("observed_same_clock_volume_ratio")
+                samples=int(p.get("same_clock_volume_sample_count") or 0)
+                if not isinstance(ratio,(float,int)):
                     counts["no_observed_volume_ratio"]+=1
+                # Versioned research-only 5-session same-clock proxy. It is NOT
+                # the undefined authoritative v0.3.3 activity baseline.
+                if q!='OK':
+                    readiness["SOURCE_NOT_OK"]+=1
+                elif samples<5:
+                    readiness["INSUFFICIENT_HISTORY_LT5"]+=1
+                elif not isinstance(ratio,(float,int)) or not (0<=ratio<1e9):
+                    readiness["RATIO_MISSING_OR_INVALID"]+=1
+                elif ratio<3:
+                    readiness["RATIO_BELOW_3X"]+=1
+                else:
+                    readiness["SHADOW_ACTIVITY_PROXY_3X"]+=1
             except (ValueError,TypeError):
                 counts["invalid_shadow_json"]+=1
     return {"status":"RESEARCH_DIAGNOSTIC_NOT_GATE",
         "sampled_observations":len(obs),"quality":dict(quality),
         "blockers_nonexclusive":dict(sorted(counts.items())),
-        "note":"Last observations across sessions. No shadow volume ratio is promoted to v0.3.3 RVOL; unresolved baseline requires an independently specified, provenance-backed method."}
+        "shadow_activity_proxy_5_sessions_3x":dict(sorted(readiness.items())),
+        "note":"Last observations across sessions. The 5-session/3x proxy is research-only and not v0.3.3 RVOL. Missing baseline provenance is not fixed by this proxy."}
