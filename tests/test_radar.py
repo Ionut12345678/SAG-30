@@ -405,6 +405,28 @@ class RadarTests(unittest.TestCase):
               'change_pct':12.0,'selected':1}], deep,
             '2026-10-08T13:20:00+00:00'))
 
+    def test_semantic_proxy_outcomes_no_future_leak_and_nonwinner_denominator(self):
+        from radar.research_audit import semantic_proxy_forward_outcomes
+        db=open_db(':memory:')
+        scout_init(db)
+        db.execute("CREATE TABLE semantic_shadow(observation_id INTEGER PRIMARY KEY,payload TEXT)")
+        for i,(symbol,ratio) in enumerate((('WIN',4.0),('LOSS',4.0),('WEAK',1.5)),1):
+            ts='2026-10-05T14:00:00+00:00'
+            db.execute("INSERT INTO observations(id,run_id,symbol,retrieval_ts,source_ts,request_started_ts,quality,reason,price,change_pct,band,payload,payload_hash) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                (i,None,symbol,ts,ts,ts,'OK','',2,5,'IDEAL','{}','hash'))
+            db.execute("INSERT INTO semantic_shadow VALUES(?,?)",
+                (i,json.dumps({'same_clock_volume_sample_count':5,
+                               'observed_same_clock_volume_ratio':ratio})))
+            db.execute("INSERT INTO scout_history VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                (1,'2026-10-05',symbol,'2026-10-05T14:05:00+00:00',
+                 35 if symbol=='WIN' else 6,0,0,0,'latestTrade',1,1,1,1,0,0))
+        result=semantic_proxy_forward_outcomes(db,datetime.fromisoformat('2026-10-08T16:00:00+00:00'))
+        hot=result['cohorts']['PROXY_3X']
+        weak=result['cohorts']['PROXY_BELOW_3X']
+        self.assertEqual((hot['finalized'],hot['later_observed_30'],hot['observed_30_rate']),(2,1,0.5))
+        self.assertEqual((weak['finalized'],weak['later_observed_30']),(1,0))
+        db.close()
+
     def test_semantic_shadow_proxy_requires_five_samples_and_3x(self):
         from radar.research_audit import semantic_blockers
         db=open_db(':memory:')
