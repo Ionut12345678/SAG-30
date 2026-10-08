@@ -17,6 +17,8 @@ on:
       - 'radar/audit_scout_two_lane.py'
       - 'radar/collect_shadow_prospective.py'
       - 'tests/test_collect_shadow_prospective.py'
+      - 'radar/evaluate_shadow_prospective.py'
+      - '.github/workflows/shadow-prospective-ledger.yml'
       - 'tests/test_export_rank_ledger.py'
       - '.github/workflows/rank-ledger-tests.yml'
   workflow_dispatch:
@@ -67,6 +69,12 @@ jobs:
         run: python -m radar.audit_scout_two_lane --db /tmp/sag30-real.sqlite3
       - name: Test prospective collector idempotence and first-snapshot behavior
         run: python -m unittest tests.test_collect_shadow_prospective
+      - name: Smoke-test prospective collection and separate evaluation on real SQLite
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m radar.collect_shadow_prospective --db /tmp/sag30-real.sqlite3 --ledger /tmp/sag30-shadow-ci.jsonl --start-session 2026-10-06
+          python -m radar.evaluate_shadow_prospective --db /tmp/sag30-real.sqlite3 --ledger /tmp/sag30-shadow-ci.jsonl
       - name: Validate export against real SQLite and report coverage
         shell: bash
         run: |
