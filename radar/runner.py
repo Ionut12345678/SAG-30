@@ -282,7 +282,7 @@ def scout_discovery(db, run_id, universe, market_caps, headers, config, now):
     if (4, 0) <= (et.hour, et.minute) < (16, 0):
         exists=db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='v0412_premarket_route'").fetchone()
         if exists:
-            cutoff=(now-timedelta(minutes=20)).isoformat() if et.hour < 8 else et.replace(hour=4,minute=0,second=0,microsecond=0).isoformat()
+            cutoff=(now-timedelta(minutes=20)).isoformat() if et.hour < 8 else et.replace(hour=4,minute=0,second=0,microsecond=0).astimezone(ZoneInfo('UTC')).isoformat()
             rows=db.execute(
               "SELECT symbol,MIN(observed_ts) AS first_route FROM v0412_premarket_route "
               "WHERE session=? AND status='EARLY_PREMARKET_ROUTE_SHADOW' AND observed_ts>=? "
