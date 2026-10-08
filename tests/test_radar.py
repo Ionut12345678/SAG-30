@@ -390,6 +390,16 @@ class RadarTests(unittest.TestCase):
         self.assertEqual(row[0],2)
         self.assertGreaterEqual(row[1],0)
 
+    def test_post_08_source_time_semantics(self):
+        from radar.health import _source_at_or_after
+        cutoff = '2026-10-08T12:00:00+00:00'
+        self.assertFalse(_source_at_or_after('2026-10-08T11:59:00Z', cutoff))
+        self.assertTrue(_source_at_or_after('2026-10-08T12:00:00Z', cutoff))
+        self.assertTrue(_source_at_or_after('2026-10-08T12:02:00Z', cutoff))
+        self.assertFalse(_source_at_or_after('invalid', cutoff))
+        self.assertFalse(_source_at_or_after(None, cutoff))
+        self.assertFalse(_source_at_or_after('2026-10-08T12:02:00', cutoff))
+
     def test_health_reports_cycle_and_pending_bridge(self):
         with tempfile.TemporaryDirectory() as directory:
             db_path = Path(directory) / 'radar.sqlite3'
