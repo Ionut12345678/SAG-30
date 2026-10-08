@@ -150,3 +150,85 @@ def semantic_blockers(db, limit=500):
         "blockers_nonexclusive":dict(sorted(counts.items())),
         "shadow_activity_proxy_5_sessions_3x":dict(sorted(readiness.items())),
         "note":"Last observations across sessions. The 5-session/3x proxy is research-only and not v0.3.3 RVOL. Missing baseline provenance is not fixed by this proxy."}
+
+def semantic_proxy_forward_outcomes(db, now=None):
+    """First qualifying deep observation per session/symbol; future scout outcomes only.
+
+    SHADOW observational cohort, NOT an unbiased prospective trading backtest.
+    Proxy class is frozen at first deep observation under +10%; future information
+    is used only to label the outcome after that timestamp.
+    """
+    if not all(exists(db,t) for t in ("observations","semantic_shadow","scout_history")):
+        return {"status":"NOT_STARTED","cohorts":{}}
+    now=now or datetime.now(timezone.utc)
+    et=now.astimezone(ZoneInfo("America/New_York"))
+    today=et.date().isoformat()
+    observations=db.execute(
+        "SELECT o.symbol,o.retrieval_ts,o.source_ts,o.quality,o.change_pct,s.payload "
+        "FROM observations o JOIN semantic_shadow s ON s.observation_id=o.id "
+        "WHERE o.quality='OK' AND o.change_pct>=-10 AND o.change_pct<10 "
+        "ORDER BY o.retrieval_ts,o.id"
+    ).fetchall()
+    first={}
+    for symbol,ts,source,quality,pct,raw in observations:
+        try:
+            instant=datetime.fromisoformat(ts.replace('Z','+00:00'))
+            if instant.tzinfo is None: continue
+            session=instant.astimezone(ZoneInfo("America/New_York")).date().isoformat()
+            key=(session,symbol)
+            if key in first: continue
+            p=json.loads(raw)
+            n=int(p.get("same_clock_volume_sample_count") or 0)
+            ratio=p.get("observed_same_clock_volume_ratio")
+            if n<5:
+                label="INSUFFICIENT_HISTORY"
+            elif not isinstance(ratio,(float,int)) or not (0<=ratio<1e9):
+                label="RATIO_INVALID"
+            elif ratio>=3:
+                label="PROXY_3X"
+            else:
+                label="PROXY_BELOW_3X"
+            first[key]=(ts,float(pct),label,n,ratio)
+        except (ValueError,TypeError):
+            continue
+    totals=defaultdict(Counter)
+    cases=[]
+    for (session,symbol),(ts,pct,label,n,ratio) in sorted(first.items()):
+        closed=session<today or (session==today and et.hour>=20)
+        # Do not give early-detection credit to already-observed +30 runners.
+        prior30=db.execute(
+            "SELECT 1 FROM scout_history WHERE session=? AND symbol=? "
+            "AND retrieval_ts<=? AND change_pct>=30 LIMIT 1",
+            (session,symbol,ts)
+        ).fetchone()
+        if prior30:
+            continue
+        future=db.execute(
+            "SELECT retrieval_ts,change_pct FROM scout_history WHERE session=? "
+            "AND symbol=? AND retrieval_ts>? ORDER BY retrieval_ts",
+            (session,symbol,ts)
+        ).fetchall()
+        first30=next((t for t,p in future if p>=30),None)
+        first50=next((t for t,p in future if p>=50),None)
+        bucket=totals[label]
+        bucket["cohort"]+=1
+        bucket["finalized" if closed else "pending"]+=1
+        if closed:
+            bucket["later_observed_30"]+=int(first30 is not None)
+            bucket["later_observed_50"]+=int(first50 is not None)
+        cases.append({"session":session,"symbol":symbol,"first_deep_ts":ts,
+                      "first_deep_pct":pct,"baseline_samples":n,"ratio":ratio,
+                      "cohort":label,"status":"FINALIZED" if closed else "PENDING",
+                      "first_observed_30_after_ts":first30,
+                      "first_observed_50_after_ts":first50})
+    cohorts={}
+    for label,b in sorted(totals.items()):
+        f=b["finalized"]
+        cohorts[label]={"total":b["cohort"],"finalized":f,"pending":b["pending"],
+                        "later_observed_30":b["later_observed_30"],
+                        "later_observed_50":b["later_observed_50"],
+                        "observed_30_rate":b["later_observed_30"]/f if f else None,
+                        "observed_50_rate":b["later_observed_50"]/f if f else None}
+    return {"status":"OBSERVATIONAL_FORWARD_LABELS_SHADOW_NOT_BUY",
+            "cohorts":cohorts,"cases":cases[-200:],
+            "note":"First valid sub-10% deep observation defines proxy cohort. Later scout snapshots label +30/+50, never selection. Deep-observed cohort is selected, not randomized; provider coverage and session censoring bias results. No tradability or predictive edge is established."}
