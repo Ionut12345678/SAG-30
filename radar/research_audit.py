@@ -1,7 +1,7 @@
 """Forward-only retention challenger and semantic blocker audit. Research only."""
 import json
 from collections import Counter, defaultdict
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from zoneinfo import ZoneInfo
 
 def exists(db, table):
@@ -36,12 +36,15 @@ def retention_outcomes(db, now=None):
         target50=next((t for t,p in future if p>=50),None)
         # Production coverage is observed deep data, not mere shortlist presence.
         # If deep was already present before challenger, challenger is not first.
+        start_et=datetime.fromisoformat(session).replace(tzinfo=ZoneInfo("America/New_York"))
+        utc_start=start_et.astimezone(timezone.utc).isoformat()
+        utc_end=(start_et+timedelta(days=1)).astimezone(timezone.utc).isoformat()
         production=db.execute(
             "SELECT MIN(retrieval_ts) FROM observations WHERE symbol=? AND retrieval_ts>=? "
-            "AND retrieval_ts<=? AND quality='OK' AND "
+            "AND retrieval_ts<? AND quality='OK' AND "
             "EXISTS(SELECT 1 FROM scout_history h WHERE h.run_id=observations.run_id "
             "AND h.symbol=observations.symbol AND h.session=? AND h.selected=1)",
-            (symbol,session+'T00:00:00',session+'T23:59:59',session)
+            (symbol,utc_start,utc_end,session)
         ).fetchone()[0] if exists(db,"observations") and exists(db,"scout_history") else None
         # Avoid treating UTC calendar day as ET session for production comparison.
         if production:
