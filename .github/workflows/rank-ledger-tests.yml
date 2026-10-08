@@ -12,6 +12,7 @@ on:
       - 'radar/replay_scout_union_rules.py'
       - 'radar/audit_scout_session_stability.py'
       - 'radar/audit_engine_first_snapshot.py'
+      - 'radar/audit_engine_winner_losses.py'
       - 'tests/test_export_rank_ledger.py'
       - '.github/workflows/rank-ledger-tests.yml'
   workflow_dispatch:
@@ -54,6 +55,8 @@ jobs:
         run: python -m radar.audit_scout_session_stability --db /tmp/sag30-real.sqlite3
       - name: Audit actual multi-engine first-snapshot routing
         run: python -m radar.audit_engine_first_snapshot --db /tmp/sag30-real.sqlite3
+      - name: Diagnose engine fields of first-snapshot winners
+        run: python -m radar.audit_engine_winner_losses --db /tmp/sag30-real.sqlite3
       - name: Validate export against real SQLite and report coverage
         shell: bash
         run: |
