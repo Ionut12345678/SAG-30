@@ -4,6 +4,7 @@ on:
     paths:
       - 'radar/export_rank_ledger.py'
       - 'radar/audit_scout_coverage.py'
+      - 'radar/audit_scout_exclusions.py'
       - 'tests/test_export_rank_ledger.py'
       - '.github/workflows/rank-ledger-tests.yml'
   workflow_dispatch:
@@ -30,6 +31,8 @@ jobs:
           test -s /tmp/sag30-real.sqlite3
       - name: Audit real full SCOUT cohort coverage
         run: python -m radar.audit_scout_coverage --db /tmp/sag30-real.sqlite3
+      - name: Classify SCOUT exclusions using real contemporaneous data
+        run: python -m radar.audit_scout_exclusions --db /tmp/sag30-real.sqlite3
       - name: Validate export against real SQLite and report coverage
         shell: bash
         run: |
