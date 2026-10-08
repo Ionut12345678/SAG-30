@@ -28,9 +28,19 @@ jobs:
           known=sum(x['rank'] is not None for x in rows)
           print(f'rows={len(rows)} rank_known={known} rank_unknown={len(rows)-known}')
           assert rows, 'No observations'
+          if known == 0:
+              print('BLOCKED: upstream radar does not emit timestamped rank snapshots; not validated')
           PY
       - name: Run chronological replay without promoting signals
         run: python research/chronological_rank_replay.py scout_snapshots.jsonl > shadow_replay.json
+      - name: Assert live rank collection readiness
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          rows=[json.loads(x) for x in Path('scout_snapshots.jsonl').read_text().splitlines() if x]
+          assert any(x['rank'] is not None for x in rows), 'BLOCKED: no live SCOUT ranks; wire radar_rank_capture_hook into producer'
+          PY
       - name: Upload diagnostic artifacts
         if: always()
         uses: actions/upload-artifact@v4
