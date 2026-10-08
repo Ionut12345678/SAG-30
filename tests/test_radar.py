@@ -405,6 +405,26 @@ class RadarTests(unittest.TestCase):
               'change_pct':12.0,'selected':1}], deep,
             '2026-10-08T13:20:00+00:00'))
 
+    def test_retention_shadow_replay_uses_only_past_selections(self):
+        from radar.winner_recall_report import _retention_shadow_replay
+        def row(run, minute, pct, selected=0):
+            return {'run_id':run,'retrieval_ts':f'2026-10-05T14:{minute:02d}:00+00:00',
+                    'change_pct':pct,'selected':selected}
+        groups={
+            ('2026-10-05','WIN'):[row(1,0,3,1),row(2,5,5),row(3,10,35),row(4,15,55)],
+            ('2026-10-05','LOSE'):[row(1,0,2,1),row(2,5,1),row(3,10,0)],
+            ('2026-10-05','NEVER_SELECTED'):[row(1,0,2),row(2,5,4),row(3,10,40)],
+            ('2026-10-05','LATE'):[row(1,0,31),row(2,5,5,1),row(3,10,6)],
+        }
+        out=_retention_shadow_replay(groups,windows=(60,),caps=(2,))
+        result=out['scenarios'][0]
+        self.assertEqual(result['extra_deep_observation_slots'],3)
+        self.assertEqual(result['held_with_later_observed_30'],1)
+        self.assertEqual(result['held_with_later_observed_50'],1)
+        self.assertEqual(result['unique_held_symbol_sessions'],2)
+        self.assertEqual(result['max_extra_slots_in_cycle'],2)
+        self.assertEqual(out['status'],'COUNTERFACTUAL_SHADOW_ROUTING_ONLY_NOT_BUY')
+
     def test_early_shortlist_outcomes_counts_nonwinners_and_avoids_lookahead(self):
         from radar.winner_recall_report import _early_shortlist_outcomes
         def row(ts, pct, selected=0):
