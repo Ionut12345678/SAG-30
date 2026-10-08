@@ -14,6 +14,7 @@ on:
       - 'radar/audit_engine_first_snapshot.py'
       - 'radar/audit_engine_winner_losses.py'
       - 'radar/audit_scout_recall_frontier.py'
+      - 'radar/audit_scout_two_lane.py'
       - 'tests/test_export_rank_ledger.py'
       - '.github/workflows/rank-ledger-tests.yml'
   workflow_dispatch:
@@ -60,6 +61,8 @@ jobs:
         run: python -m radar.audit_engine_winner_losses --db /tmp/sag30-real.sqlite3
       - name: Compare early recall frontier per session with nonwinner denominator
         run: python -m radar.audit_scout_recall_frontier --db /tmp/sag30-real.sqlite3
+      - name: Audit SHADOW two-lane discovery and priority separation
+        run: python -m radar.audit_scout_two_lane --db /tmp/sag30-real.sqlite3
       - name: Validate export against real SQLite and report coverage
         shell: bash
         run: |
