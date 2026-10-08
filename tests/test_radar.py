@@ -400,6 +400,25 @@ class RadarTests(unittest.TestCase):
         self.assertFalse(_source_at_or_after(None, cutoff))
         self.assertFalse(_source_at_or_after('2026-10-08T12:02:00', cutoff))
 
+    def test_v0412_converted_symbols_default_empty(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'radar.sqlite3'
+            db = open_db(path)
+            db.execute("""CREATE TABLE v0412_premarket_route (
+                symbol TEXT, observed_ts TEXT, session TEXT, status TEXT
+            )""")
+            db.execute(
+                "INSERT INTO runs(started,finished,status) VALUES(?,?,?)",
+                ('2026-10-08T12:05:00+00:00',
+                 '2026-10-08T12:05:10+00:00', 'MONITOR_OK')
+            )
+            db.commit()
+            db.close()
+            report = health_build(path)
+            conversion = report['v0412_session_iex_conversion']
+            self.assertEqual(conversion['converted_symbols'], [])
+            self.assertEqual(conversion['valid_source_after_08_et'], 0)
+
     def test_health_reports_cycle_and_pending_bridge(self):
         with tempfile.TemporaryDirectory() as directory:
             db_path = Path(directory) / 'radar.sqlite3'
