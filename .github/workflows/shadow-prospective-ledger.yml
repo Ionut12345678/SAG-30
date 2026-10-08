@@ -49,6 +49,8 @@ jobs:
           python -m radar.collect_shadow_prospective --db /tmp/sag30-real.sqlite3 --ledger /tmp/sag30-shadow/prospective.jsonl
           python -m radar.evaluate_shadow_prospective --db /tmp/sag30-real.sqlite3 --ledger /tmp/sag30-shadow/prospective.jsonl > /tmp/sag30-shadow/evaluation.json
           cat /tmp/sag30-shadow/evaluation.json
+          python -m radar.audit_buy_feasibility --db /tmp/sag30-real.sqlite3 > /tmp/sag30-shadow/buy_feasibility.json
+          cat /tmp/sag30-shadow/buy_feasibility.json
       - name: Upload independent audit artifacts
         uses: actions/upload-artifact@v4
         with:
