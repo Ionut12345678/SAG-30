@@ -50,7 +50,10 @@ def _classify(db,symbol,session,rows,target_row,ceiling):
     after=[r for r in deep if r["retrieval_ts"]>=first_sel]
     if not after:
         return "DEEP_MISS",first,deep,None
-    if all(int(r["baseline_samples"] or 0)<5 for r in after):
+    early_after=[r for r in after if isinstance(r["change_pct"],(int,float)) and r["change_pct"]<ceiling]
+    if not early_after:
+        return "DEEP_TIMING_MISS",first,deep,None
+    if all(int(r["baseline_samples"] or 0)<5 for r in early_after):
         return "BASELINE_MISS",first,deep,None
     return "MODEL_MISS",first,deep,None
 
