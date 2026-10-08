@@ -13,8 +13,39 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - name: Run synthetic SQLite regression tests
         run: python -m unittest discover -s tests -p 'test_export_rank_ledger.py' -v
+      - name: Restore real radar-state SQLite snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --depth=1 origin radar-state
+          git show FETCH_HEAD:radar.sqlite3.gz | gzip -dc > /tmp/sag30-real.sqlite3
+          test -s /tmp/sag30-real.sqlite3
+      - name: Validate export against real SQLite and report coverage
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m radar.export_rank_ledger --db /tmp/sag30-real.sqlite3 --out /tmp/sag30-real-ranks.jsonl
+          python - <<'PY'
+          import json, sqlite3
+          from pathlib import Path
+          db=sqlite3.connect('file:/tmp/sag30-real.sqlite3?mode=ro',uri=True)
+          db.row_factory=sqlite3.Row
+          rows=[json.loads(s) for s in Path('/tmp/sag30-real-ranks.jsonl').read_text().splitlines()]
+          count=db.execute('SELECT COUNT(*) FROM multi_engine_scores').fetchone()[0]
+          assert len(rows)==count,(len(rows),count)
+          assert all(isinstance(x['rank'],int) and x['rank']>0 for x in rows)
+          assert len({(x['run_id'],x['symbol']) for x in rows})==len(rows)
+          scout=db.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='scout_universe_history'").fetchone()
+          print(json.dumps({'status':'PASS','real_db_rows':count,'exported_rows':len(rows),
+              'sessions':len({x['session'] for x in rows}),
+              'selected_rows':sum(x['selected'] for x in rows),
+              'scout_universe_history_table':bool(scout),
+              'note':'Multi-engine eligible cohort only; no forward winner/fill validation; NOT BUY'},sort_keys=True))
+          PY
