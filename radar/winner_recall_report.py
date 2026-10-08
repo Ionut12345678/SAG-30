@@ -142,6 +142,83 @@ def _early_shortlist_outcomes(groups, now=None):
         "cases": cases[-300:],
     }
 
+def _retention_shadow_replay(groups, windows=(60, 180, 360), caps=(5, 10)):
+    """Counterfactual *routing workload*, not historical model evaluations.
+
+    A symbol must have been selected below +10% earlier in the same session.
+    Only current observed sub-10% unselected snapshots can be shadow-retained.
+    Rank by last selection timestamp, never by future winner status.
+    """
+    from collections import defaultdict
+    from datetime import datetime
+    by_session=defaultdict(lambda:defaultdict(list))
+    for (session,symbol),rows in groups.items():
+        for r in rows:
+            by_session[session][r["run_id"]].append((symbol,r))
+    results=[]
+    for minutes in windows:
+        for cap in caps:
+            extra=0
+            total_cycles=0
+            nonempty_cycles=0
+            max_per_cycle=0
+            opportunity30=set()
+            opportunity50=set()
+            all_held=set()
+            for session,runs in by_session.items():
+                last_selected={}
+                already30=set()
+                for run_id,entries in sorted(runs.items()):
+                    total_cycles+=1
+                    # Rows in the same run are one snapshot, not sequential predictions.
+                    current={symbol:r for symbol,r in entries}
+                    for symbol,r in entries:
+                        if float(r["change_pct"])>=30:
+                            already30.add(symbol)
+                    candidates=[]
+                    for symbol,r in entries:
+                        pct=float(r["change_pct"])
+                        if int(r.get("selected") or 0)==1 and -10<=pct<10 and symbol not in already30:
+                            last_selected[symbol]=r["retrieval_ts"]
+                    for symbol,r in entries:
+                        pct=float(r["change_pct"])
+                        if symbol in already30 or not (-10<=pct<10) or int(r.get("selected") or 0)==1:
+                            continue
+                        prev=last_selected.get(symbol)
+                        if not prev:
+                            continue
+                        age=(datetime.fromisoformat(r["retrieval_ts"])-datetime.fromisoformat(prev)).total_seconds()/60
+                        if 0<=age<=minutes:
+                            candidates.append((prev,symbol,r))
+                    candidates.sort(key=lambda x:(x[0],x[1]),reverse=True)
+                    chosen=candidates[:cap]
+                    extra+=len(chosen)
+                    nonempty_cycles+=int(bool(chosen))
+                    max_per_cycle=max(max_per_cycle,len(chosen))
+                    for _,symbol,r in chosen:
+                        all_held.add((session,symbol))
+                        # Labels below are outcomes, not used in selection/ranking.
+                        future=[x for x in groups[(session,symbol)] if x["retrieval_ts"]>r["retrieval_ts"]]
+                        if _first_target(future,30):
+                            opportunity30.add((session,symbol))
+                        if _first_target(future,50):
+                            opportunity50.add((session,symbol))
+            results.append({
+                "retention_minutes":minutes,"extra_slots_per_cycle_cap":cap,
+                "scout_cycles":total_cycles,"extra_deep_observation_slots":extra,
+                "cycles_with_extra_slots":nonempty_cycles,
+                "mean_extra_slots_per_cycle":extra/total_cycles if total_cycles else None,
+                "max_extra_slots_in_cycle":max_per_cycle,
+                "unique_held_symbol_sessions":len(all_held),
+                "held_with_later_observed_30":len(opportunity30),
+                "held_with_later_observed_50":len(opportunity50),
+            })
+    return {
+        "status":"COUNTERFACTUAL_SHADOW_ROUTING_ONLY_NOT_BUY",
+        "note":"Replays recorded scout snapshots only. Extra slots are hypothetical; no missing deep bars are reconstructed, no executable price or BUY is implied. Unobserved candidates and actual provider cost are not measured. Later +30/+50 labels are outcomes, never selection features.",
+        "scenarios":results,
+    }
+
 def build(db_path):
     db=sqlite3.connect(db_path); db.row_factory=sqlite3.Row
     try:
@@ -208,6 +285,7 @@ def build(db_path):
           "secondary_entry_ceiling_pct":20,
           "scope":"Only prospective sessions recorded after full-universe scout_history deployment.",
           "early_shortlist_outcomes":_early_shortlist_outcomes(groups),
+          "retention_shadow_replay":_retention_shadow_replay(groups),
           "winner_sessions":total,
           "winner_50_sessions":sum(1 for r in winners if r["reached_50"]),
           "classification_counts_under_10":counts10,
