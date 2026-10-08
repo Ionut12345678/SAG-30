@@ -3,7 +3,9 @@ import sys
 import unittest
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parent))
-from radar_rank_capture_hook import record_cycle
+from radar_rank_capture_hook import record_cycle, append_cycle
+import tempfile
+import json
 from collect_scout_snapshots import collect
 
 TS="2026-10-08T15:00:00+00:00"
@@ -29,6 +31,17 @@ class CollectorTests(unittest.TestCase):
         self.assertFalse(rows[0]["selected"])
         self.assertTrue(rows[0]["deep_routed"])
         self.assertIsNone(rows[0]["rank"])
+
+    def test_atomic_ledger_deduplicates_cycles(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path=Path(folder)/"scout.jsonl"
+            candidates=[{"symbol":"AAA","rank":4},{"symbol":"BBB","rank":8}]
+            first=append_cycle(path,candidates,TS)
+            second=append_cycle(path,candidates,TS)
+            lines=[json.loads(line) for line in path.read_text().splitlines()]
+            self.assertEqual(first["new_rows"],2)
+            self.assertEqual(second["new_rows"],0)
+            self.assertEqual(len(lines),2)
 
     def test_snapshot_rank_is_observed(self):
         snapshot=record_cycle([{"symbol":"AAA","rank":40,"selected":True}],TS)
