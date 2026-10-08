@@ -75,6 +75,7 @@ jobs:
           set -euo pipefail
           python -m radar.collect_shadow_prospective --db /tmp/sag30-real.sqlite3 --ledger /tmp/sag30-shadow-ci.jsonl --start-session 2026-10-06
           python -m radar.evaluate_shadow_prospective --db /tmp/sag30-real.sqlite3 --ledger /tmp/sag30-shadow-ci.jsonl
+          python -m radar.collect_shadow_prospective --db /tmp/sag30-real.sqlite3 --ledger /tmp/sag30-shadow-ci.jsonl --start-session 2026-10-06
       - name: Validate export against real SQLite and report coverage
         shell: bash
         run: |
