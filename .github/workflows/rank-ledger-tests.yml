@@ -9,6 +9,7 @@ on:
       - 'radar/audit_scout_selection_timing.py'
       - 'radar/audit_scout_early_entry.py'
       - 'radar/replay_scout_rank_topk.py'
+      - 'radar/replay_scout_union_rules.py'
       - 'tests/test_export_rank_ledger.py'
       - '.github/workflows/rank-ledger-tests.yml'
   workflow_dispatch:
@@ -45,6 +46,8 @@ jobs:
         run: python -m radar.audit_scout_early_entry --db /tmp/sag30-real.sqlite3
       - name: Compare observed first-snapshot SCOUT top-K with false-positive denominator
         run: python -m radar.replay_scout_rank_topk --db /tmp/sag30-real.sqlite3
+      - name: Compare SHADOW union and intersection rules
+        run: python -m radar.replay_scout_union_rules --db /tmp/sag30-real.sqlite3
       - name: Validate export against real SQLite and report coverage
         shell: bash
         run: |
