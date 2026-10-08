@@ -1,0 +1,20 @@
+name: SAG-30 Rank Ledger Tests
+on:
+  pull_request:
+    paths:
+      - 'radar/export_rank_ledger.py'
+      - 'tests/test_export_rank_ledger.py'
+      - '.github/workflows/rank-ledger-tests.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  rank-ledger:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run synthetic SQLite regression tests
+        run: python -m unittest discover -s tests -p 'test_export_rank_ledger.py' -v
