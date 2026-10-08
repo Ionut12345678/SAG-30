@@ -118,6 +118,37 @@ def build(db_path, scan_rc=0, bridge_rc=0):
                     'without_valid_post_route_observation': len(routed)-valid,
                     'note': 'Only same-run post-route snapshots; no historical backfill or BUY',
                 }
+                # Session-long prospective cohort: earliest premarket route per
+                # symbol, followed only by later observations on the same day.
+                # Keep cross-run evidence audit separate from frozen evaluation.
+                cohort = db.execute(
+                    """SELECT symbol,MIN(observed_ts) FROM v0412_premarket_route
+                       WHERE session=? AND status='EARLY_PREMARKET_ROUTE_SHADOW'
+                       GROUP BY symbol""", (current_et.date().isoformat(),)
+                ).fetchall()
+                session_iex = {'routed_symbols': len(cohort),
+                               'observed_after_route': 0,
+                               'valid_after_route': 0,
+                               'valid_after_08_et': 0}
+                transition = current_et.replace(
+                    hour=8,minute=0,second=0,microsecond=0
+                ).astimezone(timezone.utc).isoformat()
+                for symbol, first_route in cohort:
+                    counts = db.execute(
+                        """SELECT COUNT(*),
+                                  SUM(CASE WHEN quality='OK' THEN 1 ELSE 0 END),
+                                  SUM(CASE WHEN quality='OK' AND retrieval_ts>=?
+                                           THEN 1 ELSE 0 END)
+                           FROM observations
+                           WHERE symbol=? AND retrieval_ts>=?
+                             AND retrieval_ts<=?""",
+                        (transition,symbol,first_route,utcnow())
+                    ).fetchone()
+                    session_iex['observed_after_route'] += int(counts[0] or 0)>0
+                    session_iex['valid_after_route'] += int(counts[1] or 0)>0
+                    session_iex['valid_after_08_et'] += int(counts[2] or 0)>0
+                session_iex['status']='PROSPECTIVE_SHADOW_NOT_BUY'
+                result['v0412_session_iex_conversion']=session_iex
             result['evaluation_states'] = dict(db.execute(
                 'SELECT e.status,COUNT(*) FROM evaluations e JOIN observations o ON o.id=e.observation_id WHERE o.run_id=? GROUP BY e.status',
                 (run_id,)).fetchall())
