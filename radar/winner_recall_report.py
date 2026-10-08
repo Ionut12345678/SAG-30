@@ -10,7 +10,7 @@ from zoneinfo import ZoneInfo
 from pathlib import Path
 from .research_audit import retention_outcomes, semantic_blockers, semantic_proxy_forward_outcomes
 from .proxy_validation import validation as proxy_validation
-from .buy_actionability_shadow import build as buy_actionability_build
+from .buy_actionability_shadow import build as buy_actionability_build, frozen_evidence_gate_audit
 
 def _exists(db,name):
     return db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?",(name,)).fetchone() is not None
@@ -318,6 +318,7 @@ def build(db_path):
           "semantic_proxy_forward_outcomes":proxy_full,
           "semantic_proxy_validation":proxy_guardrails,
           "buy_candidate_actionability_shadow":buy_actionability_build(db),
+          "frozen_evidence_gate_audit":frozen_evidence_gate_audit(db),
           "winner_sessions":total,
           "winner_50_sessions":sum(1 for r in winners if r["reached_50"]),
           "classification_counts_under_10":counts10,
