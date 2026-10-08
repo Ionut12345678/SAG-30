@@ -405,6 +405,30 @@ class RadarTests(unittest.TestCase):
               'change_pct':12.0,'selected':1}], deep,
             '2026-10-08T13:20:00+00:00'))
 
+    def test_semantic_proxy_validation_no_hindsight_and_minimum_samples(self):
+        from radar.proxy_validation import validation,wilson
+        self.assertIsNone(wilson(0,0))
+        self.assertEqual(wilson(0,10)['low'],0)
+        self.assertLess(wilson(0,10)['high'],1)
+        rows=[]
+        # Temporal split: only first 3 days train, final day validates.
+        for day in ('2026-10-01','2026-10-02','2026-10-03','2026-10-04'):
+            for i in range(4):
+                rows.append({'session':day,'cohort':'PROXY_3X',
+                             'status':'FINALIZED','first_observed_30_after_ts':'later' if i<2 else None})
+                rows.append({'session':day,'cohort':'PROXY_BELOW_3X',
+                             'status':'FINALIZED','first_observed_30_after_ts':None})
+        rows.append({'session':'2026-10-05','cohort':'PROXY_3X',
+                     'status':'PENDING','first_observed_30_after_ts':'later'})
+        result=validation({'cases':rows},min_per_group=3,min_sessions=1)
+        self.assertEqual(result['train_sessions'],3)
+        self.assertEqual(result['validation_sessions'],1)
+        self.assertEqual(result['validation']['PROXY_3X']['n'],4)
+        self.assertEqual(result['validation']['PROXY_3X']['observed_30'],2)
+        self.assertNotEqual(result['status'],'VALIDATION_ASSOCIATION_DETECTED_NOT_BUY')
+        blocked=validation({'cases':rows},min_per_group=30,min_sessions=5)
+        self.assertEqual(blocked['status'],'INSUFFICIENT_VALIDATION_SAMPLE')
+
     def test_semantic_proxy_outcomes_no_future_leak_and_nonwinner_denominator(self):
         from radar.research_audit import semantic_proxy_forward_outcomes
         db=open_db(':memory:')
