@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'radar/export_rank_ledger.py'
+      - 'radar/audit_scout_coverage.py'
       - 'tests/test_export_rank_ledger.py'
       - '.github/workflows/rank-ledger-tests.yml'
   workflow_dispatch:
@@ -27,6 +28,8 @@ jobs:
           git fetch --depth=1 origin radar-state
           git show FETCH_HEAD:radar.sqlite3.gz | gzip -dc > /tmp/sag30-real.sqlite3
           test -s /tmp/sag30-real.sqlite3
+      - name: Audit real full SCOUT cohort coverage
+        run: python -m radar.audit_scout_coverage --db /tmp/sag30-real.sqlite3
       - name: Validate export against real SQLite and report coverage
         shell: bash
         run: |
