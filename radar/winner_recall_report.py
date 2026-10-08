@@ -50,7 +50,10 @@ def _classify(db,symbol,session,rows,target_row,ceiling):
     after=[r for r in deep if r["retrieval_ts"]>=first_sel]
     if not after:
         return "DEEP_MISS",first,deep,None
-    if all(int(r["baseline_samples"] or 0)<5 for r in after):
+    early_after=[r for r in after if isinstance(r["change_pct"],(int,float)) and r["change_pct"]<ceiling]
+    if not early_after:
+        return "DEEP_TIMING_MISS",first,deep,None
+    if all(int(r["baseline_samples"] or 0)<5 for r in early_after):
         return "BASELINE_MISS",first,deep,None
     return "MODEL_MISS",first,deep,None
 
@@ -210,6 +213,7 @@ def build(db_path):
           "classification_counts_under_10":counts10,
           "classification_counts_under_20":counts20,
           "baseline_miss_diagnostics_under_10":[{"session":r["session"],"symbol":r["symbol"],**r["baseline_diagnostic_under_10"]} for r in winners if r["classification_under_10"]=="BASELINE_MISS" and r["baseline_diagnostic_under_10"] is not None],
+          "deep_timing_miss_diagnostics_under_10":[{"session":r["session"],"symbol":r["symbol"],**r["baseline_diagnostic_under_10"]} for r in winners if r["classification_under_10"]=="DEEP_TIMING_MISS" and r["baseline_diagnostic_under_10"] is not None],
           "under_10_scout_recall":frac(lambda r:r["first_under_10_scout_ts"] is not None),
           "under_10_base_shortlist_recall":frac(lambda r:r["base_selected_under_10"]),
           "under_10_dual_extra_recall":frac(lambda r:r["dual_extra_selected_under_10"]),
