@@ -92,8 +92,15 @@ def run(db_path,universe_path):
             rows.append((rank,symbol,pct,volnum(vol)))
         stats['universe_matches']=len(rows)
         for rank,symbol,source_pct,source_vol in rows[:25]:
-            try:c=chart_latest(symbol,day)
-            except Exception:c=None
+            try:
+                c=chart_latest(symbol,day)
+            except Exception as exc:
+                stats['source_failures']+=1
+                reason='CONFIRMING_1M_SOURCE_ERROR'
+                out['rejected'].append({'symbol':symbol,'reason':reason,'source_pct':source_pct})
+                db.execute('INSERT OR REPLACE INTO v0412_premarket_route VALUES(?,?,?,?,?,?,?,?,?,?,?,?)',
+                  (day,now.isoformat(),symbol,rank,source_pct,source_vol,None,None,None,None,'PREMARKET_TRACK_ONLY',reason))
+                continue
             if not c:
                 reason='NO_CONFIRMING_1M_CHART'
                 out['rejected'].append({'symbol':symbol,'reason':reason,'source_pct':source_pct})
