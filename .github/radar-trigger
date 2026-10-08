@@ -20,3 +20,5 @@ v0.4.11-coherent-window-activation 2026-10-07
 validate-v0412-2026-10-07T19:03Z
 2026-10-08 verify main after PR31 PR32 merge; prospective only, no backfill
 2026-10-08 bootstrap post-PR35 scheduled cadence fix; SHADOW, no BUY
+
+2026-10-08 validate downstream quality audit PR37; no rule changes
