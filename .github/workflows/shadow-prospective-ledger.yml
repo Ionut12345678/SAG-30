@@ -1,0 +1,77 @@
+name: SAG-30 SHADOW Prospective Ledger
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '15 21 * * 1-5'
+permissions:
+  contents: write
+concurrency:
+  group: sag30-shadow-prospective-ledger
+  cancel-in-progress: false
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore live SQLite read-only snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --depth=1 origin radar-state
+          git show FETCH_HEAD:radar.sqlite3.gz | gzip -dc > /tmp/sag30-real.sqlite3
+          test -s /tmp/sag30-real.sqlite3
+      - name: Restore immutable ledger from isolated state branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/sag30-shadow
+          if git ls-remote --exit-code --heads origin shadow-prospective-state >/dev/null; then
+            git fetch --depth=1 origin shadow-prospective-state
+            git show FETCH_HEAD:prospective.jsonl > /tmp/sag30-shadow/prospective.jsonl
+          else
+            : > /tmp/sag30-shadow/prospective.jsonl
+          fi
+      - name: Append eligible first observations and evaluate separately
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m radar.collect_shadow_prospective --db /tmp/sag30-real.sqlite3 --ledger /tmp/sag30-shadow/prospective.jsonl
+          python -m radar.evaluate_shadow_prospective --db /tmp/sag30-real.sqlite3 --ledger /tmp/sag30-shadow/prospective.jsonl > /tmp/sag30-shadow/evaluation.json
+          cat /tmp/sag30-shadow/evaluation.json
+      - name: Upload independent audit artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sag30-shadow-ledger-${{ github.run_id }}
+          path: |
+            /tmp/sag30-shadow/prospective.jsonl
+            /tmp/sag30-shadow/evaluation.json
+          retention-days: 90
+      - name: Persist ledger on isolated branch, never modify FROZEN live
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/sag30-state-repo
+          cd /tmp/sag30-state-repo
+          git init
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --exit-code --heads origin shadow-prospective-state >/dev/null; then
+            git fetch --depth=1 origin shadow-prospective-state
+            git checkout -b shadow-prospective-state FETCH_HEAD
+          else
+            git checkout --orphan shadow-prospective-state
+          fi
+          cp /tmp/sag30-shadow/prospective.jsonl prospective.jsonl
+          cp /tmp/sag30-shadow/evaluation.json evaluation.json
+          git add prospective.jsonl evaluation.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Update SHADOW prospective ledger and separate evaluation"
+            git push origin HEAD:shadow-prospective-state
+          fi
