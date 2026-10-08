@@ -48,7 +48,7 @@ def append_cycle(path, candidates, timestamp):
     try:
         with os.fdopen(fd,"w") as out:
             for row in all_rows:
-                out.write(json.dumps(row,sort_keys=True)+"\\n")
+                out.write(json.dumps(row,sort_keys=True)+"\n")
             out.flush()
             os.fsync(out.fileno())
         os.replace(name,target)
