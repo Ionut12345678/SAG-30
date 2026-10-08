@@ -151,7 +151,7 @@ def semantic_blockers(db, limit=500):
         "shadow_activity_proxy_5_sessions_3x":dict(sorted(readiness.items())),
         "note":"Last observations across sessions. The 5-session/3x proxy is research-only and not v0.3.3 RVOL. Missing baseline provenance is not fixed by this proxy."}
 
-def semantic_proxy_forward_outcomes(db, now=None):
+def semantic_proxy_forward_outcomes(db, now=None, case_limit=200):
     """First qualifying deep observation per session/symbol; future scout outcomes only.
 
     SHADOW observational cohort, NOT an unbiased prospective trading backtest.
@@ -230,5 +230,5 @@ def semantic_proxy_forward_outcomes(db, now=None):
                         "observed_30_rate":b["later_observed_30"]/f if f else None,
                         "observed_50_rate":b["later_observed_50"]/f if f else None}
     return {"status":"OBSERVATIONAL_FORWARD_LABELS_SHADOW_NOT_BUY",
-            "cohorts":cohorts,"cases":cases[-200:],
+            "cohorts":cohorts,"cases":cases[-case_limit:] if case_limit else cases,
             "note":"First valid sub-10% deep observation defines proxy cohort. Later scout snapshots label +30/+50, never selection. Deep-observed cohort is selected, not randomized; provider coverage and session censoring bias results. No tradability or predictive edge is established."}

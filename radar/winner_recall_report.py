@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 from pathlib import Path
 from .research_audit import retention_outcomes, semantic_blockers, semantic_proxy_forward_outcomes
+from .proxy_validation import validation as proxy_validation
 
 def _exists(db,name):
     return db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?",(name,)).fetchone() is not None
@@ -300,6 +301,9 @@ def build(db_path):
         total=len(winners)
         def frac(pred):
             return sum(1 for r in winners if pred(r))/total if total else None
+        proxy_full=semantic_proxy_forward_outcomes(db,case_limit=None)
+        proxy_guardrails=proxy_validation(proxy_full)
+        proxy_full["cases"]=proxy_full.get("cases",[])[-200:]
         return {
           "status":"WINNER_RECALL_AUDIT","authoritative":False,
           "primary_entry_ceiling_pct":10,
@@ -310,7 +314,8 @@ def build(db_path):
           "retention_live_challenger":_retention_live_summary(db),
           "retention_prospective_outcomes":retention_outcomes(db),
           "semantic_blocker_diagnostics":semantic_blockers(db),
-          "semantic_proxy_forward_outcomes":semantic_proxy_forward_outcomes(db),
+          "semantic_proxy_forward_outcomes":proxy_full,
+          "semantic_proxy_validation":proxy_guardrails,
           "winner_sessions":total,
           "winner_50_sessions":sum(1 for r in winners if r["reached_50"]),
           "classification_counts_under_10":counts10,
