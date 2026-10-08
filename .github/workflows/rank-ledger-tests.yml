@@ -15,6 +15,8 @@ on:
       - 'radar/audit_engine_winner_losses.py'
       - 'radar/audit_scout_recall_frontier.py'
       - 'radar/audit_scout_two_lane.py'
+      - 'radar/collect_shadow_prospective.py'
+      - 'tests/test_collect_shadow_prospective.py'
       - 'tests/test_export_rank_ledger.py'
       - '.github/workflows/rank-ledger-tests.yml'
   workflow_dispatch:
@@ -63,6 +65,8 @@ jobs:
         run: python -m radar.audit_scout_recall_frontier --db /tmp/sag30-real.sqlite3
       - name: Audit SHADOW two-lane discovery and priority separation
         run: python -m radar.audit_scout_two_lane --db /tmp/sag30-real.sqlite3
+      - name: Test prospective collector idempotence and first-snapshot behavior
+        run: python -m unittest tests.test_collect_shadow_prospective
       - name: Validate export against real SQLite and report coverage
         shell: bash
         run: |
