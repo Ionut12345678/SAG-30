@@ -1,0 +1,100 @@
+name: SAG-30 Rank Ledger Tests
+on:
+  pull_request:
+    paths:
+      - 'radar/export_rank_ledger.py'
+      - 'radar/audit_scout_coverage.py'
+      - 'radar/audit_scout_exclusions.py'
+      - 'radar/audit_scout_forward_conversion.py'
+      - 'radar/audit_scout_selection_timing.py'
+      - 'radar/audit_scout_early_entry.py'
+      - 'radar/replay_scout_rank_topk.py'
+      - 'radar/replay_scout_union_rules.py'
+      - 'radar/audit_scout_session_stability.py'
+      - 'radar/audit_engine_first_snapshot.py'
+      - 'radar/audit_engine_winner_losses.py'
+      - 'radar/audit_scout_recall_frontier.py'
+      - 'radar/audit_scout_two_lane.py'
+      - 'radar/collect_shadow_prospective.py'
+      - 'tests/test_collect_shadow_prospective.py'
+      - 'radar/evaluate_shadow_prospective.py'
+      - '.github/workflows/shadow-prospective-ledger.yml'
+      - 'tests/test_export_rank_ledger.py'
+      - '.github/workflows/rank-ledger-tests.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  rank-ledger:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run synthetic SQLite regression tests
+        run: python -m unittest discover -s tests -p 'test_export_rank_ledger.py' -v
+      - name: Restore real radar-state SQLite snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --depth=1 origin radar-state
+          git show FETCH_HEAD:radar.sqlite3.gz | gzip -dc > /tmp/sag30-real.sqlite3
+          test -s /tmp/sag30-real.sqlite3
+      - name: Audit real full SCOUT cohort coverage
+        run: python -m radar.audit_scout_coverage --db /tmp/sag30-real.sqlite3
+      - name: Classify SCOUT exclusions using real contemporaneous data
+        run: python -m radar.audit_scout_exclusions --db /tmp/sag30-real.sqlite3
+      - name: Study later observed SCOUT +30/+50 with nonwinner denominator
+        run: python -m radar.audit_scout_forward_conversion --db /tmp/sag30-real.sqlite3
+      - name: Audit SCOUT selection timing before +30/+50
+        run: python -m radar.audit_scout_selection_timing --db /tmp/sag30-real.sqlite3
+      - name: Audit selected-under-10 recall and lead times
+        run: python -m radar.audit_scout_early_entry --db /tmp/sag30-real.sqlite3
+      - name: Compare observed first-snapshot SCOUT top-K with false-positive denominator
+        run: python -m radar.replay_scout_rank_topk --db /tmp/sag30-real.sqlite3
+      - name: Compare SHADOW union and intersection rules
+        run: python -m radar.replay_scout_union_rules --db /tmp/sag30-real.sqlite3
+      - name: Audit session stability of fixed priority rule
+        run: python -m radar.audit_scout_session_stability --db /tmp/sag30-real.sqlite3
+      - name: Audit actual multi-engine first-snapshot routing
+        run: python -m radar.audit_engine_first_snapshot --db /tmp/sag30-real.sqlite3
+      - name: Diagnose engine fields of first-snapshot winners
+        run: python -m radar.audit_engine_winner_losses --db /tmp/sag30-real.sqlite3
+      - name: Compare early recall frontier per session with nonwinner denominator
+        run: python -m radar.audit_scout_recall_frontier --db /tmp/sag30-real.sqlite3
+      - name: Audit SHADOW two-lane discovery and priority separation
+        run: python -m radar.audit_scout_two_lane --db /tmp/sag30-real.sqlite3
+      - name: Test prospective collector idempotence and first-snapshot behavior
+        run: python -m unittest tests.test_collect_shadow_prospective
+      - name: Smoke-test prospective collection and separate evaluation on real SQLite
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m radar.collect_shadow_prospective --db /tmp/sag30-real.sqlite3 --ledger /tmp/sag30-shadow-ci.jsonl --start-session 2026-10-06
+          python -m radar.evaluate_shadow_prospective --db /tmp/sag30-real.sqlite3 --ledger /tmp/sag30-shadow-ci.jsonl
+          python -m radar.collect_shadow_prospective --db /tmp/sag30-real.sqlite3 --ledger /tmp/sag30-shadow-ci.jsonl --start-session 2026-10-06
+      - name: Validate export against real SQLite and report coverage
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m radar.export_rank_ledger --db /tmp/sag30-real.sqlite3 --out /tmp/sag30-real-ranks.jsonl
+          python - <<'PY'
+          import json, sqlite3
+          from pathlib import Path
+          db=sqlite3.connect('file:/tmp/sag30-real.sqlite3?mode=ro',uri=True)
+          db.row_factory=sqlite3.Row
+          rows=[json.loads(s) for s in Path('/tmp/sag30-real-ranks.jsonl').read_text().splitlines()]
+          count=db.execute('SELECT COUNT(*) FROM multi_engine_scores').fetchone()[0]
+          assert len(rows)==count,(len(rows),count)
+          assert all(isinstance(x['rank'],int) and x['rank']>0 for x in rows)
+          assert len({(x['run_id'],x['symbol']) for x in rows})==len(rows)
+          scout=db.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='scout_universe_history'").fetchone()
+          print(json.dumps({'status':'PASS','real_db_rows':count,'exported_rows':len(rows),
+              'sessions':len({x['session'] for x in rows}),
+              'selected_rows':sum(x['selected'] for x in rows),
+              'scout_universe_history_table':bool(scout),
+              'note':'Multi-engine eligible cohort only; no forward winner/fill validation; NOT BUY'},sort_keys=True))
+          PY
