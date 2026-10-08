@@ -366,6 +366,23 @@ class RadarTests(unittest.TestCase):
             self.assertEqual(by_symbol['B']['classification_under_10'],'MODEL_MISS')
             self.assertEqual(report['winner_sessions'],2)
 
+    def test_deep_timing_miss_is_not_mislabeled_baseline(self):
+        from radar.winner_recall_report import _classify
+        from unittest.mock import patch
+        rows=[
+            {'retrieval_ts':'2026-10-05T14:00:00+00:00','change_pct':3.0,'selected':1},
+            {'retrieval_ts':'2026-10-05T14:10:00+00:00','change_pct':32.0,'selected':1},
+        ]
+        late=[{'retrieval_ts':'2026-10-05T14:05:00+00:00',
+               'change_pct':15.0,'baseline_samples':1,'state':'C34R2-LOW'}]
+        with patch('radar.winner_recall_report._deep_r2',return_value=late):
+            cls,_,_,_=_classify(None,'TEST','2026-10-05',rows,rows[1],10)
+        self.assertEqual(cls,'DEEP_TIMING_MISS')
+        early=[dict(late[0],change_pct=6.0)]
+        with patch('radar.winner_recall_report._deep_r2',return_value=early):
+            cls,_,_,_=_classify(None,'TEST','2026-10-05',rows,rows[1],10)
+        self.assertEqual(cls,'BASELINE_MISS')
+
     def test_baseline_miss_diagnostic_is_pre_target_and_research_only(self):
         from radar.winner_recall_report import _baseline_diagnostic
         rows = [
