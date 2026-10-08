@@ -1,0 +1,42 @@
+name: SAG-30 Shadow Research Validation
+on:
+  pull_request:
+    paths:
+      - 'research/**'
+      - '.github/workflows/sag30-shadow-research.yml'
+  workflow_dispatch:
+jobs:
+  research-tests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run deterministic replay regression tests
+        run: python -m unittest discover -s research -p 'test_*.py' -v
+      - name: Collect available SCOUT observations
+        run: python research/collect_scout_snapshots.py candidate_v034_report.json --output scout_snapshots.jsonl
+      - name: Audit rank availability
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          rows=[json.loads(x) for x in Path('scout_snapshots.jsonl').read_text().splitlines() if x]
+          known=sum(x['rank'] is not None for x in rows)
+          print(f'rows={len(rows)} rank_known={known} rank_unknown={len(rows)-known}')
+          assert rows, 'No observations'
+          PY
+      - name: Run chronological replay without promoting signals
+        run: python research/chronological_rank_replay.py scout_snapshots.jsonl > shadow_replay.json
+      - name: Upload diagnostic artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sag30-shadow-research
+          path: |
+            scout_snapshots.jsonl
+            shadow_replay.json
+          if-no-files-found: warn
