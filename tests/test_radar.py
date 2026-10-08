@@ -405,6 +405,35 @@ class RadarTests(unittest.TestCase):
               'change_pct':12.0,'selected':1}], deep,
             '2026-10-08T13:20:00+00:00'))
 
+    def test_live_retention_challenger_is_separate_and_prospective(self):
+        from radar.retention_shadow import select, observe
+        db=sqlite3.connect(':memory:')
+        scout_init(db)
+        db.execute("CREATE TABLE production_alerts(symbol TEXT)")
+        session='2026-10-05'
+        ts='2026-10-05T14:00:00+00:00'
+        for symbol,selected,pct in [('WIN',1,5),('LOSS',1,3),('NEVER',0,4),('ALREADY',1,2)]:
+            db.execute("INSERT INTO scout_history VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                (1,session,symbol,ts,pct,0,0,0,'latestTrade',1,1,1,1,selected,0))
+        db.execute("INSERT INTO scout_history VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            (2,session,'ALREADY','2026-10-05T14:03:00+00:00',35,0,0,0,'latestTrade',1,1,1,1,0,0))
+        db.commit()
+        now=datetime.fromisoformat('2026-10-05T14:05:00+00:00')
+        features={s:{'change_pct':5} for s in ('WIN','LOSS','NEVER','ALREADY')}
+        chosen=select(db,session,3,features,[],now,60,10)
+        self.assertEqual(set(chosen),{'WIN','LOSS'})
+        calls=[]
+        def fetch(url,headers):
+            calls.append(url)
+            return {'WIN':{'latestTrade':{'p':11,'t':'2026-10-05T14:04:00+00:00'}},
+                    'LOSS':{'latestTrade':{'p':9,'t':'2026-10-05T12:00:00+00:00'}}},'2026-10-05T14:05:00+00:00'
+        out=observe(db,3,session,features,[],now,{},'iex',fetch)
+        self.assertEqual(out,{'status':'SHADOW_ONLY_NOT_BUY','selected':2,'valid':1})
+        self.assertEqual(len(calls),1)
+        self.assertEqual(db.execute("SELECT COUNT(*) FROM retention_shadow_observations").fetchone()[0],2)
+        self.assertEqual(db.execute("SELECT COUNT(*) FROM production_alerts").fetchone()[0],0)
+        self.assertEqual(select(db,session,3,features,['WIN','LOSS'],now),[])
+
     def test_retention_shadow_replay_uses_only_past_selections(self):
         from radar.winner_recall_report import _retention_shadow_replay
         def row(run, minute, pct, selected=0):

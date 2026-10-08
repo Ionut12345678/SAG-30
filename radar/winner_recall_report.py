@@ -219,6 +219,26 @@ def _retention_shadow_replay(groups, windows=(60, 180, 360), caps=(5, 10)):
         "scenarios":results,
     }
 
+def _retention_live_summary(db):
+    if not _exists(db,"retention_shadow_observations"):
+        return {"status":"NOT_STARTED","observations":0,"fresh":0,"data_gap":0}
+    rows=db.execute(
+        "SELECT run_id,session,symbol,selected_ts,scout_pct,observed_ts,source_ts,"
+        "source_age_seconds,deep_price,feed,status "
+        "FROM retention_shadow_observations ORDER BY run_id DESC,symbol LIMIT 100"
+    ).fetchall()
+    counts=dict(db.execute(
+        "SELECT status,COUNT(*) FROM retention_shadow_observations GROUP BY status"
+    ).fetchall())
+    return {
+        "status":"LIVE_SHADOW_NOT_BUY","observations":sum(counts.values()),
+        "fresh":counts.get("SHADOW_FRESH_TRADE",0),
+        "data_gap":counts.get("SHADOW_DATA_GAP",0),
+        "fetch_error":counts.get("SHADOW_FETCH_ERROR",0),
+        "recent":[dict(r) for r in rows],
+        "note":"Independent snapshot lane. Never feeds production candidate, frozen gates or BUY."
+    }
+
 def build(db_path):
     db=sqlite3.connect(db_path); db.row_factory=sqlite3.Row
     try:
@@ -286,6 +306,7 @@ def build(db_path):
           "scope":"Only prospective sessions recorded after full-universe scout_history deployment.",
           "early_shortlist_outcomes":_early_shortlist_outcomes(groups),
           "retention_shadow_replay":_retention_shadow_replay(groups),
+          "retention_live_challenger":_retention_live_summary(db),
           "winner_sessions":total,
           "winner_50_sessions":sum(1 for r in winners if r["reached_50"]),
           "classification_counts_under_10":counts10,

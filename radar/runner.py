@@ -20,6 +20,7 @@ from .candidate_v034 import evaluate as evaluate_candidate_v034
 from .candidate_v034r2 import evaluate as evaluate_candidate_v034r2
 from .scout import init as init_scout, momentum_and_update as scout_momentum_and_update, active_symbols as scout_active_symbols, record_promotions as scout_record_promotions, record_universe_history as scout_record_universe_history
 from .multi_engine_shadow import evaluate as multi_engine_evaluate, record as multi_engine_record, watchpool_symbols as multi_engine_watchpool_symbols
+from .retention_shadow import observe as observe_retention_shadow
 
 log = logging.getLogger('radar')
 
@@ -444,7 +445,7 @@ def run():
             log.warning('SAG30_SEMANTIC_EVIDENCE source=missing path=%s; undefined frozen gates remain WAIT/UNKNOWN', evidence_path)
 
         if broad:
-            selected,_=scout_discovery(db,run_id,universe,market_caps,headers,config,now)
+            selected,scout_features=scout_discovery(db,run_id,universe,market_caps,headers,config,now)
             if not selected:
                 # Infrastructure/data failover only. Never claim full-universe discovery was healthy,
                 # never backfill, and never change frozen/candidate model semantics.
@@ -469,6 +470,17 @@ def run():
                 refresh_shadow_volume_baseline(db,selected,headers,deep_feed,now)
                 db.execute('DELETE FROM shadow_volume_baseline WHERE symbol NOT IN ('+marks+')',selected)
                 deep_count=prime_selected_after_discovery(db,run_id,selected,headers,config,evidence,deep_feed)
+                # Independent research-only challenger. No production candidates, frozen
+                # evaluation, bridge alerts or BUY gates are modified.
+                if config.get('retention_shadow_enabled',False):
+                    try:
+                        shadow_result=observe_retention_shadow(
+                            db,run_id,day,scout_features,selected,now,headers,deep_feed,request,
+                            minutes=int(config.get('retention_shadow_minutes',60)),
+                            cap=int(config.get('retention_shadow_extra_limit',10)))
+                        log.info('SAG30_RETENTION_CHALLENGER %s',shadow_result)
+                    except Exception:
+                        log.exception('SAG30_RETENTION_CHALLENGER_FAILED research-only; production unaffected')
                 run_status='DISCOVERY_OK'
                 detail=f'FAST_SCOUT {len(universe)} universe -> {deep_count} deep observations'
         else:
