@@ -5,7 +5,7 @@ This reports what the collector actually did. It does not infer or modify frozen
 import argparse
 import json
 import sqlite3
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 from .model import SPEC_SHA256
@@ -75,7 +75,7 @@ def build(db_path, scan_rc=0, bridge_rc=0):
                     """SELECT symbol, observed_ts FROM v0412_premarket_route
                        WHERE session=? AND status='EARLY_PREMARKET_ROUTE_SHADOW'
                          AND observed_ts>=? AND observed_ts<=?""",
-                    (current_et.date().isoformat(), started, finished or utcnow()),
+                    (current_et.date().isoformat(), (datetime.fromisoformat(started)-timedelta(minutes=5)).isoformat(), finished or utcnow()),
                 ).fetchall()
                 valid = 0
                 any_observation = 0
