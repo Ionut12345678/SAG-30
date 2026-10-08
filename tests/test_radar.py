@@ -366,6 +366,28 @@ class RadarTests(unittest.TestCase):
             self.assertEqual(by_symbol['B']['classification_under_10'],'MODEL_MISS')
             self.assertEqual(report['winner_sessions'],2)
 
+    def test_baseline_miss_diagnostic_is_pre_target_and_research_only(self):
+        from radar.winner_recall_report import _baseline_diagnostic
+        rows = [
+            {'retrieval_ts':'2026-10-08T13:00:00+00:00','change_pct':1.0,'selected':1},
+            {'retrieval_ts':'2026-10-08T13:20:00+00:00','change_pct':35.0,'selected':1},
+        ]
+        deep = [
+            {'retrieval_ts':'2026-10-08T13:05:00+00:00','change_pct':3.0,
+             'baseline_samples':2,'state':'C34R2-LOW'},
+            {'retrieval_ts':'2026-10-08T13:25:00+00:00','change_pct':45.0,
+             'baseline_samples':8,'state':'C34R2-HOT-SHADOW'},
+        ]
+        d = _baseline_diagnostic(rows, deep, '2026-10-08T13:20:00+00:00')
+        self.assertEqual(d['reason'], 'INSUFFICIENT_EARLY_BASELINE')
+        self.assertEqual(d['max_early_baseline_samples'], 2)
+        self.assertEqual(d['early_deep_observations'], 1)
+        self.assertEqual(d['status'], 'DIAGNOSTIC_SHADOW_NOT_BUY')
+        self.assertIsNone(_baseline_diagnostic(
+            [{'retrieval_ts':'2026-10-08T13:00:00+00:00',
+              'change_pct':12.0,'selected':1}], deep,
+            '2026-10-08T13:20:00+00:00'))
+
     def test_multi_engine_ranker_adds_sub10_precursor_without_changing_base(self):
         features={
           'BASE': {'retrieval_ts':'2026-10-05T14:00:00+00:00','change_pct':5.0,'acceleration':0.1,'impulse':0.001,'turnover':0.01,'route_source':'latestTrade'},
