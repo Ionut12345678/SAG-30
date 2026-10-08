@@ -355,6 +355,11 @@ def select_deep_feed(selected, headers, config, now):
     Delayed SIP is never returned here and therefore can never become model evidence.
     """
     configured=config['feed']
+    # Explicit entitlement configuration: do not repeatedly probe known-denied SIP.
+    # This is feed selection only; never substitute delayed/public routing prices as evidence.
+    if config.get('deep_preferred_feed_entitled') is False:
+        log.info('SAG30_DEEP_FEED status=SKIPPED_NOT_ENTITLED fallback=%s', configured)
+        return configured
     preferred=config.get('deep_preferred_feed')
     before=int(config.get('deep_preferred_before_et_hour',0) or 0)
     local_hour=now.astimezone(ZoneInfo('America/New_York')).hour
