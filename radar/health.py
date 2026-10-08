@@ -60,6 +60,14 @@ def build(db_path, scan_rc=0, bridge_rc=0):
             total, ok = db.execute("SELECT COUNT(*),SUM(CASE WHEN quality='OK' THEN 1 ELSE 0 END) FROM observations WHERE run_id=?", (run_id,)).fetchone()
             total, ok = int(total or 0), int(ok or 0)
             result['observations'] = {'total': total, 'ok': ok, 'data_quality': total-ok}
+            # Audit the stored prospective rejection reasons without reclassifying observations.
+            # One observation may carry multiple reasons; counts are not exclusive.
+            reason_counts = {}
+            for (reason,) in db.execute("SELECT reason FROM observations WHERE run_id=? AND quality!='OK'", (run_id,)):
+                for code in (reason or 'unspecified').split(','):
+                    code = code.strip() or 'unspecified'
+                    reason_counts[code] = reason_counts.get(code, 0) + 1
+            result['observations']['rejection_reasons'] = dict(sorted(reason_counts.items()))
             result['evaluation_states'] = dict(db.execute(
                 'SELECT e.status,COUNT(*) FROM evaluations e JOIN observations o ON o.id=e.observation_id WHERE o.run_id=? GROUP BY e.status',
                 (run_id,)).fetchall())
