@@ -405,6 +405,26 @@ class RadarTests(unittest.TestCase):
               'change_pct':12.0,'selected':1}], deep,
             '2026-10-08T13:20:00+00:00'))
 
+    def test_semantic_shadow_proxy_requires_five_samples_and_3x(self):
+        from radar.research_audit import semantic_blockers
+        db=open_db(':memory:')
+        db.execute("CREATE TABLE semantic_shadow(observation_id INTEGER PRIMARY KEY,payload TEXT)")
+        for i,(samples,ratio) in enumerate(((5,4.0),(5,2.0),(4,20.0),(5,None)),1):
+            db.execute("INSERT INTO observations(id,run_id,symbol,retrieval_ts,source_ts,request_started_ts,quality,reason,price,change_pct,band,payload,payload_hash) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                (i,None,'TEST','2026-10-05T14:00:00+00:00',None,
+                 '2026-10-05T14:00:00+00:00','OK','',2,5,'IDEAL','{}','hash'))
+            db.execute("INSERT INTO semantic_shadow VALUES(?,?)",
+                (i,json.dumps({'same_clock_volume_sample_count':samples,
+                               'observed_same_clock_volume_ratio':ratio})))
+        out=semantic_blockers(db)
+        funnel=out['shadow_activity_proxy_5_sessions_3x']
+        self.assertEqual(funnel['SHADOW_ACTIVITY_PROXY_3X'],1)
+        self.assertEqual(funnel['RATIO_BELOW_3X'],1)
+        self.assertEqual(funnel['INSUFFICIENT_HISTORY_LT5'],1)
+        self.assertEqual(funnel['RATIO_MISSING_OR_INVALID'],1)
+        self.assertNotIn('activity_confirmable',out['blockers_nonexclusive'])
+        db.close()
+
     def test_prospective_retention_outcomes_and_semantic_blockers(self):
         from radar.research_audit import retention_outcomes, semantic_blockers
         from radar.retention_shadow import init as retention_init
@@ -441,6 +461,7 @@ class RadarTests(unittest.TestCase):
             self.assertEqual(diag['blockers_nonexclusive']['rvol_not_numeric'],1)
             self.assertEqual(diag['blockers_nonexclusive']['baseline_provenance_unresolved'],1)
             self.assertEqual(diag['blockers_nonexclusive']['no_same_clock_history'],1)
+            self.assertEqual(diag['shadow_activity_proxy_5_sessions_3x']['INSUFFICIENT_HISTORY_LT5'],1)
             db.close()
 
     def test_live_retention_challenger_is_separate_and_prospective(self):
