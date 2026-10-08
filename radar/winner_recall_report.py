@@ -52,6 +52,35 @@ def _classify(db,symbol,session,rows,target_row,ceiling):
         return "BASELINE_MISS",first,deep,None
     return "MODEL_MISS",first,deep,None
 
+def _baseline_diagnostic(rows, deep, target_ts, ceiling=10):
+    """Explain pre-target baseline coverage without changing model gates.
+
+    All timestamps come from recorded retrievals. Never infer a tradable entry.
+    """
+    selected = [r for r in rows if r["retrieval_ts"] < target_ts
+                and float(r["change_pct"]) < ceiling
+                and int(r.get("selected") or 0) == 1]
+    if not selected:
+        return None
+    first_selected = min(r["retrieval_ts"] for r in selected)
+    before_target = [r for r in deep if first_selected <= r["retrieval_ts"] < target_ts]
+    early_deep = [r for r in before_target if isinstance(r["change_pct"], (int, float))
+                  and r["change_pct"] < ceiling]
+    sample_counts = [int(r["baseline_samples"] or 0) for r in early_deep]
+    return {
+        "status": "DIAGNOSTIC_SHADOW_NOT_BUY",
+        "first_selected_ts": first_selected,
+        "first_early_deep_ts": early_deep[0]["retrieval_ts"] if early_deep else None,
+        "early_deep_observations": len(early_deep),
+        "max_early_baseline_samples": max(sample_counts) if sample_counts else None,
+        "baseline_requirement_samples": 5,
+        "early_deep_states": sorted(set(r["state"] for r in early_deep)),
+        "reason": ("NO_EARLY_DEEP_OBSERVATION" if not early_deep else
+                   "INSUFFICIENT_EARLY_BASELINE" if max(sample_counts) < 5 else
+                   "EARLY_BASELINE_PRESENT_CHECK_OTHER_GATES"),
+        "note": "Prospective retrieval timestamps only; no implied execution or BUY.",
+    }
+
 def build(db_path):
     db=sqlite3.connect(db_path); db.row_factory=sqlite3.Row
     try:
@@ -106,6 +135,7 @@ def build(db_path):
               "r2_hot_under_10_ts":hot10["retrieval_ts"] if hot10 else None,
               "r2_hot_under_10_pct":hot10["change_pct"] if hot10 else None,
               "r2_path_before_30":deep10[-12:],
+              "baseline_diagnostic_under_10":_baseline_diagnostic(rows,deep10,t30["retrieval_ts"]),
             })
         winners.sort(key=lambda r:(not r["reached_50"],r["first_30_ts"]))
         total=len(winners)
@@ -120,6 +150,7 @@ def build(db_path):
           "winner_50_sessions":sum(1 for r in winners if r["reached_50"]),
           "classification_counts_under_10":counts10,
           "classification_counts_under_20":counts20,
+          "baseline_miss_diagnostics_under_10":[{"session":r["session"],"symbol":r["symbol"],**r["baseline_diagnostic_under_10"]} for r in winners if r["classification_under_10"]=="BASELINE_MISS" and r["baseline_diagnostic_under_10"] is not None],
           "under_10_scout_recall":frac(lambda r:r["first_under_10_scout_ts"] is not None),
           "under_10_base_shortlist_recall":frac(lambda r:r["base_selected_under_10"]),
           "under_10_dual_extra_recall":frac(lambda r:r["dual_extra_selected_under_10"]),
