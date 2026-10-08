@@ -7,6 +7,7 @@ import json
 import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
+from zoneinfo import ZoneInfo
 from .model import SPEC_SHA256
 
 def utcnow():
@@ -35,6 +36,10 @@ def build(db_path, scan_rc=0, bridge_rc=0):
         'candidate_v034r2': {'status':'NO_DATA','states':{},'signals_total':0,'last_signal':None},
         'fast_scout': {'status':'NO_DATA'},
     }
+    current_et=datetime.now(timezone.utc).astimezone(ZoneInfo('America/New_York'))
+    observation_window=current_et.weekday()<5 and 4<=current_et.hour<20
+    result['observation_window_active']=observation_window
+    result['checkpoint_is_current_cycle']=False
     path = Path(db_path)
     if not path.exists():
         result['health'] = 'FAIL'
@@ -46,6 +51,12 @@ def build(db_path, scan_rc=0, bridge_rc=0):
         if latest:
             run_id, started, finished, status, detail = latest
             result['latest_run'] = {'id': run_id, 'started': started, 'finished': finished, 'status': status, 'detail': detail}
+            # A successful off-hours workflow may legitimately contain an old run.
+            # Never present that persisted run as current-cycle evidence.
+            result['checkpoint_is_current_cycle'] = (
+                datetime.fromisoformat(started).astimezone(ZoneInfo('America/New_York')).date()==current_et.date()
+                and abs((datetime.now(timezone.utc)-datetime.fromisoformat(started)).total_seconds())<=900
+            )
             total, ok = db.execute("SELECT COUNT(*),SUM(CASE WHEN quality='OK' THEN 1 ELSE 0 END) FROM observations WHERE run_id=?", (run_id,)).fetchone()
             total, ok = int(total or 0), int(ok or 0)
             result['observations'] = {'total': total, 'ok': ok, 'data_quality': total-ok}
@@ -168,6 +179,12 @@ def build(db_path, scan_rc=0, bridge_rc=0):
             signal = db.execute('SELECT id,symbol,retrieval_ts,lane,band,change_pct,early_credit FROM signals WHERE replay=0 ORDER BY id DESC LIMIT 1').fetchone()
             if signal:
                 result['last_signal'] = dict(zip(('id','symbol','retrieval_ts','lane','band','change_pct','early_credit'), signal))
+        if not observation_window and not result['checkpoint_is_current_cycle']:
+            # Keep the established health enum and evidence diagnostics intact.
+            # Freshness is orthogonal to provider/data health.
+            result['checkpoint_freshness']='STALE_OUTSIDE_SESSION'
+        else:
+            result['checkpoint_freshness']='CURRENT' if result['checkpoint_is_current_cycle'] else 'STALE'
         if result['pending_bridge_events'] and result['health'] == 'PASS':
             result['health'] = 'DEGRADED'
     finally:
