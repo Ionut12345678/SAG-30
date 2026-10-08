@@ -40,6 +40,7 @@ def build(db_path, scan_rc=0, bridge_rc=0):
         'last_signal': None,
         'cadence_gap_seconds': None,
         'model_readiness': {'status': 'NO_OBSERVATIONS', 'activity_confirmable_packets': 0},
+        'model_validation': {'status': 'HOLD', 'buy_authorized': False},
         'semantic_shadow': {'packets': 0, 'with_history_samples': 0, 'with_observed_volume_ratio': 0, 'new_observed_highs': 0, 'two_positive_intervals': 0},
         'candidate_v034': {'status':'NO_DATA','states':{},'lanes':{},'signals_total':0,'last_signal':None},
         'candidate_v034r2': {'status':'NO_DATA','states':{},'signals_total':0,'last_signal':None},
@@ -303,6 +304,10 @@ def build(db_path, scan_rc=0, bridge_rc=0):
             result['checkpoint_freshness']='STALE_OUTSIDE_SESSION'
         else:
             result['checkpoint_freshness']='CURRENT' if result['checkpoint_is_current_cycle'] else 'STALE'
+        result['model_validation'] = {
+            'status': 'SHADOW_EVIDENCE_AVAILABLE' if result['model_readiness']['activity_confirmable_packets'] else 'HOLD',
+            'buy_authorized': False,
+        }
         if result['pending_bridge_events'] and result['health'] == 'PASS':
             result['health'] = 'DEGRADED'
     finally:
