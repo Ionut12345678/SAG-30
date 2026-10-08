@@ -13,6 +13,15 @@ from .model import SPEC_SHA256
 def utcnow():
     return datetime.now(timezone.utc).isoformat()
 
+def _source_at_or_after(source_ts, transition):
+    """True only when a timezone-aware provider trade is on/after cutoff."""
+    try:
+        source_dt = datetime.fromisoformat(source_ts.replace('Z', '+00:00'))
+        cutoff_dt = datetime.fromisoformat(transition)
+        return bool(source_dt.tzinfo and cutoff_dt.tzinfo and source_dt >= cutoff_dt)
+    except (TypeError, ValueError, AttributeError):
+        return False
+
 def _table_exists(db, name):
     return db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?", (name,)).fetchone() is not None
 
@@ -158,15 +167,9 @@ def build(db_path, scan_rc=0, bridge_rc=0):
                              AND retrieval_ts>=?""",
                         (symbol, first_route, utcnow(), transition)
                     ):
-                        try:
-                            source_dt = datetime.fromisoformat(
-                                source_ts.replace('Z', '+00:00')
-                            )
-                            if source_dt.tzinfo and source_dt >= datetime.fromisoformat(transition):
-                                fresh_source = True
-                                break
-                        except (TypeError, ValueError, AttributeError):
-                            pass
+                        if _source_at_or_after(source_ts, transition):
+                            fresh_source = True
+                            break
                     session_iex['valid_source_after_08_et'] += int(fresh_source)
                 session_iex['note'] = (
                     'valid_after_08_et counts retrievals; '
