@@ -139,7 +139,8 @@ def build(db_path, scan_rc=0, bridge_rc=0):
                                'observed_after_route': 0,
                                'valid_after_route': 0,
                                'valid_after_08_et': 0,
-                               'valid_source_after_08_et': 0}
+                               'valid_source_after_08_et': 0,
+                               'converted_symbols': []}
                 transition = current_et.replace(
                     hour=8,minute=0,second=0,microsecond=0
                 ).astimezone(timezone.utc).isoformat()
@@ -171,6 +172,10 @@ def build(db_path, scan_rc=0, bridge_rc=0):
                             fresh_source = True
                             break
                     session_iex['valid_source_after_08_et'] += int(fresh_source)
+                    if fresh_source:
+                        # Audit identity, not BUY; no prices or retrospectively
+                        # reconstructed entry points are inferred here.
+                        session_iex['converted_symbols'].append(symbol)
                 session_iex['note'] = (
                     'valid_after_08_et counts retrievals; '
                     'valid_source_after_08_et requires source trade time >=08:00 ET. '
