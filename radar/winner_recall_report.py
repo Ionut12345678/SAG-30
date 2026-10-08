@@ -8,6 +8,7 @@ import argparse, json, sqlite3
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 from pathlib import Path
+from .research_audit import retention_outcomes, semantic_blockers
 
 def _exists(db,name):
     return db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?",(name,)).fetchone() is not None
@@ -307,6 +308,8 @@ def build(db_path):
           "early_shortlist_outcomes":_early_shortlist_outcomes(groups),
           "retention_shadow_replay":_retention_shadow_replay(groups),
           "retention_live_challenger":_retention_live_summary(db),
+          "retention_prospective_outcomes":retention_outcomes(db),
+          "semantic_blocker_diagnostics":semantic_blockers(db),
           "winner_sessions":total,
           "winner_50_sessions":sum(1 for r in winners if r["reached_50"]),
           "classification_counts_under_10":counts10,
