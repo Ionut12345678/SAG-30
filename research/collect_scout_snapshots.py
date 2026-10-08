@@ -20,11 +20,26 @@ def collect(report):
         session=ts[:10]
         result.append({"session":session,"symbol":row["symbol"],"ts":ts,
                        "rank":row.get("rank_at_scout"),
-                       "selected":row.get("deep_retrieval_ts") is not None,
+                       "selected":False,  # DEEP routing does not imply shortlist selection
+                       "deep_routed":row.get("deep_retrieval_ts") is not None,
                        "scout_pct_vs_prev_close":row.get("scout_change_pct"),
                        "deep_ts":row.get("deep_retrieval_ts"),
                        "rank_quality":"OBSERVED" if row.get("rank_at_scout") is not None else "UNKNOWN",
                        "source":"candidate_v034_report.scout_to_deep",
+                       "status":"SHADOW_NOT_BUY"})
+    # Optional full-cohort, timestamped ranks emitted by the radar producer.
+    for row in report.get("scout_rank_snapshots", []):
+        ts=iso(row["ts"])
+        rank=row.get("rank")
+        if rank is not None and (isinstance(rank,bool) or not isinstance(rank,int) or rank<1):
+            raise ValueError("rank must be a positive integer or null")
+        result.append({"session":row.get("session") or ts[:10],
+                       "symbol":row["symbol"],"ts":ts,"rank":rank,
+                       "selected":bool(row.get("selected",False)),
+                       "scout_pct_vs_prev_close":row.get("change_pct"),
+                       "deep_ts":row.get("deep_ts"),
+                       "rank_quality":"OBSERVED" if rank is not None else "UNKNOWN",
+                       "source":"candidate_v034_report.scout_rank_snapshots",
                        "status":"SHADOW_NOT_BUY"})
     return result
 
@@ -38,7 +53,11 @@ def main():
     if a.output.exists():
         prior=[json.loads(line) for line in a.output.read_text().splitlines() if line.strip()]
     unique={(x["session"],x["symbol"],x["ts"]):x for x in prior}
-    for x in rows: unique.setdefault((x["session"],x["symbol"],x["ts"]),x)
+    for x in rows:
+        key=(x["session"],x["symbol"],x["ts"])
+        old=unique.get(key)
+        if old is None or (old["rank"] is None and x["rank"] is not None):
+            unique[key]=x
     values=sorted(unique.values(),key=lambda x:(x["ts"],x["symbol"]))
     a.output.write_text("".join(json.dumps(x,sort_keys=True)+"\n" for x in values))
     print(json.dumps({"input_rows":len(rows),"stored_rows":len(values),
