@@ -388,6 +388,33 @@ class RadarTests(unittest.TestCase):
               'change_pct':12.0,'selected':1}], deep,
             '2026-10-08T13:20:00+00:00'))
 
+    def test_early_shortlist_outcomes_counts_nonwinners_and_avoids_lookahead(self):
+        from radar.winner_recall_report import _early_shortlist_outcomes
+        def row(ts, pct, selected=0):
+            return {'retrieval_ts':ts, 'change_pct':pct, 'selected':selected}
+        day='2026-10-05'
+        groups={
+            (day,'WIN'):[row('2026-10-05T14:00:00+00:00',3,1),
+                         row('2026-10-05T14:05:00+00:00',31),
+                         row('2026-10-05T14:10:00+00:00',52)],
+            (day,'LOSE'):[row('2026-10-05T14:00:00+00:00',4,1),
+                          row('2026-10-05T14:05:00+00:00',-1)],
+            (day,'LATE'):[row('2026-10-05T14:00:00+00:00',40),
+                          row('2026-10-05T14:05:00+00:00',5,1),
+                          row('2026-10-05T14:10:00+00:00',50)],
+            ('2026-10-08','OPEN'):[row('2026-10-08T14:00:00+00:00',2,1)],
+        }
+        now=datetime(2026,10,8,15,0,tzinfo=timezone.utc)
+        out=_early_shortlist_outcomes(groups,now)
+        self.assertEqual(out['finalized_selected_sessions'],2)
+        self.assertEqual(out['pending_selected_sessions'],1)
+        self.assertEqual(out['finalized_observed_30_after_selection'],1)
+        self.assertEqual(out['finalized_observed_50_after_selection'],1)
+        self.assertEqual(out['observed_50_rate_finalized'],0.5)
+        self.assertNotIn('LATE',[x['symbol'] for x in out['cases']])
+        self.assertEqual(next(x for x in out['cases'] if x['symbol']=='OPEN')['status'],
+                         'PENDING_SESSION_CLOSE')
+
     def test_multi_engine_ranker_adds_sub10_precursor_without_changing_base(self):
         features={
           'BASE': {'retrieval_ts':'2026-10-05T14:00:00+00:00','change_pct':5.0,'acceleration':0.1,'impulse':0.001,'turnover':0.01,'route_source':'latestTrade'},
