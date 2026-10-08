@@ -8,7 +8,6 @@ Input JSONL: one object per observed scout candidate with:
 """
 import argparse
 import json
-from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -21,6 +20,10 @@ def replay(rows, cutoffs=(60,80,100,120)):
     rows=sorted(rows,key=lambda x:dt(x["ts"]))
     if any("rank" not in x or "session" not in x or "symbol" not in x for x in rows):
         raise ValueError("Each row needs rank, session and symbol")
+    # An observed outcome is not a verified negative; only future labels count.
+    by_key={}
+    for row in rows:
+        by_key.setdefault((row["session"],row["symbol"]),[]).append(row)
     results=[]
     for cutoff in cutoffs:
         first={}
@@ -35,16 +38,18 @@ def replay(rows, cutoffs=(60,80,100,120)):
         for key,row in first.items():
             entry=dt(row["ts"])
             for label,hit in (("observed_30_after_ts",30),("observed_50_after_ts",50)):
-                future=[dt(x[label]) for x in rows if (x["session"],x["symbol"])==key and x.get(label)]
+                future=[dt(x[label]) for x in by_key[key] if x.get(label) and dt(x[label])>entry]
                 if future:
-                    valid=min(future)>entry
-                    if hit==30: known30+=1;hits30+=int(valid)
-                    else: known50+=1;hits50+=int(valid)
+                    if hit==30: known30+=1;hits30+=1
+                    else: known50+=1;hits50+=1
         results.append({"rank_cutoff":cutoff,"unique_alerts":len(first),
                         "baseline_unique_selected":len(baseline),
                         "observed_30_after_alert":hits30,"known_30_labels":known30,
                         "observed_50_after_alert":hits50,"known_50_labels":known50,
                         "note":"Missing outcome labels are UNKNOWN, not negatives; quote/fill not validated"})
+    if any(row["rank"] is None for row in rows):
+        for result in results:
+            result["incomplete_rank_coverage"]=True
     return {"status":"CHRONOLOGICAL_SHADOW_NOT_BUY","rows":len(rows),"results":results,
             "limitations":["Requires true timestamped ranks for ALL candidates, not retrospective best ranks",
                            "Outcomes evaluated only after alert; no BUY, fills or net return",
