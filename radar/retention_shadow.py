@@ -59,7 +59,7 @@ def observe(db, run_id, session, features, production_selected, now, headers,
     except Exception:
         # Research-only outage must not fail or change the production cycle.
         for symbol in symbols:
-            db.execute("INSERT OR REPLACE INTO retention_shadow_observations VALUES(?,?,?,?,?,?,?,?,?,?)",
+            db.execute("INSERT OR REPLACE INTO retention_shadow_observations VALUES(?,?,?,?,?,?,?,?,?,?,?)",
                 (run_id,session,symbol,selected_ts[symbol],features[symbol]['change_pct'],
                  None,None,None,None,feed,'SHADOW_FETCH_ERROR'))
         db.commit()
@@ -81,7 +81,7 @@ def observe(db, run_id, session, features, production_selected, now, headers,
             age is not None and 0<=age<=900)
         status='SHADOW_FRESH_TRADE' if ok else 'SHADOW_DATA_GAP'
         valid+=int(ok)
-        db.execute("INSERT OR REPLACE INTO retention_shadow_observations VALUES(?,?,?,?,?,?,?,?,?,?)",
+        db.execute("INSERT OR REPLACE INTO retention_shadow_observations VALUES(?,?,?,?,?,?,?,?,?,?,?)",
             (run_id,session,symbol,selected_ts[symbol],features[symbol]['change_pct'],
              retrieved,source,age,float(price) if isinstance(price,(int,float)) else None,
              feed,status))
