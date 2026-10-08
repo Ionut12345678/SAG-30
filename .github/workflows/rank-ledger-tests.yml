@@ -7,6 +7,7 @@ on:
       - 'radar/audit_scout_exclusions.py'
       - 'radar/audit_scout_forward_conversion.py'
       - 'radar/audit_scout_selection_timing.py'
+      - 'radar/audit_scout_early_entry.py'
       - 'tests/test_export_rank_ledger.py'
       - '.github/workflows/rank-ledger-tests.yml'
   workflow_dispatch:
@@ -39,6 +40,8 @@ jobs:
         run: python -m radar.audit_scout_forward_conversion --db /tmp/sag30-real.sqlite3
       - name: Audit SCOUT selection timing before +30/+50
         run: python -m radar.audit_scout_selection_timing --db /tmp/sag30-real.sqlite3
+      - name: Audit selected-under-10 recall and lead times
+        run: python -m radar.audit_scout_early_entry --db /tmp/sag30-real.sqlite3
       - name: Validate export against real SQLite and report coverage
         shell: bash
         run: |
