@@ -274,7 +274,7 @@ def scout_discovery(db, run_id, universe, market_caps, headers, config, now):
     # It may promote a universe symbol even before delayed SIP has a fresh routing snapshot.
     # Deep/model evidence remains entirely on the existing entitled feed and frozen gates.
     external_premarket=[]
-    if 4 <= now.astimezone(ZoneInfo('America/New_York')).hour < 10:
+    if (lambda et: (et.hour, et.minute) >= (4, 0) and (et.hour, et.minute) < (9, 30))(now.astimezone(ZoneInfo('America/New_York'))):
         exists=db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='v0412_premarket_route'").fetchone()
         if exists:
             cutoff=(now-timedelta(minutes=20)).isoformat()

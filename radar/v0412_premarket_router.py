@@ -52,38 +52,77 @@ def init(db):
       status TEXT NOT NULL, reason TEXT NOT NULL,
       PRIMARY KEY(session,observed_ts,symbol))''')
     db.execute('CREATE INDEX IF NOT EXISTS v0412_session_symbol ON v0412_premarket_route(session,symbol,observed_ts)')
+    db.execute("""CREATE TABLE IF NOT EXISTS v0412_cycle_audit(
+      session TEXT NOT NULL, observed_ts TEXT NOT NULL,
+      status TEXT NOT NULL, board_rows INTEGER NOT NULL,
+      universe_matches INTEGER NOT NULL, independent_confirmations INTEGER NOT NULL,
+      routed INTEGER NOT NULL, rejected INTEGER NOT NULL, source_failures INTEGER NOT NULL,
+      reason TEXT NOT NULL, PRIMARY KEY(session,observed_ts))""")
 
 def run(db_path,universe_path):
     now=datetime.now(timezone.utc); et=now.astimezone(ET); day=et.date().isoformat()
     out={'status':'INACTIVE','session':day,'observed_ts':now.isoformat(),'routes':[],'rejected':[],'note':'ROUTING SHADOW / NOT BUY / NOT MODEL EVIDENCE'}
     db=sqlite3.connect(db_path);init(db)
+    stats={'board_rows':0,'universe_matches':0,'independent_confirmations':0,'source_failures':0}
+    def audit(reason=''):
+        db.execute("INSERT OR REPLACE INTO v0412_cycle_audit VALUES(?,?,?,?,?,?,?,?,?,?)",
+          (day,now.isoformat(),out['status'],stats['board_rows'],stats['universe_matches'],
+           stats['independent_confirmations'],len(out['routes']),len(out['rejected']),
+           stats['source_failures'],reason))
+        db.commit()
     try:
         if et.weekday()>=5 or not (dtime(4,0)<=et.time()<dtime(9,30)):
             out['status']='OUTSIDE_PREMARKET';return out
-        html=fetch(BOARD)
-        if 'Top Gainers' not in html:raise RuntimeError('premarket board missing Top Gainers')
+        try:
+            html=fetch(BOARD)
+            if 'Top Gainers' not in html:raise RuntimeError('premarket board missing Top Gainers')
+            board_rows=ROW.findall(html)
+            if not board_rows:raise RuntimeError('premarket board parse yielded zero rows')
+        except Exception as exc:
+            stats['source_failures']+=1
+            out['status']='DATA_GAP'
+            out['source_failure']=str(exc)
+            audit(str(exc))
+            return out
+        stats['board_rows']=len(board_rows)
         allowed=universe(universe_path); rows=[]
-        for rank,symbol,price,pct,vol in ROW.findall(html):
+        for rank,symbol,price,pct,vol in board_rows:
             rank=int(rank); pct=float(pct)
             if rank>25 or symbol not in allowed:continue
             rows.append((rank,symbol,pct,volnum(vol)))
+        stats['universe_matches']=len(rows)
         for rank,symbol,source_pct,source_vol in rows[:25]:
             try:c=chart_latest(symbol,day)
             except Exception:c=None
             if not c:
-                out['rejected'].append({'symbol':symbol,'reason':'NO_CONFIRMING_1M_CHART','source_pct':source_pct});continue
-            cp=float(c['chart_pct']); agreement=abs(cp-source_pct)<=max(10.0,0.50*max(abs(source_pct),1.0))
-            if 1.0<=cp<20.0 and agreement:
+                reason='NO_CONFIRMING_1M_CHART'
+                out['rejected'].append({'symbol':symbol,'reason':reason,'source_pct':source_pct})
+                db.execute('INSERT OR REPLACE INTO v0412_premarket_route VALUES(?,?,?,?,?,?,?,?,?,?,?,?)',
+                  (day,now.isoformat(),symbol,rank,source_pct,source_vol,None,None,None,None,'PREMARKET_TRACK_ONLY',reason))
+                continue
+            cp=float(c['chart_pct'])
+            chart_dt=datetime.fromisoformat(c['chart_ts'])
+            chart_age=(now-chart_dt.astimezone(timezone.utc)).total_seconds()
+            fresh= -60 <= chart_age <= 300  # data-quality guard; never model evidence
+            if fresh:stats['independent_confirmations']+=1
+            agreement=abs(cp-source_pct)<=max(10.0,0.50*max(abs(source_pct),1.0))
+            if not fresh:
+                status='PREMARKET_TRACK_ONLY';reason='STALE_OR_FUTURE_1M_CHART'
+            elif not (1.0<=cp<20.0 and agreement):
+                status='PREMARKET_TRACK_ONLY';reason='ALREADY_EXPLODED_OR_SOURCE_DISAGREEMENT'
+            elif len(out['routes'])>=5:
+                status='PREMARKET_TRACK_ONLY';reason='ROUTE_CAP_REACHED'
+            else:
                 status='EARLY_PREMARKET_ROUTE_SHADOW';reason='TOP_GAINER_PLUS_INDEPENDENT_1M_CONFIRMATION'
                 out['routes'].append({'symbol':symbol,'rank':rank,'source_pct':source_pct,'source_volume':source_vol,**c})
-            else:
-                status='PREMARKET_TRACK_ONLY';reason='ALREADY_EXPLODED_OR_SOURCE_DISAGREEMENT'
+            if status!='EARLY_PREMARKET_ROUTE_SHADOW':
                 out['rejected'].append({'symbol':symbol,'reason':reason,'source_pct':source_pct,'chart_pct':cp,'rank':rank})
             db.execute('INSERT OR REPLACE INTO v0412_premarket_route VALUES(?,?,?,?,?,?,?,?,?,?,?,?)',
               (day,now.isoformat(),symbol,rank,source_pct,source_vol,c.get('chart_ts'),cp,c.get('first_ts'),c.get('first_pct'),status,reason))
-        out['routes']=sorted(out['routes'],key=lambda x:(x['rank'],abs(x['chart_pct'])))[:5]
         out['status']='PASS' if rows else 'NO_UNIVERSE_MATCHES'
-        db.commit();return out
+        out['audit']=dict(stats,route_load=len(out['routes']),rejected=len(out['rejected']))
+        audit()
+        return out
     finally:db.close()
 
 def main():
