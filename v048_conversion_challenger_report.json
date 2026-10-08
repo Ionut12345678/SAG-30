@@ -1,0 +1,128 @@
+{
+  "activated_at": "2026-10-07T15:25:48.796330+00:00",
+  "authoritative": false,
+  "buy": false,
+  "counts": {
+    "EXPIRED_NO_CONVERSION": 7
+  },
+  "generated_at": "2026-10-08T18:13:04.764766+00:00",
+  "note": "Future-only; pre-activation signals receive zero credit. v0.3.3/v0.4.7 unchanged. Never BUY.",
+  "preregistered_gates": {
+    "confirmation_window_minutes": [
+      2,
+      10
+    ],
+    "entry_change_pct": [
+      1.5,
+      8.0
+    ],
+    "max_giveback_fraction": 0.4,
+    "max_spread_pct": 2.0,
+    "min_activity_ratio": 2.0,
+    "min_advance_pp": 2.0,
+    "min_positive_steps": 2,
+    "min_volume_retention": 0.5
+  },
+  "session": "2026-10-08",
+  "signals": [
+    {
+      "activity_ratio": 7.598333333333334,
+      "entry_change_pct": 4.195804195804187,
+      "giveback_fraction": 0.09090909090910823,
+      "max_change_pct": 5.477855477855487,
+      "positive_steps": 3,
+      "signal_spread_pct": 0.22296544035673993,
+      "source_signal_ts": "2026-10-08T13:45:13.657297+00:00",
+      "stage2_change_pct": null,
+      "stage2_ts": null,
+      "status": "EXPIRED_NO_CONVERSION",
+      "symbol": "BORR",
+      "volume_retention": 0.24281640710682167
+    },
+    {
+      "activity_ratio": 3.8766666666666665,
+      "entry_change_pct": 3.1630170316301776,
+      "giveback_fraction": 0.3333333333333333,
+      "max_change_pct": 3.8929440389294134,
+      "positive_steps": 4,
+      "signal_spread_pct": 0.47058823529410765,
+      "source_signal_ts": "2026-10-08T13:48:32.620129+00:00",
+      "stage2_change_pct": null,
+      "stage2_ts": null,
+      "status": "EXPIRED_NO_CONVERSION",
+      "symbol": "NAT",
+      "volume_retention": 0.46302665520206365
+    },
+    {
+      "activity_ratio": 2.034346103038309,
+      "entry_change_pct": 3.8321167883211604,
+      "giveback_fraction": 1.0,
+      "max_change_pct": 3.8321167883211604,
+      "positive_steps": 2,
+      "signal_spread_pct": 1.0619469026548656,
+      "source_signal_ts": "2026-10-08T13:53:44.197850+00:00",
+      "stage2_change_pct": null,
+      "stage2_ts": null,
+      "status": "EXPIRED_NO_CONVERSION",
+      "symbol": "METC",
+      "volume_retention": 0.287012987012987
+    },
+    {
+      "activity_ratio": 2.497,
+      "entry_change_pct": 1.830543933054396,
+      "giveback_fraction": 4.000000000000849,
+      "max_change_pct": 1.9351464435146237,
+      "positive_steps": 2,
+      "signal_spread_pct": 0.10277492291881077,
+      "source_signal_ts": "2026-10-08T14:20:07.837969+00:00",
+      "stage2_change_pct": null,
+      "stage2_ts": null,
+      "status": "EXPIRED_NO_CONVERSION",
+      "symbol": "ARAI",
+      "volume_retention": 0.30877052462955545
+    },
+    {
+      "activity_ratio": 2.526923076923077,
+      "entry_change_pct": 2.3917995444191487,
+      "giveback_fraction": 0.0,
+      "max_change_pct": 2.505694760820054,
+      "positive_steps": 2,
+      "signal_spread_pct": 0.22296544035673993,
+      "source_signal_ts": "2026-10-08T14:27:30.742588+00:00",
+      "stage2_change_pct": null,
+      "stage2_ts": null,
+      "status": "EXPIRED_NO_CONVERSION",
+      "symbol": "RZLT",
+      "volume_retention": 0.5007610350076104
+    },
+    {
+      "activity_ratio": 4.172366621067032,
+      "entry_change_pct": 6.021897810218957,
+      "giveback_fraction": 0.4285714285714261,
+      "max_change_pct": 7.299270072992692,
+      "positive_steps": 2,
+      "signal_spread_pct": 0.3418803418803498,
+      "source_signal_ts": "2026-10-08T15:10:44.980377+00:00",
+      "stage2_change_pct": null,
+      "stage2_ts": null,
+      "status": "EXPIRED_NO_CONVERSION",
+      "symbol": "EDIT",
+      "volume_retention": 0.8360655737704918
+    },
+    {
+      "activity_ratio": 3.776061776061776,
+      "entry_change_pct": 1.678240740740744,
+      "giveback_fraction": 1.0,
+      "max_change_pct": 1.678240740740744,
+      "positive_steps": 1,
+      "signal_spread_pct": 0.11383039271485244,
+      "source_signal_ts": "2026-10-08T16:59:02.403005+00:00",
+      "stage2_change_pct": null,
+      "stage2_ts": null,
+      "status": "EXPIRED_NO_CONVERSION",
+      "symbol": "TRIP",
+      "volume_retention": 0.15610088616223586
+    }
+  ],
+  "status": "SAG-30-v0.4.8-CONVERSION-CHALLENGER-PROSPECTIVE-SHADOW"
+}

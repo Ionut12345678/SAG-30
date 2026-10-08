@@ -1,0 +1,158 @@
+{
+  "cadence_gap_seconds": 395.153,
+  "candidate_count": 70,
+  "candidate_v034": {
+    "lanes": {
+      "FRESH": 62,
+      "SECOND_IMPULSE": 8
+    },
+    "last_signal": {
+      "change_pct": -3.5998725708824466,
+      "lane": "FRESH",
+      "proof": "two positive intervals with rising observed highs",
+      "retrieval_ts": "2026-10-08T18:06:53.368735+00:00",
+      "state": "C34-HOT-SHADOW",
+      "symbol": "WOLF"
+    },
+    "signals_total": 400,
+    "states": {
+      "C34-ACCEPTED": 1,
+      "C34-BLOCKED-LANE": 7,
+      "C34-CONVERSION": 1,
+      "C34-DATA_QUALITY": 4,
+      "C34-FAILED": 2,
+      "C34-HOT-SHADOW": 11,
+      "C34-LOW": 38,
+      "C34-WAIT-ABSORPTION": 2,
+      "C34-WATCH": 4
+    },
+    "status": "CANDIDATE_SHADOW_ONLY"
+  },
+  "candidate_v034r2": {
+    "last_signal": {
+      "change_pct": 17.647058823529413,
+      "lane": "FRESH",
+      "proof": "reacceleration >=2pp after acceptance",
+      "retrieval_ts": "2026-10-08T18:06:53.368735+00:00",
+      "state": "C34R2-HOT-SHADOW",
+      "symbol": "NCT"
+    },
+    "signals_total": 554,
+    "states": {
+      "C34R2-ACCEPTED": 1,
+      "C34R2-BLOCKED-LANE": 7,
+      "C34R2-DATA_QUALITY": 4,
+      "C34R2-FAILED": 1,
+      "C34R2-HOT-SHADOW": 12,
+      "C34R2-LATE-SHADOW": 1,
+      "C34R2-LOW": 31,
+      "C34R2-WAIT-ABSORPTION": 3,
+      "C34R2-WATCH": 10
+    },
+    "status": "CANDIDATE_SHADOW_CHALLENGER"
+  },
+  "checkpoint_freshness": "CURRENT",
+  "checkpoint_is_current_cycle": true,
+  "evaluation_states": {
+    "RADAR-LOW": 66,
+    "UNKNOWN/DATA_QUALITY": 4
+  },
+  "fast_scout": {
+    "eligible_count": 1374,
+    "fetch_seconds": 0.839,
+    "selected_count": 70,
+    "status": "PASS",
+    "sticky_count": 15,
+    "total_seconds": 2.158,
+    "universe_count": 3185
+  },
+  "frozen_version": "SAG-30 Early Radar v0.3.3 FROZEN SHADOW",
+  "generated_ts": "2026-10-08T18:13:04.913666+00:00",
+  "health": "PASS",
+  "last_signal": null,
+  "latest_run": {
+    "detail": "FAST_SCOUT 3185 universe -> 70 deep observations",
+    "finished": "2026-10-08T18:06:53.791268+00:00",
+    "id": 315,
+    "started": "2026-10-08T18:06:36.030563+00:00",
+    "status": "DISCOVERY_OK"
+  },
+  "model_readiness": {
+    "activity_confirmable_packets": 0,
+    "status": "BLOCKED_SEMANTIC_EVIDENCE"
+  },
+  "observation_window_active": true,
+  "observations": {
+    "data_quality": 4,
+    "ok": 66,
+    "rejection_reasons": {
+      "future_or_stale_source": 2,
+      "invalid_previous_close_time": 2
+    },
+    "source_trade_age_bins": {
+      "0_60s": 32,
+      "300_900s": 7,
+      "60_300s": 29,
+      "future": 0,
+      "missing_or_invalid": 0,
+      "over_900s": 2
+    },
+    "total": 70
+  },
+  "pending_bridge_events": 0,
+  "semantic_shadow": {
+    "new_observed_highs": 12,
+    "packets": 70,
+    "two_positive_intervals": 13,
+    "with_history_samples": 64,
+    "with_observed_volume_ratio": 64
+  },
+  "spec_sha256": "65c3c170d42e0b4bb8eca75b38d32a3c551f1ba7101eef825c745d588fdabc31",
+  "v0412_downstream": {
+    "note": "Only same-run post-route snapshots; no historical backfill or BUY",
+    "same_run_routes": 0,
+    "status": "SHADOW_NOT_MODEL_EVIDENCE",
+    "with_post_route_observation": 0,
+    "with_valid_post_route_observation": 0,
+    "without_valid_post_route_observation": 0
+  },
+  "v0412_session_iex_conversion": {
+    "converted_symbols": [
+      "ACH",
+      "CATX",
+      "CHR",
+      "CYAB",
+      "DTI",
+      "ENLV",
+      "FNGR",
+      "FRGT",
+      "GCDT",
+      "HYPR",
+      "JZ",
+      "KAPA",
+      "LSTA",
+      "MEDS",
+      "MOBX",
+      "MTEK",
+      "NCPL",
+      "NXXT",
+      "OLB",
+      "PFSA",
+      "QTEX",
+      "RCKT",
+      "SKYQ",
+      "SOAR"
+    ],
+    "note": "valid_after_08_et counts retrievals; valid_source_after_08_et requires source trade time >=08:00 ET. Prospective audit only, not BUY.",
+    "observed_after_route": 35,
+    "routed_symbols": 40,
+    "status": "PROSPECTIVE_SHADOW_NOT_BUY",
+    "valid_after_08_et": 24,
+    "valid_after_route": 24,
+    "valid_source_after_08_et": 24
+  },
+  "workflow": {
+    "bridge_rc": 0,
+    "scan_rc": 0
+  }
+}

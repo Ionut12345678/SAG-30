@@ -1,0 +1,464 @@
+{
+  "activated_at": "2026-10-07T16:31:13.827732+00:00",
+  "authoritative": false,
+  "buy": false,
+  "counts": {
+    "rolling_precursor_watch": 44
+  },
+  "gates": {
+    "entry_change_pct": [
+      1.0,
+      8.0
+    ],
+    "max_spread_pct": 2.0,
+    "max_step_gap_minutes": 5.0,
+    "min_activity_ratio": 1.5,
+    "positive_steps": 2
+  },
+  "generated_at": "2026-10-08T18:13:04.531006+00:00",
+  "note": "Future-only rolling precursor WATCH. Broad scout is routing only. No changes to v0.3.3/v0.4.7/v0.4.8. Never BUY.",
+  "session": "2026-10-08",
+  "signals": [
+    {
+      "activity_ratio": 3.1337386018237083,
+      "entry_change_pct": 1.3452914798206095,
+      "first_watch_ts": "2026-10-08T13:43:15.754410+00:00",
+      "last_eval_ts": "2026-10-08T13:45:18.061409+00:00",
+      "source_ts": "2026-10-08T13:42:00Z",
+      "spread_pct": 0.22148394241417027,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "ESRT"
+    },
+    {
+      "activity_ratio": 2.1,
+      "entry_change_pct": 4.453441295546545,
+      "first_watch_ts": "2026-10-08T13:43:15.754410+00:00",
+      "last_eval_ts": "2026-10-08T13:45:18.062656+00:00",
+      "source_ts": "2026-10-08T13:42:00Z",
+      "spread_pct": 0.7782101167315181,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "RC"
+    },
+    {
+      "activity_ratio": 7.598333333333334,
+      "entry_change_pct": 4.195804195804187,
+      "first_watch_ts": "2026-10-08T13:45:13.657297+00:00",
+      "last_eval_ts": "2026-10-08T13:45:18.060855+00:00",
+      "source_ts": "2026-10-08T13:44:00Z",
+      "spread_pct": 0.22296544035673993,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "BORR"
+    },
+    {
+      "activity_ratio": 1.5,
+      "entry_change_pct": 4.051724137931045,
+      "first_watch_ts": "2026-10-08T13:48:32.620129+00:00",
+      "last_eval_ts": "2026-10-08T13:50:31.896369+00:00",
+      "source_ts": "2026-10-08T13:47:00Z",
+      "spread_pct": 1.1599005799502948,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "GRML"
+    },
+    {
+      "activity_ratio": 3.8766666666666665,
+      "entry_change_pct": 3.1630170316301776,
+      "first_watch_ts": "2026-10-08T13:48:32.620129+00:00",
+      "last_eval_ts": "2026-10-08T13:50:31.896920+00:00",
+      "source_ts": "2026-10-08T13:46:00Z",
+      "spread_pct": 0.47058823529410765,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "NAT"
+    },
+    {
+      "activity_ratio": 2.034346103038309,
+      "entry_change_pct": 3.8321167883211604,
+      "first_watch_ts": "2026-10-08T13:53:44.197850+00:00",
+      "last_eval_ts": "2026-10-08T13:55:51.318412+00:00",
+      "source_ts": "2026-10-08T13:52:00Z",
+      "spread_pct": 1.0619469026548656,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "METC"
+    },
+    {
+      "activity_ratio": 1.7742857142857142,
+      "entry_change_pct": 1.8538713195201728,
+      "first_watch_ts": "2026-10-08T14:04:20.919921+00:00",
+      "last_eval_ts": "2026-10-08T14:06:32.624879+00:00",
+      "source_ts": "2026-10-08T14:03:00Z",
+      "spread_pct": 0.10678056593699721,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "SG"
+    },
+    {
+      "activity_ratio": 4.635,
+      "entry_change_pct": 4.35374149659864,
+      "first_watch_ts": "2026-10-08T14:04:20.919921+00:00",
+      "last_eval_ts": "2026-10-08T14:06:32.625311+00:00",
+      "source_ts": "2026-10-08T14:03:00Z",
+      "spread_pct": 0.2600780234070281,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "SOC"
+    },
+    {
+      "activity_ratio": 1.588089330024814,
+      "entry_change_pct": 2.331113225499526,
+      "first_watch_ts": "2026-10-08T14:09:32.958493+00:00",
+      "last_eval_ts": "2026-10-08T14:11:46.310602+00:00",
+      "source_ts": "2026-10-08T14:08:00Z",
+      "spread_pct": 0.5602240896358589,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "FWRG"
+    },
+    {
+      "activity_ratio": 2.107355864811133,
+      "entry_change_pct": 1.6621983914209215,
+      "first_watch_ts": "2026-10-08T14:10:35.559772+00:00",
+      "last_eval_ts": "2026-10-08T14:11:46.308777+00:00",
+      "source_ts": "2026-10-08T14:09:00Z",
+      "spread_pct": 0.10531858873090874,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "ASAN"
+    },
+    {
+      "activity_ratio": 2.07532084998948,
+      "entry_change_pct": 1.0252365930599527,
+      "first_watch_ts": "2026-10-08T14:14:53.410365+00:00",
+      "last_eval_ts": "2026-10-08T14:17:09.051057+00:00",
+      "source_ts": "2026-10-08T14:13:00Z",
+      "spread_pct": 0.1556420233463002,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "GENI"
+    },
+    {
+      "activity_ratio": 3.7133333333333334,
+      "entry_change_pct": 1.285347043701801,
+      "first_watch_ts": "2026-10-08T14:15:56.806302+00:00",
+      "last_eval_ts": "2026-10-08T14:17:09.049535+00:00",
+      "source_ts": "2026-10-08T14:14:00Z",
+      "spread_pct": 0.12714558169103352,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "BRBR"
+    },
+    {
+      "activity_ratio": 4.15,
+      "entry_change_pct": 1.305483028720622,
+      "first_watch_ts": "2026-10-08T14:20:07.837969+00:00",
+      "last_eval_ts": "2026-10-08T14:22:12.544907+00:00",
+      "source_ts": "2026-10-08T14:18:00Z",
+      "spread_pct": 0.5089058524173032,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "ALEC"
+    },
+    {
+      "activity_ratio": 2.497,
+      "entry_change_pct": 1.830543933054396,
+      "first_watch_ts": "2026-10-08T14:20:07.837969+00:00",
+      "last_eval_ts": "2026-10-08T14:22:12.545143+00:00",
+      "source_ts": "2026-10-08T14:19:00Z",
+      "spread_pct": 0.10277492291881077,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "ARAI"
+    },
+    {
+      "activity_ratio": 5.504587155963303,
+      "entry_change_pct": 1.7773620205799867,
+      "first_watch_ts": "2026-10-08T14:22:07.431018+00:00",
+      "last_eval_ts": "2026-10-08T14:22:12.545240+00:00",
+      "source_ts": "2026-10-08T14:21:00Z",
+      "spread_pct": 0.18399264029440063,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "ASM"
+    },
+    {
+      "activity_ratio": 2.2875,
+      "entry_change_pct": 1.3235294117647012,
+      "first_watch_ts": "2026-10-08T14:22:07.431018+00:00",
+      "last_eval_ts": "2026-10-08T14:22:12.547950+00:00",
+      "source_ts": "2026-10-08T14:21:00Z",
+      "spread_pct": 0.29112081513827615,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "RYAM"
+    },
+    {
+      "activity_ratio": 2.513011152416357,
+      "entry_change_pct": 4.269854824935959,
+      "first_watch_ts": "2026-10-08T14:25:21.228891+00:00",
+      "last_eval_ts": "2026-10-08T14:27:40.914825+00:00",
+      "source_ts": "2026-10-08T14:24:00Z",
+      "spread_pct": 0.08200082000819833,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "NTLA"
+    },
+    {
+      "activity_ratio": 2.526923076923077,
+      "entry_change_pct": 2.3917995444191487,
+      "first_watch_ts": "2026-10-08T14:27:30.742588+00:00",
+      "last_eval_ts": "2026-10-08T14:27:40.916231+00:00",
+      "source_ts": "2026-10-08T14:26:00Z",
+      "spread_pct": 0.22296544035673993,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "RZLT"
+    },
+    {
+      "activity_ratio": 6.244871794871795,
+      "entry_change_pct": 1.6248153618906969,
+      "first_watch_ts": "2026-10-08T14:35:53.477793+00:00",
+      "last_eval_ts": "2026-10-08T14:38:16.899925+00:00",
+      "source_ts": "2026-10-08T14:34:00Z",
+      "spread_pct": 0.289435600578865,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "ACRS"
+    },
+    {
+      "activity_ratio": 5.908008658008658,
+      "entry_change_pct": 1.2173913043478368,
+      "first_watch_ts": "2026-10-08T14:38:05.565890+00:00",
+      "last_eval_ts": "2026-10-08T14:38:16.900907+00:00",
+      "source_ts": "2026-10-08T14:37:00Z",
+      "spread_pct": 0.3418803418803498,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "ASPI"
+    },
+    {
+      "activity_ratio": 1.7046632124352332,
+      "entry_change_pct": 1.1685728493286973,
+      "first_watch_ts": "2026-10-08T14:59:06.809550+00:00",
+      "last_eval_ts": "2026-10-08T14:59:18.402081+00:00",
+      "source_ts": "2026-10-08T14:58:00Z",
+      "spread_pct": 0.6642883503506044,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "NKTR"
+    },
+    {
+      "activity_ratio": 6.672025723472669,
+      "entry_change_pct": 3.754940711462451,
+      "first_watch_ts": "2026-10-08T15:08:20.498082+00:00",
+      "last_eval_ts": "2026-10-08T15:11:02.650055+00:00",
+      "source_ts": "2026-10-08T15:05:00Z",
+      "spread_pct": 0.3809523809523728,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "RCKT"
+    },
+    {
+      "activity_ratio": 4.172366621067032,
+      "entry_change_pct": 6.021897810218957,
+      "first_watch_ts": "2026-10-08T15:10:44.980377+00:00",
+      "last_eval_ts": "2026-10-08T15:11:02.644043+00:00",
+      "source_ts": "2026-10-08T15:09:00Z",
+      "spread_pct": 0.3418803418803498,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "EDIT"
+    },
+    {
+      "activity_ratio": 1.505,
+      "entry_change_pct": 3.1446540880503138,
+      "first_watch_ts": "2026-10-08T15:15:42.168246+00:00",
+      "last_eval_ts": "2026-10-08T15:15:51.926076+00:00",
+      "source_ts": "2026-10-08T15:14:00Z",
+      "spread_pct": 1.2269938650306624,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "NCPL"
+    },
+    {
+      "activity_ratio": 1.5,
+      "entry_change_pct": 2.5559105431310014,
+      "first_watch_ts": "2026-10-08T15:24:09.265735+00:00",
+      "last_eval_ts": "2026-10-08T15:26:30.801144+00:00",
+      "source_ts": "2026-10-08T15:23:00Z",
+      "spread_pct": 0.6230529595015583,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "DTIL"
+    },
+    {
+      "activity_ratio": 1.8673218673218672,
+      "entry_change_pct": 4.166666666666674,
+      "first_watch_ts": "2026-10-08T15:50:30.191144+00:00",
+      "last_eval_ts": "2026-10-08T15:53:21.984161+00:00",
+      "source_ts": "2026-10-08T15:47:00Z",
+      "spread_pct": 0.3108808290155375,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "ASC"
+    },
+    {
+      "activity_ratio": 2.413793103448276,
+      "entry_change_pct": 2.503293807641649,
+      "first_watch_ts": "2026-10-08T15:58:08.919218+00:00",
+      "last_eval_ts": "2026-10-08T15:58:24.933354+00:00",
+      "source_ts": "2026-10-08T15:57:00Z",
+      "spread_pct": 0.2570694087403659,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "RGNX"
+    },
+    {
+      "activity_ratio": 16.543563068920676,
+      "entry_change_pct": 1.4877789585547418,
+      "first_watch_ts": "2026-10-08T16:01:03.463620+00:00",
+      "last_eval_ts": "2026-10-08T16:04:21.407196+00:00",
+      "source_ts": "2026-10-08T16:00:00Z",
+      "spread_pct": 0.10476689366161931,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "REAL"
+    },
+    {
+      "activity_ratio": 2.13107822410148,
+      "entry_change_pct": 3.631284916201105,
+      "first_watch_ts": "2026-10-08T16:17:21.531298+00:00",
+      "last_eval_ts": "2026-10-08T16:20:53.095072+00:00",
+      "source_ts": "2026-10-08T16:16:00Z",
+      "spread_pct": 0.27210884353742126,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "WTI"
+    },
+    {
+      "activity_ratio": 2.0802377414561666,
+      "entry_change_pct": 1.0406176569318637,
+      "first_watch_ts": "2026-10-08T16:27:55.119917+00:00",
+      "last_eval_ts": "2026-10-08T16:31:34.489032+00:00",
+      "source_ts": "2026-10-08T16:25:00Z",
+      "spread_pct": 0.19940179461615912,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "RARE"
+    },
+    {
+      "activity_ratio": 1.6651305683563749,
+      "entry_change_pct": 3.236797274275971,
+      "first_watch_ts": "2026-10-08T16:53:14.728676+00:00",
+      "last_eval_ts": "2026-10-08T16:53:58.406384+00:00",
+      "source_ts": "2026-10-08T16:52:00Z",
+      "spread_pct": 0.16488046166530382,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "AHCO"
+    },
+    {
+      "activity_ratio": 2.8807631160572336,
+      "entry_change_pct": 3.9755351681957096,
+      "first_watch_ts": "2026-10-08T16:53:14.728676+00:00",
+      "last_eval_ts": "2026-10-08T16:53:58.408879+00:00",
+      "source_ts": "2026-10-08T16:52:00Z",
+      "spread_pct": 0.11757789535567065,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "BLMN"
+    },
+    {
+      "activity_ratio": 2.540983606557377,
+      "entry_change_pct": 2.972399150743099,
+      "first_watch_ts": "2026-10-08T16:55:42.531063+00:00",
+      "last_eval_ts": "2026-10-08T16:59:48.365206+00:00",
+      "source_ts": "2026-10-08T16:54:00Z",
+      "spread_pct": 0.4123711340206281,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "HLLY"
+    },
+    {
+      "activity_ratio": 20.154228855721392,
+      "entry_change_pct": 1.675392670157061,
+      "first_watch_ts": "2026-10-08T16:55:42.531063+00:00",
+      "last_eval_ts": "2026-10-08T16:59:48.370616+00:00",
+      "source_ts": "2026-10-08T16:54:00Z",
+      "spread_pct": 0.15428130624839875,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "NCNO"
+    },
+    {
+      "activity_ratio": 3.0483091787439616,
+      "entry_change_pct": 3.8109756097560954,
+      "first_watch_ts": "2026-10-08T16:55:42.531063+00:00",
+      "last_eval_ts": "2026-10-08T16:59:48.372697+00:00",
+      "source_ts": "2026-10-08T16:54:00Z",
+      "spread_pct": 0.29368575624082904,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "PLAY"
+    },
+    {
+      "activity_ratio": 3.776061776061776,
+      "entry_change_pct": 1.678240740740744,
+      "first_watch_ts": "2026-10-08T16:59:02.403005+00:00",
+      "last_eval_ts": "2026-10-08T16:59:48.377637+00:00",
+      "source_ts": "2026-10-08T16:58:00Z",
+      "spread_pct": 0.11383039271485244,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "TRIP"
+    },
+    {
+      "activity_ratio": 2.684723726977248,
+      "entry_change_pct": 1.1124121779859664,
+      "first_watch_ts": "2026-10-08T17:13:58.960177+00:00",
+      "last_eval_ts": "2026-10-08T17:16:35.282868+00:00",
+      "source_ts": "2026-10-08T17:12:00Z",
+      "spread_pct": 0.23174971031287775,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "ALHC"
+    },
+    {
+      "activity_ratio": 2.9,
+      "entry_change_pct": 1.0815307820299491,
+      "first_watch_ts": "2026-10-08T17:20:13.713760+00:00",
+      "last_eval_ts": "2026-10-08T17:22:53.089575+00:00",
+      "source_ts": "2026-10-08T17:18:00Z",
+      "spread_pct": 0.08213552361396129,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "DXC"
+    },
+    {
+      "activity_ratio": 1.5177304964539007,
+      "entry_change_pct": 2.089783281733748,
+      "first_watch_ts": "2026-10-08T17:25:59.031258+00:00",
+      "last_eval_ts": "2026-10-08T17:27:47.751371+00:00",
+      "source_ts": "2026-10-08T17:24:00Z",
+      "spread_pct": 0.6069802731411235,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "AURA"
+    },
+    {
+      "activity_ratio": 2.8994627782041444,
+      "entry_change_pct": 3.460207612456756,
+      "first_watch_ts": "2026-10-08T17:25:59.031258+00:00",
+      "last_eval_ts": "2026-10-08T17:27:47.757644+00:00",
+      "source_ts": "2026-10-08T17:24:00Z",
+      "spread_pct": 0.1668056713928238,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "OI"
+    },
+    {
+      "activity_ratio": 7.8901098901098905,
+      "entry_change_pct": 1.8806214227309992,
+      "first_watch_ts": "2026-10-08T17:37:14.429437+00:00",
+      "last_eval_ts": "2026-10-08T17:40:06.064455+00:00",
+      "source_ts": "2026-10-08T17:36:00Z",
+      "spread_pct": 0.16064257028113535,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "WU"
+    },
+    {
+      "activity_ratio": 1.654109589041096,
+      "entry_change_pct": 1.097114993904924,
+      "first_watch_ts": "2026-10-08T17:45:19.518519+00:00",
+      "last_eval_ts": "2026-10-08T17:46:00.817995+00:00",
+      "source_ts": "2026-10-08T17:44:00Z",
+      "spread_pct": 0.16077170418006087,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "QDEL"
+    },
+    {
+      "activity_ratio": 6.981969486823855,
+      "entry_change_pct": 3.9548022598870025,
+      "first_watch_ts": "2026-10-08T17:47:58.770781+00:00",
+      "last_eval_ts": "2026-10-08T17:53:00.702669+00:00",
+      "source_ts": "2026-10-08T17:46:00Z",
+      "spread_pct": 0.5449591280653956,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "BAK"
+    },
+    {
+      "activity_ratio": 3.2275132275132274,
+      "entry_change_pct": 2.2026431718061623,
+      "first_watch_ts": "2026-10-08T18:09:52.224811+00:00",
+      "last_eval_ts": "2026-10-08T18:13:04.506110+00:00",
+      "source_ts": "2026-10-08T18:08:00Z",
+      "spread_pct": 0.06633499170812462,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "AMPL"
+    }
+  ],
+  "status": "SAG-30-v0.4.9-ROLLING-PRECURSOR-PROSPECTIVE-SHADOW"
+}
