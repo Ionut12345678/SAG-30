@@ -5,7 +5,7 @@ This reports what the collector actually did. It does not infer or modify frozen
 import argparse
 import json
 import sqlite3
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 from .model import SPEC_SHA256
@@ -68,6 +68,34 @@ def build(db_path, scan_rc=0, bridge_rc=0):
                     code = code.strip() or 'unspecified'
                     reason_counts[code] = reason_counts.get(code, 0) + 1
             result['observations']['rejection_reasons'] = dict(sorted(reason_counts.items()))
+            # Link only routes observed during this same prospective run to later
+            # observations. Never use pre-route snapshots as downstream evidence.
+            if _table_exists(db, 'v0412_premarket_route'):
+                routed = db.execute(
+                    """SELECT symbol, observed_ts FROM v0412_premarket_route
+                       WHERE session=? AND status='EARLY_PREMARKET_ROUTE_SHADOW'
+                         AND observed_ts>=? AND observed_ts<=?""",
+                    (current_et.date().isoformat(), (datetime.fromisoformat(started)-timedelta(minutes=5)).isoformat(), finished or utcnow()),
+                ).fetchall()
+                valid = 0
+                any_observation = 0
+                for symbol, route_ts in routed:
+                    match = db.execute(
+                        """SELECT COUNT(*), SUM(CASE WHEN quality='OK' THEN 1 ELSE 0 END)
+                           FROM observations WHERE run_id=? AND symbol=?
+                           AND retrieval_ts>=?""",
+                        (run_id, symbol, route_ts),
+                    ).fetchone()
+                    any_observation += int((match or (0, 0))[0] or 0) > 0
+                    valid += int((match or (0, 0))[1] or 0) > 0
+                result['v0412_downstream'] = {
+                    'status': 'SHADOW_NOT_MODEL_EVIDENCE',
+                    'same_run_routes': len(routed),
+                    'with_post_route_observation': any_observation,
+                    'with_valid_post_route_observation': valid,
+                    'without_valid_post_route_observation': len(routed)-valid,
+                    'note': 'Only same-run post-route snapshots; no historical backfill or BUY',
+                }
             result['evaluation_states'] = dict(db.execute(
                 'SELECT e.status,COUNT(*) FROM evaluations e JOIN observations o ON o.id=e.observation_id WHERE o.run_id=? GROUP BY e.status',
                 (run_id,)).fetchall())
