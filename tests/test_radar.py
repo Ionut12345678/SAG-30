@@ -391,12 +391,14 @@ class RadarTests(unittest.TestCase):
         self.assertGreaterEqual(row[1],0)
 
     def test_post_08_source_time_semantics(self):
-        from datetime import datetime, timezone
-        boundary = datetime.fromisoformat('2026-10-08T12:00:00+00:00')
-        old = datetime.fromisoformat('2026-10-08T11:59:00Z'.replace('Z', '+00:00'))
-        new = datetime.fromisoformat('2026-10-08T12:02:00Z'.replace('Z', '+00:00'))
-        self.assertLess(old, boundary)
-        self.assertGreaterEqual(new, boundary)
+        from radar.health import _source_at_or_after
+        cutoff = '2026-10-08T12:00:00+00:00'
+        self.assertFalse(_source_at_or_after('2026-10-08T11:59:00Z', cutoff))
+        self.assertTrue(_source_at_or_after('2026-10-08T12:00:00Z', cutoff))
+        self.assertTrue(_source_at_or_after('2026-10-08T12:02:00Z', cutoff))
+        self.assertFalse(_source_at_or_after('invalid', cutoff))
+        self.assertFalse(_source_at_or_after(None, cutoff))
+        self.assertFalse(_source_at_or_after('2026-10-08T12:02:00', cutoff))
 
     def test_health_reports_cycle_and_pending_bridge(self):
         with tempfile.TemporaryDirectory() as directory:
