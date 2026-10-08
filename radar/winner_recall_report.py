@@ -5,6 +5,8 @@ Secondary benchmark: below +20%.
 Research-only; never changes production or candidate gates.
 """
 import argparse, json, sqlite3
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 from pathlib import Path
 
 def _exists(db,name):
@@ -81,6 +83,62 @@ def _baseline_diagnostic(rows, deep, target_ts, ceiling=10):
         "note": "Prospective retrieval timestamps only; no implied execution or BUY.",
     }
 
+def _early_shortlist_outcomes(groups, now=None):
+    """Forward-only cohort with a denominator, including non-winners.
+
+    A candidate enters only at its first observed selected <+10% snapshot,
+    provided no +30% observation preceded it in that session. Open sessions
+    are PENDING and excluded from finalized precision statistics.
+    """
+    now = now or datetime.now(timezone.utc)
+    et = now.astimezone(ZoneInfo("America/New_York"))
+    today = et.date().isoformat()
+    finalized = 0
+    hit30 = 0
+    hit50 = 0
+    pending = 0
+    cases = []
+    for (session, symbol), rows in sorted(groups.items()):
+        rows = sorted(rows, key=lambda r: r["retrieval_ts"])
+        first = next((i for i, r in enumerate(rows)
+                      if int(r.get("selected") or 0) == 1
+                      and -10 <= float(r["change_pct"]) < 10
+                      and not any(float(p["change_pct"]) >= 30 for p in rows[:i])), None)
+        if first is None:
+            continue
+        entry = rows[first]
+        future = [r for r in rows[first + 1:]
+                  if r["retrieval_ts"] > entry["retrieval_ts"]]
+        first30 = _first_target(future, 30)
+        first50 = _first_target(future, 50)
+        closed = session < today or (session == today and et.hour >= 20)
+        if closed:
+            finalized += 1
+            hit30 += int(first30 is not None)
+            hit50 += int(first50 is not None)
+        else:
+            pending += 1
+        cases.append({
+            "session": session, "symbol": symbol,
+            "status": "FINALIZED" if closed else "PENDING_SESSION_CLOSE",
+            "first_selected_ts": entry["retrieval_ts"],
+            "first_selected_pct": entry["change_pct"],
+            "first_observed_30_after_selection_ts": first30["retrieval_ts"] if first30 else None,
+            "first_observed_50_after_selection_ts": first50["retrieval_ts"] if first50 else None,
+            "last_observed_pct": rows[-1]["change_pct"],
+        })
+    return {
+        "status": "SHADOW_PROSPECTIVE_NOT_BUY",
+        "note": "Scout-selected denominator; no execution assumptions. Pending sessions excluded from finalized precision. Recorded snapshots may miss intracycle highs.",
+        "finalized_selected_sessions": finalized,
+        "pending_selected_sessions": pending,
+        "finalized_observed_30_after_selection": hit30,
+        "finalized_observed_50_after_selection": hit50,
+        "observed_30_rate_finalized": hit30 / finalized if finalized else None,
+        "observed_50_rate_finalized": hit50 / finalized if finalized else None,
+        "cases": cases[-300:],
+    }
+
 def build(db_path):
     db=sqlite3.connect(db_path); db.row_factory=sqlite3.Row
     try:
@@ -146,6 +204,7 @@ def build(db_path):
           "primary_entry_ceiling_pct":10,
           "secondary_entry_ceiling_pct":20,
           "scope":"Only prospective sessions recorded after full-universe scout_history deployment.",
+          "early_shortlist_outcomes":_early_shortlist_outcomes(groups),
           "winner_sessions":total,
           "winner_50_sessions":sum(1 for r in winners if r["reached_50"]),
           "classification_counts_under_10":counts10,
