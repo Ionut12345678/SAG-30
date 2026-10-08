@@ -129,7 +129,8 @@ def build(db_path, scan_rc=0, bridge_rc=0):
                 session_iex = {'routed_symbols': len(cohort),
                                'observed_after_route': 0,
                                'valid_after_route': 0,
-                               'valid_after_08_et': 0}
+                               'valid_after_08_et': 0,
+                               'valid_source_after_08_et': 0}
                 transition = current_et.replace(
                     hour=8,minute=0,second=0,microsecond=0
                 ).astimezone(timezone.utc).isoformat()
@@ -147,6 +148,31 @@ def build(db_path, scan_rc=0, bridge_rc=0):
                     session_iex['observed_after_route'] += int(counts[0] or 0)>0
                     session_iex['valid_after_route'] += int(counts[1] or 0)>0
                     session_iex['valid_after_08_et'] += int(counts[2] or 0)>0
+                    # Retrieval after 08:00 does not prove the underlying IEX
+                    # trade happened after 08:00. Audit source time separately.
+                    fresh_source = False
+                    for (source_ts,) in db.execute(
+                        """SELECT source_ts FROM observations
+                           WHERE symbol=? AND quality='OK'
+                             AND retrieval_ts>=? AND retrieval_ts<=?
+                             AND retrieval_ts>=?""",
+                        (symbol, first_route, utcnow(), transition)
+                    ):
+                        try:
+                            source_dt = datetime.fromisoformat(
+                                source_ts.replace('Z', '+00:00')
+                            )
+                            if source_dt.tzinfo and source_dt >= datetime.fromisoformat(transition):
+                                fresh_source = True
+                                break
+                        except (TypeError, ValueError, AttributeError):
+                            pass
+                    session_iex['valid_source_after_08_et'] += int(fresh_source)
+                session_iex['note'] = (
+                    'valid_after_08_et counts retrievals; '
+                    'valid_source_after_08_et requires source trade time >=08:00 ET. '
+                    'Prospective audit only, not BUY.'
+                )
                 session_iex['status']='PROSPECTIVE_SHADOW_NOT_BUY'
                 result['v0412_session_iex_conversion']=session_iex
             result['evaluation_states'] = dict(db.execute(
