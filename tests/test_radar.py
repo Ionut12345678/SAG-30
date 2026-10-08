@@ -405,6 +405,33 @@ class RadarTests(unittest.TestCase):
               'change_pct':12.0,'selected':1}], deep,
             '2026-10-08T13:20:00+00:00'))
 
+    def test_buy_actionability_fails_closed_and_never_emits_buy(self):
+        from radar.buy_actionability_shadow import assess,build
+        ts='2026-10-05T14:30:00+00:00'
+        snap={'latestTrade':{'p':10.0,'t':'2026-10-05T14:29:55Z'},
+              'latestQuote':{'bp':9.98,'ap':10.02,'bs':100,'as':100,
+                             't':'2026-10-05T14:29:57Z'}}
+        good=assess(snap,ts,'OK',5,'C34R2-HOT-SHADOW')
+        self.assertEqual(good['status'],'QUOTE_SCREEN_PASSED_SHADOW_NOT_BUY')
+        self.assertEqual(good['blockers'],[])
+        missing=assess({'latestTrade':snap['latestTrade']},ts,'OK',5,'C34R2-HOT-SHADOW')
+        self.assertIn('MISSING_OR_STALE_QUOTE',missing['blockers'])
+        self.assertIn('INVALID_BID_ASK',missing['blockers'])
+        stale=dict(snap)
+        stale['latestQuote']={**snap['latestQuote'],'t':'2026-10-05T14:28:00Z'}
+        self.assertIn('MISSING_OR_STALE_QUOTE',
+                      assess(stale,ts,'OK',5,'C34R2-HOT-SHADOW')['blockers'])
+        wide=dict(snap)
+        wide['latestQuote']={**snap['latestQuote'],'bp':9.0,'ap':10.5}
+        self.assertIn('SPREAD_OVER_2_PCT',
+                      assess(wide,ts,'OK',5,'C34R2-HOT-SHADOW')['blockers'])
+        self.assertIn('LATE_OR_MISSING_PCT',
+                      assess(snap,ts,'OK',22,'C34R2-HOT-SHADOW')['blockers'])
+        db=open_db(':memory:')
+        result=build(db)
+        self.assertEqual(result['status'],'NO_CANDIDATE_SIGNALS_TABLE')
+        db.close()
+
     def test_semantic_proxy_validation_no_hindsight_and_minimum_samples(self):
         from radar.proxy_validation import validation,wilson
         self.assertIsNone(wilson(0,0))
