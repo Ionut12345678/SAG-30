@@ -25,5 +25,8 @@
   "deep_preferred_before_et_hour": 8,
   "fast_path_realtime_start_et_hour": 8,
   "cadence_target_seconds": 300,
-  "deep_preferred_feed_entitled": false
+  "deep_preferred_feed_entitled": false,
+  "retention_shadow_enabled": true,
+  "retention_shadow_minutes": 60,
+  "retention_shadow_extra_limit": 10
 }
