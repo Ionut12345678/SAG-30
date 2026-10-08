@@ -309,7 +309,7 @@ jobs:
           echo "SAG30_CHECKPOINT_PUSH_PASS bytes=$compressed_bytes"
 
       - name: Dispatch next cadence cycle
-        if: ${{ always() && github.event_name != 'schedule' }}
+        if: ${{ always() }}
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
