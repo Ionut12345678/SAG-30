@@ -6,6 +6,7 @@ on:
       - 'radar/audit_scout_coverage.py'
       - 'radar/audit_scout_exclusions.py'
       - 'radar/audit_scout_forward_conversion.py'
+      - 'radar/audit_scout_selection_timing.py'
       - 'tests/test_export_rank_ledger.py'
       - '.github/workflows/rank-ledger-tests.yml'
   workflow_dispatch:
@@ -36,6 +37,8 @@ jobs:
         run: python -m radar.audit_scout_exclusions --db /tmp/sag30-real.sqlite3
       - name: Study later observed SCOUT +30/+50 with nonwinner denominator
         run: python -m radar.audit_scout_forward_conversion --db /tmp/sag30-real.sqlite3
+      - name: Audit SCOUT selection timing before +30/+50
+        run: python -m radar.audit_scout_selection_timing --db /tmp/sag30-real.sqlite3
       - name: Validate export against real SQLite and report coverage
         shell: bash
         run: |
