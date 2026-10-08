@@ -103,3 +103,58 @@ def build(db):
             "blockers_nonexclusive":dict(sorted(blockers.items())),
             "cases":cases[-100:],
             "limitations":"No execution evidence, fill probability, full-market NBBO, trading costs or actual BUY. Missing quotes remain blocked; never infer spread from last trades. Frozen v0.3.3 is NOT BUY."}
+
+def frozen_evidence_gate_audit(db, limit=500):
+    """Explicit, source-anchored evidence requirements; never promotes gates."""
+    if not db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='evidence'").fetchone():
+        return {"status":"NO_EVIDENCE_TABLE","not_buy":True}
+    rows=db.execute(
+        "SELECT e.payload,o.symbol,o.source_ts,o.quality FROM evidence e "
+        "JOIN observations o ON o.id=e.observation_id "
+        "ORDER BY o.id DESC LIMIT ?",(limit,)
+    ).fetchall()
+    failures=Counter();stage=Counter()
+    keys=("valid_activity_baseline","lane_classification","price_conversion",
+          "acceptance_reclaim","acceptance_still_valid","no_absorption")
+    for raw,symbol,source,quality in rows:
+        try:
+            p=json.loads(raw)
+        except (ValueError,TypeError):
+            failures["INVALID_EVIDENCE_JSON"]+=1
+            continue
+        if p.get("symbol")!=symbol or p.get("source_ts")!=source or quality!="OK":
+            failures["MISMATCHED_SOURCE_OR_QUALITY"]+=1
+            continue
+        stage["source_matched_quality_ok"]+=1
+        rvol=p.get("rvol")
+        baseline=p.get("valid_activity_baseline") or {}
+        if not (_positive(rvol) and rvol>=3 and baseline.get("value") is True and
+                baseline.get("provenance") and
+                not str(baseline.get("provenance")).startswith("UNRESOLVED")):
+            failures["ACTIVITY_BASELINE_UNCONFIRMED"]+=1
+            continue
+        stage["activity_evidence"]+=1
+        lane=p.get("lane")
+        if lane not in ("FRESH","SECOND_IMPULSE","OVERNIGHT"):
+            failures["LANE_UNCLASSIFIED"]+=1
+            continue
+        if lane=="SECOND_IMPULSE":
+            lane_keys=("energy_memory","reset","rewake","no_absorption")
+        elif lane=="OVERNIGHT":
+            lane_keys=("preclose_ah_event","price_response","hold","premarket_continuation")
+        else:
+            lane_keys=()
+        required=("lane_classification","price_conversion","acceptance_reclaim",
+                  "acceptance_still_valid","no_absorption")+lane_keys
+        unresolved=[key for key in dict.fromkeys(required) if not (
+            isinstance(p.get(key),dict) and p[key].get("value") is True and
+            p[key].get("provenance") and
+            not str(p[key].get("provenance")).startswith("UNRESOLVED"))]
+        if unresolved:
+            for key in unresolved: failures["MISSING_GATE_"+key.upper()]+=1
+        else:
+            stage["all_static_gates_sourced"]+=1
+    return {"status":"FROZEN_EVIDENCE_DIAGNOSTIC_NOT_BUY","not_buy":True,
+            "packets_sampled":len(rows),"stages":dict(stage),
+            "blockers_nonexclusive":dict(sorted(failures.items())),
+            "note":"Expansion proof requires future chronological observations and is not certified by static evidence. The FROZEN specification explicitly forbids BUY. No gate is synthesized from research proxy values."}
