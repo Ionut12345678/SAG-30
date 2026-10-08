@@ -405,6 +405,44 @@ class RadarTests(unittest.TestCase):
               'change_pct':12.0,'selected':1}], deep,
             '2026-10-08T13:20:00+00:00'))
 
+    def test_prospective_retention_outcomes_and_semantic_blockers(self):
+        from radar.research_audit import retention_outcomes, semantic_blockers
+        from radar.retention_shadow import init as retention_init
+        with tempfile.TemporaryDirectory() as td:
+            db=open_db(Path(td)/'audit.sqlite')
+            scout_init(db)
+            retention_init(db)
+            db.execute("CREATE TABLE evidence(observation_id INTEGER PRIMARY KEY,payload TEXT)")
+            db.execute("CREATE TABLE semantic_shadow(observation_id INTEGER PRIMARY KEY,payload TEXT)")
+            # Past closed session: one winner and one loser. Never use pre-entry +30.
+            for symbol in ('WIN','LOSS'):
+                db.execute("INSERT INTO retention_shadow_observations VALUES(?,?,?,?,?,?,?,?,?,?,?)",
+                    (3,'2026-10-05',symbol,'2026-10-05T14:00:00+00:00',5,
+                     '2026-10-05T14:05:00+00:00','2026-10-05T14:04:59+00:00',1,
+                     2.0,'iex','SHADOW_FRESH_TRADE'))
+                for run,ts,pct in ((2,'2026-10-05T14:00:00+00:00',5),
+                                   (4,'2026-10-05T14:10:00+00:00',35 if symbol=='WIN' else 6)):
+                    db.execute("INSERT INTO scout_history VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                        (run,'2026-10-05',symbol,ts,pct,0,0,0,'latestTrade',1,1,1,1,0,0))
+            # No production observations: challenger first by construction.
+            out=retention_outcomes(db,datetime.fromisoformat('2026-10-08T16:00:00+00:00'))
+            self.assertEqual((out['finalized'],out['observed_30_after'],out['early_and_30']),(2,1,1))
+            self.assertEqual(out['observed_30_rate'],0.5)
+            db.execute("INSERT INTO runs(id,started,status) VALUES(1,'2026-10-05T14:00:00+00:00','DISCOVERY_OK')")
+            db.execute("INSERT INTO observations(run_id,symbol,retrieval_ts,source_ts,request_started_ts,quality,reason,price,change_pct,band,payload,payload_hash) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
+                (1,'WIN','2026-10-05T14:00:00+00:00','2026-10-05T13:59:59+00:00',
+                 '2026-10-05T13:59:58+00:00','OK','',2,5,'IDEAL','{}','hash'))
+            oid=db.execute("SELECT id FROM observations").fetchone()[0]
+            db.execute("INSERT INTO evidence VALUES(?,?)",(oid,json.dumps({
+                'rvol':None,'valid_activity_baseline':{'value':False,'provenance':'UNRESOLVED: no method'}})))
+            db.execute("INSERT INTO semantic_shadow VALUES(?,?)",(oid,json.dumps({
+                'same_clock_volume_sample_count':0,'observed_same_clock_volume_ratio':None})))
+            diag=semantic_blockers(db)
+            self.assertEqual(diag['blockers_nonexclusive']['rvol_not_numeric'],1)
+            self.assertEqual(diag['blockers_nonexclusive']['baseline_provenance_unresolved'],1)
+            self.assertEqual(diag['blockers_nonexclusive']['no_same_clock_history'],1)
+            db.close()
+
     def test_live_retention_challenger_is_separate_and_prospective(self):
         from radar.retention_shadow import select, observe
         db=sqlite3.connect(':memory:')
