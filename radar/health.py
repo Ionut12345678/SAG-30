@@ -68,6 +68,28 @@ def build(db_path, scan_rc=0, bridge_rc=0):
                     code = code.strip() or 'unspecified'
                     reason_counts[code] = reason_counts.get(code, 0) + 1
             result['observations']['rejection_reasons'] = dict(sorted(reason_counts.items()))
+
+            # Prospective age diagnostics, never a substitute for quality='OK'.
+            # Age is measured from the provider's trade timestamp, not the HTTP response.
+            age_bins = {'future': 0, '0_60s': 0, '60_300s': 0,
+                        '300_900s': 0, 'over_900s': 0, 'missing_or_invalid': 0}
+            for retrieval_ts, source_ts in db.execute(
+                'SELECT retrieval_ts,source_ts FROM observations WHERE run_id=?', (run_id,)
+            ):
+                try:
+                    retrieved_dt = datetime.fromisoformat(retrieval_ts)
+                    source_dt = datetime.fromisoformat(source_ts.replace('Z', '+00:00'))
+                    if retrieved_dt.tzinfo is None or source_dt.tzinfo is None:
+                        raise ValueError('timezone missing')
+                    age = (retrieved_dt-source_dt).total_seconds()
+                    bucket = ('future' if age < 0 else '0_60s' if age <= 60
+                              else '60_300s' if age <= 300 else '300_900s'
+                              if age <= 900 else 'over_900s')
+                except (TypeError, ValueError, AttributeError):
+                    bucket = 'missing_or_invalid'
+                age_bins[bucket] += 1
+            result['observations']['source_trade_age_bins'] = age_bins
+
             # Link only routes observed during this same prospective run to later
             # observations. Never use pre-route snapshots as downstream evidence.
             if _table_exists(db, 'v0412_premarket_route'):
