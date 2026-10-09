@@ -26,7 +26,7 @@ jobs:
           python-version: '3.12'
       - name: Validate BUY Candidate SHADOW model
         run: |
-          python -m unittest tests.test_buy_readiness_shadow tests.test_buy_candidate_model tests.test_early_paper_entry_v02 tests.test_paper_outcome_v03 -v
+          python -m unittest tests.test_buy_readiness_shadow tests.test_buy_candidate_model tests.test_early_paper_entry_v02 tests.test_paper_outcome_v03 tests.test_audit_real_paper_v03 -v
       - name: Restore live SQLite read-only snapshot
         shell: bash
         run: |
@@ -54,6 +54,8 @@ jobs:
           cat /tmp/sag30-shadow/evaluation.json
           python -m radar.audit_buy_feasibility --db /tmp/sag30-real.sqlite3 > /tmp/sag30-shadow/buy_feasibility.json
           cat /tmp/sag30-shadow/buy_feasibility.json
+          python -m radar.audit_real_paper_v03 --db /tmp/sag30-real.sqlite3 > /tmp/sag30-shadow/real_paper_audit.json
+          cat /tmp/sag30-shadow/real_paper_audit.json
       - name: Upload independent audit artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -62,6 +64,7 @@ jobs:
             /tmp/sag30-shadow/prospective.jsonl
             /tmp/sag30-shadow/evaluation.json
             /tmp/sag30-shadow/buy_feasibility.json
+            /tmp/sag30-shadow/real_paper_audit.json
           retention-days: 90
       - name: Persist ledger on isolated branch, never modify FROZEN live
         shell: bash
@@ -82,7 +85,8 @@ jobs:
           cp /tmp/sag30-shadow/prospective.jsonl prospective.jsonl
           cp /tmp/sag30-shadow/evaluation.json evaluation.json
           cp /tmp/sag30-shadow/buy_feasibility.json buy_feasibility.json
-          git add prospective.jsonl evaluation.json buy_feasibility.json
+          cp /tmp/sag30-shadow/real_paper_audit.json real_paper_audit.json
+          git add prospective.jsonl evaluation.json buy_feasibility.json real_paper_audit.json
           if ! git diff --cached --quiet; then
             git commit -m "Update SHADOW prospective ledger and separate evaluation"
             git push origin HEAD:shadow-prospective-state
