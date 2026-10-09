@@ -7,7 +7,7 @@ class TestSlots(unittest.TestCase):
   c=sqlite3.connect(self.path)
   c.execute("CREATE TABLE scout_history(session TEXT,run_id INTEGER,symbol TEXT,retrieval_ts TEXT,change_pct REAL,rank_change INTEGER,rank_turnover INTEGER,selected INTEGER)")
   for s,rank,sel in [("AAA",1,0),("BBB",2,0),("CCC",3,1),("DDD",4,1)]:
-   c.execute("INSERT INTO scout_history VALUES (?,?,?,?,?,?,?,?)",("2026-10-09",1,s,"2026-10-09T13:00:00Z",5,rank,rank,sel))
+   c.execute("INSERT INTO scout_history VALUES (?,?,?,?,?,?,?,?)",("2026-10-09",1,s,"2026-10-09T13:00:00Z",12 if sel else 5,rank,rank,sel))
   c.commit();c.close()
  def tearDown(self):self.tmp.cleanup()
  def test_slots_replace_not_inflate(self):
