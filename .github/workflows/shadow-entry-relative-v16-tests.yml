@@ -1,0 +1,22 @@
+name: SAG-30 SHADOW v1.6 audit tests
+on:
+  pull_request:
+    paths:
+      - 'radar/audit_entry_relative_v16.py'
+      - 'tests/test_audit_entry_relative_v16.py'
+      - '.github/workflows/shadow-prospective-ledger.yml'
+      - '.github/workflows/shadow-entry-relative-v16-tests.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate v1.6 sampled outcomes and existing prospective ledger
+        run: |
+          python -m unittest tests.test_audit_entry_relative_v16 tests.test_collect_shadow_prospective tests.test_early_paper_matched_outcome_v15 -v
