@@ -29,8 +29,19 @@ class EntryRelativeV16(unittest.TestCase):
             self.assertEqual(x["overall"]["sampled_absolute50"], 1)
             self.assertEqual(x["overall"]["sampled_entry_relative50"], 0)
             self.assertEqual(x["overall"]["sampled_entry_relative30"], 1)
+            self.assertEqual(x["overall"]["sampled_entry_relative10"], 1)
+            self.assertEqual(x["overall"]["sampled_entry_relative15"], 1)
+            self.assertEqual(x["overall"]["sampled_entry_relative20"], 1)
+            self.assertEqual(x["overall"]["sampled_absolute10"], 1)
+            self.assertEqual(x["overall"]["sampled_absolute15"], 1)
+            self.assertEqual(x["overall"]["sampled_absolute20"], 1)
+            self.assertEqual(x["top_observed_entry_relative"][0]["first_sampled_hit15_ts"],
+                             "2026-10-09T14:10:00+00:00")
+            self.assertIsNone(x["top_observed_entry_relative"][0]["first_sampled_hit50_ts"])
             self.assertEqual(x["top_observed_entry_relative"][0]["max_entry_relative_sampled_return_pct"],38.88889)
             self.assertEqual(r["horizons"]["240m"]["overall"]["sampled_entry_relative50"],1)
+            self.assertEqual(r["horizons"]["240m"]["top_observed_entry_relative"][0]["first_sampled_hit50_ts"],
+                             "2026-10-09T15:05:00+00:00")
             self.assertEqual(x["lanes"]["priority"]["candidates"],0)
 
     def test_censoring_and_duplicates(self):
@@ -47,6 +58,7 @@ class EntryRelativeV16(unittest.TestCase):
             x = audit(db_path, ledger)["horizons"]["60m"]["overall"]
             self.assertEqual(x["pending_window"],1)
             self.assertEqual(x["sampled_entry_relative30"],0)
+            self.assertEqual(x["sampled_entry_relative15"],0)
             ledger.write_text(json.dumps(row)+"\n"+json.dumps(row)+"\n")
             with self.assertRaises(ValueError):
                 audit(db_path, ledger)
