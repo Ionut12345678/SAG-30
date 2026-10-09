@@ -26,7 +26,7 @@ jobs:
           python-version: '3.12'
       - name: Validate BUY Candidate SHADOW model
         run: |
-          python -m unittest tests.test_buy_readiness_shadow tests.test_buy_candidate_model tests.test_early_paper_entry_v02 tests.test_paper_outcome_v03 tests.test_audit_real_paper_v03 tests.test_audit_delayed_entry_v04 tests.test_audit_retry_v05 -v
+          python -m unittest tests.test_buy_readiness_shadow tests.test_buy_candidate_model tests.test_early_paper_entry_v02 tests.test_paper_outcome_v03 tests.test_audit_real_paper_v03 tests.test_audit_delayed_entry_v04 tests.test_audit_retry_v05 tests.test_audit_deep_coverage_v06 -v
       - name: Restore live SQLite read-only snapshot
         shell: bash
         run: |
@@ -60,6 +60,8 @@ jobs:
           cat /tmp/sag30-shadow/delayed_entry_audit.json
           python -m radar.audit_retry_v05 --db /tmp/sag30-real.sqlite3 > /tmp/sag30-shadow/retry_audit_v05.json
           cat /tmp/sag30-shadow/retry_audit_v05.json
+          python -m radar.audit_deep_coverage_v06 --db /tmp/sag30-real.sqlite3 > /tmp/sag30-shadow/deep_coverage_v06.json
+          cat /tmp/sag30-shadow/deep_coverage_v06.json
       - name: Upload independent audit artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -71,6 +73,7 @@ jobs:
             /tmp/sag30-shadow/real_paper_audit.json
             /tmp/sag30-shadow/delayed_entry_audit.json
             /tmp/sag30-shadow/retry_audit_v05.json
+            /tmp/sag30-shadow/deep_coverage_v06.json
           retention-days: 90
       - name: Persist ledger on isolated branch, never modify FROZEN live
         shell: bash
@@ -94,7 +97,8 @@ jobs:
           cp /tmp/sag30-shadow/real_paper_audit.json real_paper_audit.json
           cp /tmp/sag30-shadow/delayed_entry_audit.json delayed_entry_audit.json
           cp /tmp/sag30-shadow/retry_audit_v05.json retry_audit_v05.json
-          git add prospective.jsonl evaluation.json buy_feasibility.json real_paper_audit.json delayed_entry_audit.json retry_audit_v05.json
+          cp /tmp/sag30-shadow/deep_coverage_v06.json deep_coverage_v06.json
+          git add prospective.jsonl evaluation.json buy_feasibility.json real_paper_audit.json delayed_entry_audit.json retry_audit_v05.json deep_coverage_v06.json
           if ! git diff --cached --quiet; then
             git commit -m "Update SHADOW prospective ledger and separate evaluation"
             git push origin HEAD:shadow-prospective-state
