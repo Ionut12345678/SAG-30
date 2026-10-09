@@ -12,6 +12,8 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 HORIZONS = (60, 240)
+# Additive sampled research milestones, not executable returns or FROZEN gates.
+THRESHOLDS = (10, 15, 20, 30, 50)
 LANES = ("baseline", "discovery", "priority")
 
 def timestamp(value):
@@ -87,10 +89,14 @@ def audit(db_path, ledger_path):
                         samples=len(future), observed_peak_change_pct=round(peak_pct, 5),
                         observed_peak_ts=peak_t.isoformat(),
                         max_entry_relative_sampled_return_pct=round(relative, 5),
-                        sampled_hit30_from_entry=relative >= 30,
-                        sampled_hit50_from_entry=relative >= 50,
-                        sampled_absolute30=peak_pct >= 30,
-                        sampled_absolute50=peak_pct >= 50)
+                        **{f"sampled_hit{threshold}_from_entry": relative >= threshold
+                           for threshold in THRESHOLDS},
+                        **{f"sampled_absolute{threshold}": peak_pct >= threshold
+                           for threshold in THRESHOLDS},
+                        **{f"first_sampled_hit{threshold}_ts": next(
+                            (t.isoformat() for t, pct in future
+                             if 100 * ((100 + pct) / (100 + baseline) - 1) >= threshold), None)
+                           for threshold in THRESHOLDS})
             cases.append(case)
         def summarize(group):
             observed = [x for x in group if x["status"].startswith("SAMPLED_")]
@@ -101,10 +107,12 @@ def audit(db_path, ledger_path):
                     "no_future_sample": sum(x["status"] == "NO_FUTURE_SAMPLE" for x in group),
                     "pending_window": sum(x["status"] == "PENDING_WINDOW" for x in group),
                     "invalid_entry": sum(x["status"] == "INVALID_ENTRY" for x in group),
-                    "sampled_entry_relative30": sum(x["sampled_hit30_from_entry"] for x in observed),
-                    "sampled_entry_relative50": sum(x["sampled_hit50_from_entry"] for x in observed),
-                    "sampled_absolute30": sum(x["sampled_absolute30"] for x in observed),
-                    "sampled_absolute50": sum(x["sampled_absolute50"] for x in observed)}
+                    **{f"sampled_entry_relative{threshold}": sum(
+                        x[f"sampled_hit{threshold}_from_entry"] for x in observed)
+                       for threshold in THRESHOLDS},
+                    **{f"sampled_absolute{threshold}": sum(
+                        x[f"sampled_absolute{threshold}"] for x in observed)
+                       for threshold in THRESHOLDS}}
         by_session = defaultdict(list)
         for case in cases:
             by_session[case["session"]].append(case)
@@ -118,9 +126,11 @@ def audit(db_path, ledger_path):
     return {"version": "SAG30_ENTRY_RELATIVE_SAMPLED_AUDIT_V16",
             "status": "RESEARCH_ONLY_NOT_BUY", "horizons": reports,
             "definition": "100 * ((100 + future scout change_pct)/(100 + first eligible scout change_pct) - 1)",
+            "sampled_thresholds_pct": list(THRESHOLDS),
             "warnings": [
                 "First eligible SCOUT price is not an executable ask or fill; sampled returns are not trade P&L.",
                 "Only strictly later, same-session, within-horizon snapshots; no intrabar high or interpolation.",
+                "First sampled crossing timestamps and threshold counts are research observations, not executable entry/exit or guaranteed tradable highs.",
                 "SAMPLED_PARTIAL and missing samples are censored, not failures; even COMPLETE means feed window elapsed, not guaranteed continuous coverage.",
                 "Lane cohorts overlap; their counts are not independent and must not be summed.",
                 "No production BUY, threshold changes, order placement or FROZEN model modifications."]}
