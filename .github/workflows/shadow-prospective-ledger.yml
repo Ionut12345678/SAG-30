@@ -1,5 +1,5 @@
 name: SAG-30 SHADOW Prospective Ledger
-# v0.7 protected-slot corrected fixture replay; production unchanged.
+# v1.5 matched forward outcome CI validation; production unchanged.
 on:
   push:
     branches: [main]
