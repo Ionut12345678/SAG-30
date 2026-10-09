@@ -26,7 +26,7 @@ jobs:
           python-version: '3.12'
       - name: Validate BUY Candidate SHADOW model
         run: |
-          python -m unittest tests.test_buy_readiness_shadow tests.test_buy_candidate_model tests.test_early_paper_entry_v02 tests.test_paper_outcome_v03 tests.test_audit_real_paper_v03 tests.test_audit_delayed_entry_v04 tests.test_audit_retry_v05 tests.test_audit_deep_coverage_v06 tests.test_audit_reserved_early_slots_v07 -v
+          python -m unittest tests.test_buy_readiness_shadow tests.test_buy_candidate_model tests.test_early_paper_entry_v02 tests.test_paper_outcome_v03 tests.test_audit_real_paper_v03 tests.test_audit_delayed_entry_v04 tests.test_audit_retry_v05 tests.test_audit_deep_coverage_v06 tests.test_audit_reserved_early_slots_v07 tests.test_audit_routing_swap_v08 -v
       - name: Restore live SQLite read-only snapshot
         shell: bash
         run: |
@@ -64,6 +64,8 @@ jobs:
           cat /tmp/sag30-shadow/deep_coverage_v06.json
           python -m radar.audit_reserved_early_slots_v07 --db /tmp/sag30-real.sqlite3 > /tmp/sag30-shadow/early_slots_v07.json
           cat /tmp/sag30-shadow/early_slots_v07.json
+          python -m radar.audit_routing_swap_v08 --db /tmp/sag30-real.sqlite3 > /tmp/sag30-shadow/routing_swap_v08.json
+          cat /tmp/sag30-shadow/routing_swap_v08.json
       - name: Upload independent audit artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -77,6 +79,7 @@ jobs:
             /tmp/sag30-shadow/retry_audit_v05.json
             /tmp/sag30-shadow/deep_coverage_v06.json
             /tmp/sag30-shadow/early_slots_v07.json
+            /tmp/sag30-shadow/routing_swap_v08.json
           retention-days: 90
       - name: Persist ledger on isolated branch, never modify FROZEN live
         shell: bash
@@ -102,7 +105,8 @@ jobs:
           cp /tmp/sag30-shadow/retry_audit_v05.json retry_audit_v05.json
           cp /tmp/sag30-shadow/deep_coverage_v06.json deep_coverage_v06.json
           cp /tmp/sag30-shadow/early_slots_v07.json early_slots_v07.json
-          git add prospective.jsonl evaluation.json buy_feasibility.json real_paper_audit.json delayed_entry_audit.json retry_audit_v05.json deep_coverage_v06.json early_slots_v07.json
+          cp /tmp/sag30-shadow/routing_swap_v08.json routing_swap_v08.json
+          git add prospective.jsonl evaluation.json buy_feasibility.json real_paper_audit.json delayed_entry_audit.json retry_audit_v05.json deep_coverage_v06.json early_slots_v07.json routing_swap_v08.json
           if ! git diff --cached --quiet; then
             git commit -m "Update SHADOW prospective ledger and separate evaluation"
             git push origin HEAD:shadow-prospective-state
