@@ -21,6 +21,7 @@ from .candidate_v034r2 import evaluate as evaluate_candidate_v034r2
 from .scout import init as init_scout, momentum_and_update as scout_momentum_and_update, active_symbols as scout_active_symbols, record_promotions as scout_record_promotions, record_universe_history as scout_record_universe_history
 from .multi_engine_shadow import evaluate as multi_engine_evaluate, record as multi_engine_record, watchpool_symbols as multi_engine_watchpool_symbols
 from .retention_shadow import observe as observe_retention_shadow
+from .early_paper_extra_live_v11 import observe as observe_early_paper_extra
 
 log = logging.getLogger('radar')
 
@@ -470,6 +471,16 @@ def run():
                 refresh_shadow_volume_baseline(db,selected,headers,deep_feed,now)
                 db.execute('DELETE FROM shadow_volume_baseline WHERE symbol NOT IN ('+marks+')',selected)
                 deep_count=prime_selected_after_discovery(db,run_id,selected,headers,config,evidence,deep_feed)
+                # Independent additive EARLY PAPER quote research; never enters
+                # production candidates, model gates, bridge, or orders.
+                if config.get('early_paper_extra_enabled',False):
+                    try:
+                        extra=observe_early_paper_extra(
+                            db,run_id,day,scout_features,selected,headers,deep_feed,request,
+                            cap=config.get('early_paper_extra_limit',3))
+                        log.info('SAG30_EARLY_PAPER_EXTRA %s',extra)
+                    except Exception:
+                        log.exception('SAG30_EARLY_PAPER_EXTRA_FAILED research-only; production unaffected')
                 # Independent research-only challenger. No production candidates, frozen
                 # evaluation, bridge alerts or BUY gates are modified.
                 if config.get('retention_shadow_enabled',False):
