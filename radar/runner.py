@@ -22,6 +22,7 @@ from .scout import init as init_scout, momentum_and_update as scout_momentum_and
 from .multi_engine_shadow import evaluate as multi_engine_evaluate, record as multi_engine_record, watchpool_symbols as multi_engine_watchpool_symbols
 from .retention_shadow import observe as observe_retention_shadow
 from .early_paper_extra_live_v11 import observe as observe_early_paper_extra
+from .early_paper_follow_v12 import observe as observe_early_paper_follow
 
 log = logging.getLogger('radar')
 
@@ -502,6 +503,16 @@ def run():
             deep_count=prime_selected_after_discovery(db,run_id,candidates,headers,config,evidence,deep_feed)
             run_status='MONITOR_OK'
             detail=f'DEEP_MONITOR {deep_count} observations'
+        # Independently follow accepted early PAPER entries for seven days,
+        # including when the symbol falls out of the production shortlist.
+        if config.get('early_paper_follow_enabled',False):
+            try:
+                follow=observe_early_paper_follow(
+                    db,run_id,now,headers,deep_feed,request,
+                    cap=config.get('early_paper_follow_limit',20))
+                log.info('SAG30_EARLY_PAPER_FOLLOW %s',follow)
+            except Exception:
+                log.exception('SAG30_EARLY_PAPER_FOLLOW_FAILED research-only; production unaffected')
         if deep_count <= 0:
             raise ValueError('No deep observations recorded after routing')
         valid_deep_count=db.execute(
