@@ -11,7 +11,7 @@ class MomentumShadowTest(unittest.TestCase):
    db.execute("CREATE TABLE scout_history(run_id INTEGER,session TEXT,symbol TEXT,change_pct REAL,acceleration_pp_per_min REAL,fresh_turnover_impulse_per_min REAL)")
    db.execute("INSERT INTO early_paper_extra_observations VALUES(3,'2026-10-09','AAA',2,10,9.9,'EARLY_PAPER_ENTRY_REVIEW')")
    for run in (1,2,3,4):
-    db.execute("INSERT INTO scout_history VALUES(?,'2026-10-09','AAA',2,?,?,?)",(run,1 if run!=4 else -5,1 if run!=4 else -5))
+    db.execute("INSERT INTO scout_history VALUES(?,'2026-10-09','AAA',2,?,?)",(run,1 if run!=4 else -5,1 if run!=4 else -5))
     db.execute("INSERT INTO scout_history VALUES(?,'2026-10-09','BBB',2.1,-1,-1)",(run,))
    db.commit();db.close()
    report=build(path)
