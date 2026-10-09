@@ -272,6 +272,12 @@ jobs:
         run: |
           python -m radar.early_paper_momentum_shadow_v14 --db state/radar.sqlite3 --out state/early_paper_momentum_shadow_v14.json
 
+      - name: Build PAPER matched forward outcomes
+        if: ${{ always() && steps.restore.outcome == 'success' }}
+        shell: bash
+        run: |
+          python -m radar.early_paper_matched_outcome_v15 --db state/radar.sqlite3 --out state/early_paper_matched_outcome_v15.json
+
       - name: Persist audit state and heartbeat
         if: ${{ always() && steps.restore.outcome == 'success' }}
         shell: bash
@@ -290,6 +296,7 @@ jobs:
           cp state/early_paper_outcome_report_v12.json /tmp/radar-state/early_paper_outcome_report_v12.json
           cp state/early_paper_diagnostic_v13.json /tmp/radar-state/early_paper_diagnostic_v13.json
           cp state/early_paper_momentum_shadow_v14.json /tmp/radar-state/early_paper_momentum_shadow_v14.json
+          cp state/early_paper_matched_outcome_v15.json /tmp/radar-state/early_paper_matched_outcome_v15.json
           cp state/semantic_shadow_report.json /tmp/radar-state/semantic_shadow_report.json
           cp state/candidate_v034_report.json /tmp/radar-state/candidate_v034_report.json
           cp state/winner_recall_report.json /tmp/radar-state/winner_recall_report.json
@@ -310,7 +317,7 @@ jobs:
           git remote add origin "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git"
           git config http.extraheader "$(git -C "$GITHUB_WORKSPACE" config --get http.https://github.com/.extraheader)"
           git add radar.sqlite3.gz health.json semantic_shadow_report.json candidate_v034_report.json winner_recall_report.json multi_engine_report.json
-          git add early_paper_extra_report_v11.json early_paper_outcome_report_v12.json early_paper_diagnostic_v13.json early_paper_momentum_shadow_v14.json
+          git add early_paper_extra_report_v11.json early_paper_outcome_report_v12.json early_paper_diagnostic_v13.json early_paper_momentum_shadow_v14.json early_paper_matched_outcome_v15.json
           if [ -f fast_path_report.json ]; then git add fast_path_report.json; fi
           if [ -f fast_path_v047_validated_report.json ]; then git add fast_path_v047_validated_report.json; fi
           if [ -f v048_conversion_challenger_report.json ]; then git add v048_conversion_challenger_report.json; fi
