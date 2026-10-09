@@ -26,7 +26,7 @@ jobs:
           python-version: '3.12'
       - name: Validate BUY Candidate SHADOW model
         run: |
-          python -m unittest tests.test_buy_readiness_shadow tests.test_buy_candidate_model tests.test_early_paper_entry_v02 -v
+          python -m unittest tests.test_buy_readiness_shadow tests.test_buy_candidate_model tests.test_early_paper_entry_v02 tests.test_paper_outcome_v03 -v
       - name: Restore live SQLite read-only snapshot
         shell: bash
         run: |
