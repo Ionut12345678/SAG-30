@@ -33,6 +33,35 @@ class EntryRelativeV16(unittest.TestCase):
             self.assertEqual(r["horizons"]["240m"]["overall"]["sampled_entry_relative50"],1)
             self.assertEqual(x["lanes"]["priority"]["candidates"],0)
 
+    def test_subsecond_same_cycle_peak_not_credited_as_future_gain(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            db_path, ledger = Path(tmp)/"data.db", Path(tmp)/"ledger.jsonl"
+            db = sqlite3.connect(db_path)
+            db.execute("CREATE TABLE scout_history(session TEXT,symbol TEXT,retrieval_ts TEXT,change_pct REAL)")
+            db.executemany("INSERT INTO scout_history VALUES(?,?,?,?)", [
+                ("2026-10-09", "VIVK", "2026-10-09T13:32:32.476425+00:00", 82.61851),
+                ("2026-10-09", "VIVK", "2026-10-09T13:32:33.000000+00:00", 82.61851),
+                ("2026-10-09", "WFF", "2026-10-09T14:41:02.383261+00:00", 9.47867),
+                ("2026-10-09", "WFF", "2026-10-09T15:54:57.715387+00:00", 73.45972)])
+            db.commit()
+            db.close()
+            ledger.write_text("\\n".join(json.dumps(row) for row in [
+                {"session":"2026-10-09","symbol":"VIVK",
+                 "first_eligible_ts":"2026-10-09T13:32:32.409279+00:00",
+                 "first_change_pct":7.81893},
+                {"session":"2026-10-09","symbol":"WFF",
+                 "first_eligible_ts":"2026-10-09T14:41:02.383261+00:00",
+                 "first_change_pct":9.47867}])+"\\n")
+            report = audit(db_path, ledger)
+            v = next(x for x in report["horizons"]["60m"]["top_observed_entry_relative"]
+                     if x["symbol"] == "VIVK") if any(
+                         x["symbol"] == "VIVK" for x in report["horizons"]["60m"]["top_observed_entry_relative"]) else None
+            self.assertIsNone(v)
+            self.assertEqual(report["horizons"]["60m"]["overall"]["unverified_same_cycle_only"], 1)
+            w = next(x for x in report["horizons"]["240m"]["top_observed_entry_relative"]
+                     if x["symbol"] == "WFF")
+            self.assertGreater(w["max_entry_relative_sampled_return_pct"], 50)
+
     def test_censoring_and_duplicates(self):
         with tempfile.TemporaryDirectory() as tmp:
             db_path, ledger = Path(tmp)/"data.db", Path(tmp)/"ledger.jsonl"
