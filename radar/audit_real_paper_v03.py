@@ -7,6 +7,8 @@ Research-only: no orders, no claimed fills or profit.
 import argparse,json,sqlite3
 from collections import Counter,defaultdict
 from datetime import datetime
+from zoneinfo import ZoneInfo
+ET=ZoneInfo('America/New_York')
 from pathlib import Path
 from radar.early_paper_entry_v02 import evaluate as screen
 from radar.paper_outcome_v03 import evaluate as outcome
@@ -77,7 +79,7 @@ def audit(path,session_start=None,max_examples=30):
   forward=[]
   for f in future_by_key[symbol]:
    t=_dt(f["retrieval_ts"])
-   if t and scout_ts and t>scout_ts and t.astimezone(scout_ts.tzinfo).date()==scout_ts.date():
+   if t and scout_ts and t>scout_ts and t.astimezone(ET).date()==scout_ts.astimezone(ET).date():
     forward.append({"ts":f["retrieval_ts"],"price":f["price"]})
   result=outcome(ask,first["retrieval_ts"],forward)
   if result["status"]=="INDICATIVE_OUTCOME_NOT_FILL":
