@@ -12,6 +12,8 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 HORIZONS = (60, 240)
+# Same-cycle subsecond records are not independently actionable later observations.
+MIN_INDEPENDENT_OBSERVATION_LAG = timedelta(seconds=1)
 LANES = ("baseline", "discovery", "priority")
 
 def timestamp(value):
@@ -76,9 +78,14 @@ def audit(db_path, ledger_path):
             deadline = entry + timedelta(minutes=horizon)
             end = session_end.get(session)
             case["window_complete_in_feed"] = end is not None and end >= deadline
-            future = [(t, pct) for t, pct in samples[(session, symbol)] if entry < t <= deadline]
+            future = [(t, pct) for t, pct in samples[(session, symbol)]
+                      if entry + MIN_INDEPENDENT_OBSERVATION_LAG <= t <= deadline]
+            same_cycle = sum(entry < t < entry + MIN_INDEPENDENT_OBSERVATION_LAG
+                             for t, pct in samples[(session, symbol)])
+            case["excluded_subsecond_observations"] = same_cycle
             if not future:
-                case["status"] = "NO_FUTURE_SAMPLE" if case["window_complete_in_feed"] else "PENDING_WINDOW"
+                case["status"] = ("UNVERIFIED_SAME_CYCLE_ONLY" if same_cycle else
+                                  "NO_FUTURE_SAMPLE" if case["window_complete_in_feed"] else "PENDING_WINDOW")
                 cases.append(case)
                 continue
             peak_t, peak_pct = max(future, key=lambda x: x[1])
@@ -101,6 +108,7 @@ def audit(db_path, ledger_path):
                     "no_future_sample": sum(x["status"] == "NO_FUTURE_SAMPLE" for x in group),
                     "pending_window": sum(x["status"] == "PENDING_WINDOW" for x in group),
                     "invalid_entry": sum(x["status"] == "INVALID_ENTRY" for x in group),
+                    "unverified_same_cycle_only": sum(x["status"] == "UNVERIFIED_SAME_CYCLE_ONLY" for x in group),
                     "sampled_entry_relative30": sum(x["sampled_hit30_from_entry"] for x in observed),
                     "sampled_entry_relative50": sum(x["sampled_hit50_from_entry"] for x in observed),
                     "sampled_absolute30": sum(x["sampled_absolute30"] for x in observed),
@@ -120,7 +128,7 @@ def audit(db_path, ledger_path):
             "definition": "100 * ((100 + future scout change_pct)/(100 + first eligible scout change_pct) - 1)",
             "warnings": [
                 "First eligible SCOUT price is not an executable ask or fill; sampled returns are not trade P&L.",
-                "Only strictly later, same-session, within-horizon snapshots; no intrabar high or interpolation.",
+                "Only independently later (at least 1 second), same-session, within-horizon snapshots; subsecond same-cycle duplicates excluded, no intrabar high or interpolation.",
                 "SAMPLED_PARTIAL and missing samples are censored, not failures; even COMPLETE means feed window elapsed, not guaranteed continuous coverage.",
                 "Lane cohorts overlap; their counts are not independent and must not be summed.",
                 "No production BUY, threshold changes, order placement or FROZEN model modifications."]}
