@@ -33,13 +33,15 @@ def audit(path,slots=(5,10,20)):
   already={r["symbol"] for r in selected}
   missing=[r for r in eligible if r["symbol"] not in already]
   missing.sort(key=lambda r:(r["rank_change"],r["rank_turnover"],r["symbol"]))
+  protected={r["symbol"] for r in eligible if r["symbol"] in already}
+  replaceable=[r for r in selected if r["symbol"] not in protected]
   # No production route changes; a hypothetical slot consumes one current slot.
   for k in slots:
    m=metrics[str(k)]
    m["runs_with_early_candidates"]+=1
    m["first_early_discovery"]+=len(eligible)
    m["baseline_selected_early"]+=sum(r["symbol"] in already for r in eligible)
-   added=min(k,len(missing),len(selected))
+   added=min(k,len(missing),len(replaceable))
    m["hypothetical_extra_early_coverage"]+=added
    m["hypothetical_displaced_existing_selections"]+=added
    m["still_unselected_early"]+=len(missing)-added
@@ -49,7 +51,7 @@ def audit(path,slots=(5,10,20)):
     "missing_early":len(missing),"top_missing":[r["symbol"] for r in missing[:5]]})
  return {"version":VERSION,"status":"HISTORICAL_ROUTING_COUNTERFACTUAL_NOT_BUY",
   "by_reserved_slots":{k:dict(v) for k,v in metrics.items()},"examples":examples,
-  "caveat":"Hypothetical capacity-neutral swap. Does not simulate lost winner recall of displaced names or actual new deep fetches. Needs separate replay on winners AND false positives and prospective shadow A/B before any production routing change."}
+  "caveat":"Hypothetical capacity-neutral swap protects already selected first-early names. Does not simulate lost winner recall of displaced names or actual new deep fetches. Needs separate replay on winners AND false positives and prospective shadow A/B before any production routing change."}
 if __name__=="__main__":
  p=argparse.ArgumentParser();p.add_argument("--db",required=True)
  a=p.parse_args();print(json.dumps(audit(a.db),sort_keys=True))
