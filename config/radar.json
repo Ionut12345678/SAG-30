@@ -28,5 +28,7 @@
   "deep_preferred_feed_entitled": false,
   "retention_shadow_enabled": true,
   "retention_shadow_minutes": 60,
-  "retention_shadow_extra_limit": 10
+  "retention_shadow_extra_limit": 10,
+  "early_paper_extra_enabled": true,
+  "early_paper_extra_limit": 3
 }
