@@ -30,5 +30,7 @@
   "retention_shadow_minutes": 60,
   "retention_shadow_extra_limit": 10,
   "early_paper_extra_enabled": true,
-  "early_paper_extra_limit": 3
+  "early_paper_extra_limit": 3,
+  "early_paper_follow_enabled": true,
+  "early_paper_follow_limit": 20
 }
