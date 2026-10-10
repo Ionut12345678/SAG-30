@@ -70,7 +70,7 @@ class LeadTimeTest(unittest.TestCase):
         self.assertEqual(result["status"], "EARLY_10M")
 
     def test_no_pre_scout_onset_credit(self):
-        result = evaluate(event(20, 8), self.samples, event(20, 8))
+        result = evaluate(event(26, 35), self.samples, event(26, 35))
         self.assertEqual(result["status"], "UNVERIFIABLE")
         self.assertEqual(result["reason"], "no_observed_acceleration_onset")
 
