@@ -23,6 +23,7 @@ from .multi_engine_shadow import evaluate as multi_engine_evaluate, record as mu
 from .retention_shadow import observe as observe_retention_shadow
 from .early_paper_extra_live_v11 import observe as observe_early_paper_extra
 from .early_paper_follow_v12 import observe as observe_early_paper_follow
+from .evening_scout_shadow import ingest as ingest_evening_scout, handoff as evening_handoff
 
 log = logging.getLogger('radar')
 
@@ -221,6 +222,19 @@ def scout_discovery(db, run_id, universe, market_caps, headers, config, now):
               'retrieval_ts':retrieved,'change_pct':change,'acceleration':accel,'impulse':impulse,
               'turnover':turnover,'route_source':route_source
             }
+            # Additive prospective SHADOW only; no frozen model or BUY mutation.
+            # A genuine routing snapshot is required; never infer a missing observation.
+            if 16 <= local_hour < 20:
+                try:
+                    ingest_evening_scout(
+                        db,symbol=symbol,price=price,retrieval_ts_utc=retrieved,
+                        source=discovery_feed + ':' + route_source,
+                        source_ts_utc=source_ts,
+                        coverage={'universe':len(universe),'feed':discovery_feed,
+                                  'routing_change_pct':change,'route_only':True})
+                except (ValueError,TypeError) as exc:
+                    log.warning('SAG30_EVENING_SCOUT_REJECT symbol=%s reason=%s',symbol,str(exc))
+
             eligible += 1
             fallbacks += int(route_source=='minuteBar')
         db.commit()
@@ -294,9 +308,22 @@ def scout_discovery(db, run_id, universe, market_caps, headers, config, now):
             ).fetchall()
             external_premarket=[r[0] for r in rows]
 
+    # Next-session research handoff: preserve origin timestamp and price.
+    # Only candidates observed in the CURRENT live universe can be routed.
+    # Older observations are never relabelled as today's fresh signals.
+    evening_carry=[]
+    if 4 <= et.hour < 16:
+        for days_back in range(1,8):
+            origin=(et.date()-timedelta(days=days_back)).isoformat()
+            cohort=evening_handoff(db,origin_session_et=origin)
+            if cohort:
+                evening_carry=[row['symbol'] for row in cohort if row['symbol'] in features]
+                log.info('SAG30_EVENING_HANDOFF origin_et=%s cohort=%s fresh_eligible=%s',
+                         origin,len(cohort),len(evening_carry))
+                break
     selected=list(base_selected)
     # External premarket and rapid-mover rescue get priority over retained/challenger extras.
-    for symbol in list(external_premarket)+list(rescue)+list(retained)+list(challenger_extras):
+    for symbol in list(evening_carry)+list(external_premarket)+list(rescue)+list(retained)+list(challenger_extras):
         if symbol not in selected and (symbol in features or symbol in external_premarket):
             selected.append(symbol)
     multi_engine_record(db,run_id,session,features,scores,base_selected,challenger_extras)
