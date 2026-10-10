@@ -12,9 +12,9 @@ class EveningWiringTests(unittest.TestCase):
 
     def test_no_frozen_model_changes_in_integration(self):
         source = Path(runner.__file__).read_text()
-        self.assertIn("SAG30_EVENING_HANDOFF", source)
+        self.assertIn("SAG30_EVENING_FOLLOW", source)
         self.assertIn("SAG30_EVENING_SCOUT_REJECT", source)
-        self.assertIn("if row['symbol'] in features", source)
+        self.assertIn("DATA_GAP_NO_FRESH_QUOTE", source)
 
 if __name__ == "__main__":
     unittest.main()
