@@ -42,19 +42,19 @@ def evaluate(first_seen, observations, first_watch=None):
 
     Inputs: first_seen/first_watch {ts, change_pct}, observations list of
     {ts, change_pct} from comparable, source-timestamped snapshots.
-    EARLY_10M requires >=10m WATCH-to-observed-onset lead and <=6m gaps
-    from WATCH through onset. An UNKNOWN is never counted as a decoy.
+    Primary EARLY_10M requires >=10m SCOUT-to-observed-onset lead and
+    <=6m source-observation gaps from SCOUT through onset. WATCH lead is
+    diagnostic only and never replaces the primary KPI. UNKNOWN is not a decoy.
     """
     scout, error = _event(first_seen, "first_scout")
     if error:
         return {"status": "UNVERIFIABLE", "reason": error}
-    watch, error = _event(first_watch, "first_watch")
-    if error:
-        return {"status": "UNVERIFIABLE", "reason": error}
     scout_ts, _ = scout
-    watch_ts, _ = watch
-    if watch_ts < scout_ts:
-        return {"status": "UNVERIFIABLE", "reason": "watch_before_scout"}
+    watch, watch_error = _event(first_watch, "first_watch")
+    watch_ts = watch[0] if watch else None
+    if watch_ts is not None and watch_ts < scout_ts:
+        watch_error = "watch_before_scout"
+        watch_ts = None
 
     clean = []
     for row in observations:
@@ -62,6 +62,8 @@ def evaluate(first_seen, observations, first_watch=None):
         if not error:
             clean.append(event)
     clean.sort()
+    # Never use pre-SCOUT samples to establish a prospective SCOUT lead.
+    clean = [row for row in clean if row[0] >= scout_ts]
     # Two different prices at the same timestamp are not ordered observations.
     if any(a[0] == b[0] and a[1] != b[1] for a, b in zip(clean, clean[1:])):
         return {"status": "UNVERIFIABLE", "reason": "conflicting_same_timestamp"}
@@ -87,24 +89,45 @@ def evaluate(first_seen, observations, first_watch=None):
     if onset is None:
         return {"status": "UNVERIFIABLE", "reason": "no_observed_acceleration_onset"}
 
-    delta = onset - watch_ts
+    # Coverage is required from the immutable first SCOUT, not only WATCH.
+    # Without it, a long gap could manufacture an apparent early signal.
+    delta = onset - scout_ts
     if abs(delta.total_seconds()) < 1:
-        return {"status": "UNVERIFIABLE", "reason": "same_cycle_watch_onset"}
+        return {"status": "UNVERIFIABLE", "reason": "same_cycle_scout_onset"}
     if delta > timedelta(0):
-        # Require continuous source observations after the WATCH. An empty
-        # interval cannot prove an early warning, even if a later jump occurs.
-        stamps = [watch_ts] + [t for t, _ in clean if watch_ts < t <= onset]
+        stamps = [scout_ts] + [t for t, _ in clean if scout_ts < t <= onset]
         if stamps[-1] != onset or any(b - a > MAX_GAP for a, b in zip(stamps, stamps[1:])):
-            return {"status": "UNVERIFIABLE", "reason": "coverage_gap_watch_to_onset"}
+            return {"status": "UNVERIFIABLE", "reason": "coverage_gap_scout_to_onset"}
 
     lead = delta.total_seconds() / 60
     status = "EARLY_10M" if delta >= MIN_LEAD else "LATE" if delta > timedelta(0) else "MISSED"
+
+    # WATCH is a separate diagnostic and must never override the SCOUT verdict.
+    watch_status = "UNVERIFIABLE"
+    watch_lead = None
+    watch_reason = watch_error
+    if watch_ts is not None:
+        watch_delta = onset - watch_ts
+        watch_lead = round(watch_delta.total_seconds() / 60, 3)
+        if abs(watch_delta.total_seconds()) < 1:
+            watch_reason = "same_cycle_watch_onset"
+        elif watch_delta > timedelta(0):
+            stamps = [watch_ts] + [t for t, _ in clean if watch_ts < t <= onset]
+            if stamps[-1] != onset or any(b - a > MAX_GAP for a, b in zip(stamps, stamps[1:])):
+                watch_reason = "coverage_gap_watch_to_onset"
+            else:
+                watch_status = "EARLY_10M" if watch_delta >= MIN_LEAD else "LATE"
+        else:
+            watch_status = "MISSED"
     return {
         "status": status,
         "lead_minutes": round(lead, 3),
-        "scout_lead_minutes": round((onset - scout_ts).total_seconds() / 60, 3),
+        "scout_lead_minutes": round(lead, 3),
         "first_scout_ts": scout_ts.isoformat(),
-        "first_watch_ts": watch_ts.isoformat(),
+        "first_watch_ts": watch_ts.isoformat() if watch_ts is not None else None,
+        "watch_status": watch_status,
+        "watch_lead_minutes": watch_lead,
+        "watch_reason": watch_reason if watch_status == "UNVERIFIABLE" else None,
         "acceleration_onset_ts": onset.isoformat(),
         "onset_definition": "first observed start of >=20% price-relative rise within <=10m; max 6m adjacent gaps",
         "warning": "SHADOW evaluation only; observed onset is not the physical start or an executable entry.",
