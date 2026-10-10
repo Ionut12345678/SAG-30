@@ -444,25 +444,29 @@ def follow_evening_shadow(db, run_id, now, universe, headers, config):
         PRIMARY KEY(run_id,origin_session_et,symbol))""")
     # An origin is eligible only if a newer exchange trading session is open.
     # The caller has already checked today's Alpaca market calendar.
-    cohort=[]
-    origin=None
-    for days_back in range(1,8):
-        candidate=(et.date()-timedelta(days=days_back)).isoformat()
-        rows=evening_handoff(db,origin_session_et=candidate)
-        if rows:
-            origin=candidate
-            cohort=[row for row in rows if row['symbol'] in universe]
-            break
+    # Follow only the immediately preceding weekday cohort. Never resurrect an
+    # older cohort merely because the preceding session has no observations.
+    # Holiday-aware session resolution remains a separate calendar improvement.
+    previous=et.date()-timedelta(days=1)
+    while previous.weekday() >= 5:
+        previous-=timedelta(days=1)
+    origin=previous.isoformat()
+    cohort=evening_handoff(db,origin_session_et=origin)
     if not cohort:
         return 0
+    # An evening symbol must survive a later universe refresh. The original
+    # prospective cohort is immutable; do not filter by today's universe.
     symbols=[row['symbol'] for row in cohort]
+    follow_feed=config.get('discovery_fallback_feed') or config['feed']
+    follow_age=int(config.get('discovery_fallback_max_age_seconds',
+                              follow_age))
     observed=0
     seen=set()
     for _,batch,_,snapshots,retrieved in fetch_snapshot_batches(
-            symbols,headers,config['feed'],config.get('snapshot_workers',8)):
+            symbols,headers,follow_feed,config.get('snapshot_workers',8)):
         for symbol in batch:
             seen.add(symbol)
-            route=routing_view(snapshots.get(symbol,{}),retrieved,
+            route=routing_view((snapshots or {}).get(symbol,{}),retrieved,
                                config['max_source_age_seconds'])
             if route:
                 normalized,_,_=route
