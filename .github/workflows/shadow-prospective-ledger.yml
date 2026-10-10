@@ -26,7 +26,7 @@ jobs:
           python-version: '3.12'
       - name: Validate BUY Candidate SHADOW model
         run: |
-          python -m unittest tests.test_buy_readiness_shadow tests.test_buy_candidate_model tests.test_early_paper_entry_v02 tests.test_paper_outcome_v03 tests.test_audit_real_paper_v03 tests.test_audit_delayed_entry_v04 tests.test_audit_retry_v05 tests.test_audit_deep_coverage_v06 tests.test_audit_reserved_early_slots_v07 tests.test_audit_routing_swap_v08 tests.test_audit_additive_shadow_v09 tests.test_audit_fixed_rankings_v10 tests.test_early_paper_extra_live_v11 tests.test_early_paper_follow_v12 tests.test_early_paper_momentum_shadow_v14 tests.test_early_paper_matched_outcome_v15 tests.test_audit_entry_relative_v16 -v
+          python -m unittest tests.test_buy_readiness_shadow tests.test_buy_candidate_model tests.test_early_paper_entry_v02 tests.test_paper_outcome_v03 tests.test_audit_real_paper_v03 tests.test_audit_delayed_entry_v04 tests.test_audit_retry_v05 tests.test_audit_deep_coverage_v06 tests.test_audit_reserved_early_slots_v07 tests.test_audit_routing_swap_v08 tests.test_audit_additive_shadow_v09 tests.test_audit_fixed_rankings_v10 tests.test_early_paper_extra_live_v11 tests.test_early_paper_follow_v12 tests.test_early_paper_momentum_shadow_v14 tests.test_early_paper_matched_outcome_v15 tests.test_audit_entry_relative_v16 tests.test_shadow_watch_capture tests.test_audit_leadtime_10m -v
       - name: Restore live SQLite read-only snapshot
         shell: bash
         run: |
