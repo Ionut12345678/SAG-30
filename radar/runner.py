@@ -428,7 +428,7 @@ def prime_selected_after_discovery(db, run_id, selected, headers, config, eviden
     return len(selected)
 
 
-def follow_evening_shadow(db, run_id, now, universe, headers, config):
+def follow_evening_shadow(db, run_id, now, universe, headers, config, trading_sessions=None):
     """Independently follow the latest previous-session evening cohort, SHADOW only.
 
     Missing quotes are recorded as DATA_GAP, not silently dropped or promoted
@@ -442,15 +442,24 @@ def follow_evening_shadow(db, run_id, now, universe, headers, config):
         symbol TEXT NOT NULL, observed_utc TEXT NOT NULL, source_ts_utc TEXT,
         observed_price REAL, status TEXT NOT NULL,
         PRIMARY KEY(run_id,origin_session_et,symbol))""")
-    # An origin is eligible only if a newer exchange trading session is open.
-    # The caller has already checked today's Alpaca market calendar.
-    # Follow only the immediately preceding weekday cohort. Never resurrect an
-    # older cohort merely because the preceding session has no observations.
-    # Holiday-aware session resolution remains a separate calendar improvement.
-    previous=et.date()-timedelta(days=1)
-    while previous.weekday() >= 5:
-        previous-=timedelta(days=1)
-    origin=previous.isoformat()
+    # Resolve the actual preceding exchange session, not merely a weekday.
+    # Production passes Alpaca's dated calendar; never replay an older cohort
+    # when the immediately preceding trading session has no evening candidates.
+    today=et.date().isoformat()
+    if trading_sessions is not None:
+        sessions=sorted({str(row['date']) for row in trading_sessions
+                         if isinstance(row,dict) and row.get('date') and str(row['date']) < today})
+        if not sessions:
+            log.warning('SAG30_EVENING_FOLLOW_NO_PRIOR_EXCHANGE_SESSION date=%s',today)
+            return 0
+        origin=sessions[-1]
+    else:
+        # Legacy direct-call compatibility; the production runner always supplies
+        # the exchange calendar. Never use this fallback for production decisions.
+        previous=et.date()-timedelta(days=1)
+        while previous.weekday() >= 5:
+            previous-=timedelta(days=1)
+        origin=previous.isoformat()
     cohort=evening_handoff(db,origin_session_et=origin)
     if not cohort:
         return 0
@@ -512,8 +521,9 @@ def run():
             raise ValueError('Missing ALPACA_API_KEY / ALPACA_SECRET_KEY secrets')
         headers = {'APCA-API-KEY-ID': keys[0], 'APCA-API-SECRET-KEY': keys[1]}
         day = now.astimezone(ZoneInfo('America/New_York')).date().isoformat()
-        calendar, _ = request('https://paper-api.alpaca.markets/v2/calendar?' + urlencode({'start':day,'end':day}), headers)
-        if not calendar:
+        calendar_start=(now.astimezone(ZoneInfo('America/New_York')).date()-timedelta(days=14)).isoformat()
+        calendar, _ = request('https://paper-api.alpaca.markets/v2/calendar?' + urlencode({'start':calendar_start,'end':day}), headers)
+        if not any(isinstance(row,dict) and row.get('date')==day for row in calendar):
             db.execute('UPDATE runs SET finished=?,status=? WHERE id=?', (utcnow(), 'CLOSED', run_id))
             db.commit()
             return
@@ -531,7 +541,7 @@ def run():
         # Execute independent evening follow BEFORE the discovery/deep-data path,
         # so an intraday DATA_GAP cannot prevent prospective cohort observations.
         try:
-            follow_evening_shadow(db,run_id,now,universe,headers,config)
+            follow_evening_shadow(db,run_id,now,universe,headers,config,trading_sessions=calendar)
         except Exception:
             log.exception('SAG30_EVENING_FOLLOW_FAILED SHADOW-only; frozen radar unaffected')
         if broad:

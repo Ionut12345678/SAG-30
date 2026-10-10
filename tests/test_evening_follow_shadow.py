@@ -57,5 +57,47 @@ class EveningFollowTests(unittest.TestCase):
         fetch.assert_not_called()
 
 
+    def test_holiday_uses_previous_actual_exchange_session(self):
+        db=sqlite3.connect(":memory:")
+        ingest(db,symbol="FRIDAY",price=3.0,
+               retrieval_ts_utc="2026-07-02T20:30:00+00:00",
+               source="iex",source_ts_utc="2026-07-02T20:29:00+00:00")
+        # Friday July 3 is a market holiday; Monday July 6 follows Thursday July 2.
+        calendar=[{"date":"2026-07-02"},{"date":"2026-07-06"}]
+        def fake_batches(symbols,headers,feed,workers):
+            self.assertEqual(symbols,["FRIDAY"])
+            yield 0,symbols,"2026-07-06T12:00:00+00:00",{},"2026-07-06T12:00:00+00:00"
+        with patch.object(runner,"fetch_snapshot_batches",side_effect=fake_batches):
+            count=runner.follow_evening_shadow(
+                db,4,datetime(2026,7,6,12,tzinfo=timezone.utc),
+                [],{},{"feed":"iex","max_source_age_seconds":900},
+                trading_sessions=calendar)
+        self.assertEqual(count,1)
+        self.assertEqual(db.execute("SELECT origin_session_et FROM evening_follow_shadow").fetchone()[0],"2026-07-02")
+
+    def test_no_stale_replay_when_prior_exchange_session_has_no_cohort(self):
+        db=sqlite3.connect(":memory:")
+        ingest(db,symbol="STALE",price=2.0,
+               retrieval_ts_utc="2026-07-01T20:30:00+00:00",
+               source="iex",source_ts_utc="2026-07-01T20:29:00+00:00")
+        with patch.object(runner,"fetch_snapshot_batches") as fetch:
+            count=runner.follow_evening_shadow(
+                db,5,datetime(2026,7,6,12,tzinfo=timezone.utc),
+                [],{},{"feed":"iex","max_source_age_seconds":900},
+                trading_sessions=[{"date":"2026-07-01"},{"date":"2026-07-02"},{"date":"2026-07-06"}])
+        self.assertEqual(count,0)
+        fetch.assert_not_called()
+
+    def test_calendar_missing_prior_session_fails_closed(self):
+        db=sqlite3.connect(":memory:")
+        with patch.object(runner,"fetch_snapshot_batches") as fetch:
+            count=runner.follow_evening_shadow(
+                db,6,datetime(2026,7,6,12,tzinfo=timezone.utc),
+                [],{},{"feed":"iex","max_source_age_seconds":900},
+                trading_sessions=[{"date":"2026-07-06"}])
+        self.assertEqual(count,0)
+        fetch.assert_not_called()
+
+
 if __name__=="__main__":
     unittest.main()

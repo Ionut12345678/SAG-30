@@ -15,7 +15,7 @@ class EveningWiringTests(unittest.TestCase):
         self.assertIn("SAG30_EVENING_FOLLOW", source)
         self.assertIn("SAG30_EVENING_SCOUT_REJECT", source)
         self.assertIn("DATA_GAP_MISSING_SNAPSHOT", source)
-        self.assertLess(source.index("follow_evening_shadow(db,run_id,now,universe,headers,config)"), source.index("if broad:"))
+        self.assertLess(source.index("follow_evening_shadow(db,run_id,now,universe,headers,config,trading_sessions=calendar)"), source.index("if broad:"))
         self.assertIn("local_hour >= 16", source)
 
 if __name__ == "__main__":
