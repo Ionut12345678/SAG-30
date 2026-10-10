@@ -53,11 +53,12 @@ def capture(db_path, state_dir):
                 except (ValueError,TypeError):continue
                 if not t or not math.isfinite(p) or p<=-100:continue
                 key=(session,symbol,ts)
-                if key not in obs_keys:
-                    fresh.append({"session":session,"symbol":symbol,"ts":ts,
-                                  "change_pct":p,"run_id":row["run_id"]})
-                    obs_keys.add(key)
-                if (session,symbol) in watch_keys:continue
+                if (session,symbol) in watch_keys:
+                    if key not in obs_keys:
+                        fresh.append({"session":session,"symbol":symbol,"ts":ts,
+                                      "change_pct":p,"run_id":row["run_id"]})
+                        obs_keys.add(key)
+                    continue
                 # Historical observations may provide momentum context, but are
                 # NEVER written as earlier first WATCH events.
                 history=db.execute("""SELECT retrieval_ts,change_pct FROM scout_history
@@ -79,6 +80,10 @@ def capture(db_path, state_dir):
                    "trigger_lanes":triggers,
                    "status":"WATCH_ONLY_NOT_BUY"})
                 watch_keys.add((session,symbol))
+                if key not in obs_keys:
+                    fresh.append({"session":session,"symbol":symbol,"ts":ts,
+                                  "change_pct":p,"run_id":row["run_id"]})
+                    obs_keys.add(key)
             write_jsonl(obs_path,fresh)
             write_jsonl(watch_path,new_watches)
             # Evaluate from persisted source observations, not inferred maxima.
