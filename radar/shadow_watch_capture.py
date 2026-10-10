@@ -8,7 +8,6 @@ import math
 import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
-from radar.shadow_early_watch import screen
 from radar.audit_leadtime_10m import evaluate
 
 def parse_ts(s):
@@ -66,14 +65,18 @@ def capture(db_path, state_dir):
                   ORDER BY retrieval_ts DESC LIMIT 100""",(session,symbol,ts)).fetchall()
                 series=[{"ts":h["retrieval_ts"],"change_pct":h["change_pct"]}
                         for h in reversed(history) if h["change_pct"] is not None]
-                trigger=screen(series)
-                if trigger["status"]!="SHADOW_WATCH_ONLY":continue
-                # Evaluate trigger on the CURRENT snapshot only; screen() may
-                # return a past trigger which cannot be credited prospectively.
-                if parse_ts(trigger["first_watch_ts"])!=t:continue
+                triggers=[]
+                if p>=3:triggers.append("PRICE_3")
+                for minutes,threshold,name in [(5,2,"MOMENTUM_5M_2"),(10,5,"MOMENTUM_10M_5")]:
+                    prior=[float(h["change_pct"]) for h in series if parse_ts(h["ts"]) and
+                           1 <= (t-parse_ts(h["ts"])).total_seconds() <= minutes*60 and
+                           math.isfinite(float(h["change_pct"])) and float(h["change_pct"])>-100]
+                    if prior and max(100*((100+p)/(100+v)-1) for v in prior)>=threshold:
+                        triggers.append(name)
+                if not triggers:continue
                 new_watches.append({"session":session,"symbol":symbol,"ts":ts,
                    "change_pct":p,"run_id":row["run_id"],
-                   "trigger_lanes":trigger["trigger_lanes"],
+                   "trigger_lanes":triggers,
                    "status":"WATCH_ONLY_NOT_BUY"})
                 watch_keys.add((session,symbol))
             write_jsonl(obs_path,fresh)
