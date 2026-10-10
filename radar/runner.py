@@ -180,7 +180,7 @@ def scout_discovery(db, run_id, universe, market_caps, headers, config, now):
     discovery_max_age=config['max_source_age_seconds']
     fallback_feed=config.get('discovery_fallback_feed')
     fallback_before=int(config.get('discovery_fallback_before_et_hour',0) or 0)
-    if fallback_feed and local_hour < fallback_before:
+    if fallback_feed and (local_hour < fallback_before or local_hour >= 16):
         # Routing-only fallback for hours where the configured real-time venue is closed.
         # This never changes model evidence: deep observations still use config['feed'].
         discovery_feed=fallback_feed
@@ -457,9 +457,11 @@ def follow_evening_shadow(db, run_id, now, universe, headers, config):
         return 0
     symbols=[row['symbol'] for row in cohort]
     observed=0
+    seen=set()
     for _,batch,_,snapshots,retrieved in fetch_snapshot_batches(
             symbols,headers,config['feed'],config.get('snapshot_workers',8)):
         for symbol in batch:
+            seen.add(symbol)
             route=routing_view(snapshots.get(symbol,{}),retrieved,
                                config['max_source_age_seconds'])
             if route:
@@ -477,6 +479,11 @@ def follow_evening_shadow(db, run_id, now, universe, headers, config):
                 (run_id,origin_session_et,symbol,observed_utc,source_ts_utc,observed_price,status)
                 VALUES (?,?,?,?,?,?,?)""",
                 (run_id,origin,symbol,retrieved,source_ts,price,status))
+    for symbol in set(symbols)-seen:
+        db.execute("""INSERT OR IGNORE INTO evening_follow_shadow
+            (run_id,origin_session_et,symbol,observed_utc,source_ts_utc,observed_price,status)
+            VALUES (?,?,?,?,?,?,?)""",
+            (run_id,origin,symbol,now.isoformat(),None,None,'DATA_GAP_MISSING_SNAPSHOT'))
     db.commit()
     log.info('SAG30_EVENING_FOLLOW origin=%s total=%s fresh=%s data_gap=%s NOT_BUY',
              origin,len(symbols),observed,len(symbols)-observed)
@@ -517,6 +524,12 @@ def run():
         if not evidence_path.exists():
             log.warning('SAG30_SEMANTIC_EVIDENCE source=missing path=%s; undefined frozen gates remain WAIT/UNKNOWN', evidence_path)
 
+        # Execute independent evening follow BEFORE the discovery/deep-data path,
+        # so an intraday DATA_GAP cannot prevent prospective cohort observations.
+        try:
+            follow_evening_shadow(db,run_id,now,universe,headers,config)
+        except Exception:
+            log.exception('SAG30_EVENING_FOLLOW_FAILED SHADOW-only; frozen radar unaffected')
         if broad:
             selected,scout_features=scout_discovery(db,run_id,universe,market_caps,headers,config,now)
             if not selected:
@@ -574,11 +587,6 @@ def run():
             deep_count=prime_selected_after_discovery(db,run_id,candidates,headers,config,evidence,deep_feed)
             run_status='MONITOR_OK'
             detail=f'DEEP_MONITOR {deep_count} observations'
-        # Independent evening follow runs regardless of intraday shortlist rank.
-        try:
-            follow_evening_shadow(db,run_id,now,universe,headers,config)
-        except Exception:
-            log.exception('SAG30_EVENING_FOLLOW_FAILED SHADOW-only; frozen radar unaffected')
         # Independently follow accepted early PAPER entries for seven days,
         # including when the symbol falls out of the production shortlist.
         if config.get('early_paper_follow_enabled',False):
