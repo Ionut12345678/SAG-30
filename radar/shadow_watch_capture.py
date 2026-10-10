@@ -6,7 +6,8 @@ import argparse
 import json
 import math
 import sqlite3
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
+from zoneinfo import ZoneInfo
 from pathlib import Path
 from radar.audit_leadtime_10m import evaluate
 
@@ -26,7 +27,14 @@ def write_jsonl(path, rows):
     with Path(path).open("a") as f:
         for row in rows:f.write(json.dumps(row,sort_keys=True)+"\n")
 
-def capture(db_path, state_dir):
+def capture(db_path, state_dir, as_of=None):
+    # Capture time is execution time, not source retrieval time.
+    now=as_of or datetime.now(timezone.utc)
+    if now.tzinfo is None:raise ValueError("as_of must be timezone aware")
+    now=now.astimezone(timezone.utc)
+    market_date=now.astimezone(ZoneInfo("America/New_York")).date().isoformat()
+    freshness=timedelta(minutes=15)
+    max_future_skew=timedelta(seconds=60)
     root=Path(state_dir);root.mkdir(parents=True,exist_ok=True)
     watch_path=root/"shadow_first_watch.jsonl"
     obs_path=root/"shadow_watch_observations.jsonl"
@@ -40,18 +48,27 @@ def capture(db_path, state_dir):
     try:
         latest=db.execute("SELECT MAX(run_id) FROM scout_history").fetchone()[0]
         if latest is None:
-            result={"status":"NO_SCOUT_HISTORY","new_watches":0,"new_observations":0}
+            result={"status":"NO_SCOUT_HISTORY","new_watches":0,"new_observations":0,"capture_ts_utc":now.isoformat()}
         else:
             # Only current-run observations can generate a first WATCH.
             current=db.execute("""SELECT session,symbol,retrieval_ts,change_pct,run_id
               FROM scout_history WHERE run_id=? ORDER BY retrieval_ts,symbol""",(latest,)).fetchall()
-            fresh=[]; new_watches=[]
+            fresh=[]; new_watches=[]; stale_skipped=0; future_skipped=0; session_skipped=0
             for row in current:
                 session,symbol,ts=row["session"],row["symbol"],row["retrieval_ts"]
                 t=parse_ts(ts)
                 try:p=float(row["change_pct"])
                 except (ValueError,TypeError):continue
                 if not t or not math.isfinite(p) or p<=-100:continue
+                if session!=market_date or t.astimezone(ZoneInfo("America/New_York")).date().isoformat()!=market_date:
+                    session_skipped+=1
+                    continue
+                if t>now+max_future_skew:
+                    future_skipped+=1
+                    continue
+                if now-t>freshness:
+                    stale_skipped+=1
+                    continue
                 key=(session,symbol,ts)
                 if (session,symbol) in watch_keys:
                     if key not in obs_keys:
@@ -76,6 +93,10 @@ def capture(db_path, state_dir):
                         triggers.append(name)
                 if not triggers:continue
                 new_watches.append({"session":session,"symbol":symbol,"ts":ts,
+                   "captured_at_utc":now.isoformat(),
+                   "retrieval_ts_utc":t.isoformat(),
+                   "retrieval_ts_et":t.astimezone(ZoneInfo("America/New_York")).isoformat(),
+                   "retrieval_ts_bucharest":t.astimezone(ZoneInfo("Europe/Bucharest")).isoformat(),
                    "change_pct":p,"run_id":row["run_id"],
                    "trigger_lanes":triggers,
                    "status":"WATCH_ONLY_NOT_BUY"})
@@ -106,6 +127,10 @@ def capture(db_path, state_dir):
             result={"status":"SHADOW_PROSPECTIVE_ONLY_NOT_BUY",
                     "latest_run_id":latest,"new_watches":len(new_watches),
                     "new_observations":len(fresh),"total_watches":len(watches)+len(new_watches),
+                    "capture_ts_utc":now.isoformat(),"market_session_et":market_date,
+                    "stale_skipped":stale_skipped,"future_skipped":future_skipped,
+                    "session_skipped":session_skipped,
+                    "timestamp_basis":"retrieval_ts; not verified exchange source trade time",
                     "outcomes":outcomes,
                     "warning":"WATCH is recorded only when first observed in an active run; source gaps and unobserved onset remain UNVERIFIABLE. First scout from historic SQLite is context, not first WATCH. No fills or execution proof."}
     finally:db.close()
