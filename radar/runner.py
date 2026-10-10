@@ -459,7 +459,7 @@ def follow_evening_shadow(db, run_id, now, universe, headers, config):
     symbols=[row['symbol'] for row in cohort]
     follow_feed=config.get('discovery_fallback_feed') or config['feed']
     follow_age=int(config.get('discovery_fallback_max_age_seconds',
-                              follow_age))
+                              config['max_source_age_seconds']))
     observed=0
     seen=set()
     for _,batch,_,snapshots,retrieved in fetch_snapshot_batches(
