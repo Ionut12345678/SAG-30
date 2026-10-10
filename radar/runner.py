@@ -308,22 +308,11 @@ def scout_discovery(db, run_id, universe, market_caps, headers, config, now):
             ).fetchall()
             external_premarket=[r[0] for r in rows]
 
-    # Next-session research handoff: preserve origin timestamp and price.
-    # Only candidates observed in the CURRENT live universe can be routed.
-    # Older observations are never relabelled as today's fresh signals.
-    evening_carry=[]
-    if 4 <= et.hour < 16:
-        for days_back in range(1,8):
-            origin=(et.date()-timedelta(days=days_back)).isoformat()
-            cohort=evening_handoff(db,origin_session_et=origin)
-            if cohort:
-                evening_carry=[row['symbol'] for row in cohort if row['symbol'] in features]
-                log.info('SAG30_EVENING_HANDOFF origin_et=%s cohort=%s fresh_eligible=%s',
-                         origin,len(cohort),len(evening_carry))
-                break
+    # EVENING is an independent SHADOW lane, never a production ranking gate.
+    # Monitoring is performed by follow_evening_shadow(), even with no fresh
+    # discovery features. Do not insert stale candidates into frozen evaluation.
     selected=list(base_selected)
-    # External premarket and rapid-mover rescue get priority over retained/challenger extras.
-    for symbol in list(evening_carry)+list(external_premarket)+list(rescue)+list(retained)+list(challenger_extras):
+    for symbol in list(external_premarket)+list(rescue)+list(retained)+list(challenger_extras):
         if symbol not in selected and (symbol in features or symbol in external_premarket):
             selected.append(symbol)
     multi_engine_record(db,run_id,session,features,scores,base_selected,challenger_extras)
@@ -439,6 +428,61 @@ def prime_selected_after_discovery(db, run_id, selected, headers, config, eviden
     return len(selected)
 
 
+def follow_evening_shadow(db, run_id, now, universe, headers, config):
+    """Independently follow the latest previous-session evening cohort, SHADOW only.
+
+    Missing quotes are recorded as DATA_GAP, not silently dropped or promoted
+    to BUY. Immutable evening entry prices/timestamps stay in the source ledger.
+    """
+    et=now.astimezone(ZoneInfo('America/New_York'))
+    if not (4 <= et.hour < 20):
+        return 0
+    db.execute("""CREATE TABLE IF NOT EXISTS evening_follow_shadow(
+        run_id INTEGER NOT NULL, origin_session_et TEXT NOT NULL,
+        symbol TEXT NOT NULL, observed_utc TEXT NOT NULL, source_ts_utc TEXT,
+        observed_price REAL, status TEXT NOT NULL,
+        PRIMARY KEY(run_id,origin_session_et,symbol))""")
+    # An origin is eligible only if a newer exchange trading session is open.
+    # The caller has already checked today's Alpaca market calendar.
+    cohort=[]
+    origin=None
+    for days_back in range(1,8):
+        candidate=(et.date()-timedelta(days=days_back)).isoformat()
+        rows=evening_handoff(db,origin_session_et=candidate)
+        if rows:
+            origin=candidate
+            cohort=[row for row in rows if row['symbol'] in universe]
+            break
+    if not cohort:
+        return 0
+    symbols=[row['symbol'] for row in cohort]
+    observed=0
+    for _,batch,_,snapshots,retrieved in fetch_snapshot_batches(
+            symbols,headers,config['feed'],config.get('snapshot_workers',8)):
+        for symbol in batch:
+            route=routing_view(snapshots.get(symbol,{}),retrieved,
+                               config['max_source_age_seconds'])
+            if route:
+                normalized,_,_=route
+                trade=normalized['latestTrade']
+                price=float(trade['p'])
+                source_ts=trade['t']
+                status='FRESH_SHADOW_QUOTE'
+                observed+=1
+            else:
+                price=None
+                source_ts=None
+                status='DATA_GAP_NO_FRESH_QUOTE'
+            db.execute("""INSERT OR IGNORE INTO evening_follow_shadow
+                (run_id,origin_session_et,symbol,observed_utc,source_ts_utc,observed_price,status)
+                VALUES (?,?,?,?,?,?,?)""",
+                (run_id,origin,symbol,retrieved,source_ts,price,status))
+    db.commit()
+    log.info('SAG30_EVENING_FOLLOW origin=%s total=%s fresh=%s data_gap=%s NOT_BUY',
+             origin,len(symbols),observed,len(symbols)-observed)
+    return len(symbols)
+
+
 def run():
     verify_spec()
     config = json.loads(Path(os.getenv('RADAR_CONFIG', 'config/radar.json')).read_text())
@@ -530,6 +574,11 @@ def run():
             deep_count=prime_selected_after_discovery(db,run_id,candidates,headers,config,evidence,deep_feed)
             run_status='MONITOR_OK'
             detail=f'DEEP_MONITOR {deep_count} observations'
+        # Independent evening follow runs regardless of intraday shortlist rank.
+        try:
+            follow_evening_shadow(db,run_id,now,universe,headers,config)
+        except Exception:
+            log.exception('SAG30_EVENING_FOLLOW_FAILED SHADOW-only; frozen radar unaffected')
         # Independently follow accepted early PAPER entries for seven days,
         # including when the symbol falls out of the production shortlist.
         if config.get('early_paper_follow_enabled',False):
