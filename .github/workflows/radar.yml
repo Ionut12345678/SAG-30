@@ -56,7 +56,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for file in shadow_first_watch.jsonl shadow_watch_observations.jsonl; do
+          for file in shadow_first_watch.jsonl shadow_watch_observations.jsonl shadow_first_paper_buy_signal.jsonl; do
             if git cat-file -e FETCH_HEAD:"$file" 2>/dev/null; then
               git show FETCH_HEAD:"$file" > "state/$file"
             fi
@@ -161,6 +161,13 @@ jobs:
         run: |
           set -euo pipefail
           python -m radar.shadow_watch_capture --db state/radar.sqlite3 --state-dir state
+
+      - name: Capture prospective PAPER BUY signals (NO ORDERS)
+        if: ${{ always() && steps.restore.outcome == 'success' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m radar.paper_buy_signal_shadow --db state/radar.sqlite3 --state-dir state
 
       - name: Publish pending signal batch to ChatGPT bridge
         id: bridge
@@ -310,7 +317,7 @@ jobs:
             exit 1
           fi
           cp state/health.json /tmp/radar-state/health.json
-          for file in shadow_first_watch.jsonl shadow_watch_observations.jsonl shadow_watch_status.json; do
+          for file in shadow_first_watch.jsonl shadow_watch_observations.jsonl shadow_watch_status.json shadow_first_paper_buy_signal.jsonl shadow_paper_buy_audit.json; do
             if [ -f "state/$file" ]; then cp "state/$file" "/tmp/radar-state/$file"; fi
           done
           cp state/early_paper_extra_report_v11.json /tmp/radar-state/early_paper_extra_report_v11.json
