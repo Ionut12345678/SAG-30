@@ -1,0 +1,308 @@
+{
+  "version": "SAG30_PAPER_MATCHED_OUTCOME_V15",
+  "status": "PARTIAL_PROSPECTIVE_SHADOW_NOT_BUY",
+  "windows": {
+    "60m": {
+      "paper": {
+        "total": 16,
+        "with_future_samples": 16,
+        "observed_hit10": 0,
+        "observed_hit30": 0,
+        "observed_hit50": 0
+      },
+      "controls": {
+        "total": 80,
+        "with_future_samples": 76,
+        "observed_hit10": 1,
+        "observed_hit30": 0,
+        "observed_hit50": 0
+      },
+      "paired_with_both_observed": 16,
+      "pairs": [
+        {
+          "symbol": "AURA",
+          "control_count": 5,
+          "paper_max_pct": 1.6017,
+          "control_mean_max_pct": 0.6605,
+          "paper_hit30": false,
+          "control_hit30_count": 0
+        },
+        {
+          "symbol": "PSIG",
+          "control_count": 5,
+          "paper_max_pct": -0.703,
+          "control_mean_max_pct": 3.1381,
+          "paper_hit30": false,
+          "control_hit30_count": 0
+        },
+        {
+          "symbol": "BRBS",
+          "control_count": 5,
+          "paper_max_pct": -0.641,
+          "control_mean_max_pct": 0.4269,
+          "paper_hit30": false,
+          "control_hit30_count": 0
+        },
+        {
+          "symbol": "NTLA",
+          "control_count": 5,
+          "paper_max_pct": 0.1188,
+          "control_mean_max_pct": 1.1687,
+          "paper_hit30": false,
+          "control_hit30_count": 0
+        },
+        {
+          "symbol": "KDK",
+          "control_count": 5,
+          "paper_max_pct": 2.0833,
+          "control_mean_max_pct": 0.089,
+          "paper_hit30": false,
+          "control_hit30_count": 0
+        },
+        {
+          "symbol": "BORR",
+          "control_count": 4,
+          "paper_max_pct": 0.6417,
+          "control_mean_max_pct": 0.6164,
+          "paper_hit30": false,
+          "control_hit30_count": 0
+        },
+        {
+          "symbol": "ACB",
+          "control_count": 5,
+          "paper_max_pct": 0.0,
+          "control_mean_max_pct": 0.2142,
+          "paper_hit30": false,
+          "control_hit30_count": 0
+        },
+        {
+          "symbol": "WYFI",
+          "control_count": 5,
+          "paper_max_pct": 0.1582,
+          "control_mean_max_pct": 0.3967,
+          "paper_hit30": false,
+          "control_hit30_count": 0
+        },
+        {
+          "symbol": "METC",
+          "control_count": 5,
+          "paper_max_pct": 1.5332,
+          "control_mean_max_pct": 0.4273,
+          "paper_hit30": false,
+          "control_hit30_count": 0
+        },
+        {
+          "symbol": "SFIX",
+          "control_count": 5,
+          "paper_max_pct": 0.7207,
+          "control_mean_max_pct": 0.8702,
+          "paper_hit30": false,
+          "control_hit30_count": 0
+        },
+        {
+          "symbol": "RCKT",
+          "control_count": 5,
+          "paper_max_pct": 0.0,
+          "control_mean_max_pct": -0.0818,
+          "paper_hit30": false,
+          "control_hit30_count": 0
+        },
+        {
+          "symbol": "AI",
+          "control_count": 5,
+          "paper_max_pct": 0.7302,
+          "control_mean_max_pct": 1.8224,
+          "paper_hit30": false,
+          "control_hit30_count": 0
+        },
+        {
+          "symbol": "FCEL",
+          "control_count": 4,
+          "paper_max_pct": 0.2288,
+          "control_mean_max_pct": 0.1829,
+          "paper_hit30": false,
+          "control_hit30_count": 0
+        },
+        {
+          "symbol": "CYPH",
+          "control_count": 5,
+          "paper_max_pct": 1.1667,
+          "control_mean_max_pct": 0.5953,
+          "paper_hit30": false,
+          "control_hit30_count": 0
+        },
+        {
+          "symbol": "AMPX",
+          "control_count": 4,
+          "paper_max_pct": 0.6882,
+          "control_mean_max_pct": 0.4761,
+          "paper_hit30": false,
+          "control_hit30_count": 0
+        },
+        {
+          "symbol": "MLTX",
+          "control_count": 4,
+          "paper_max_pct": -0.0928,
+          "control_mean_max_pct": -0.0815,
+          "paper_hit30": false,
+          "control_hit30_count": 0
+        }
+      ]
+    },
+    "240m": {
+      "paper": {
+        "total": 16,
+        "with_future_samples": 16,
+        "observed_hit10": 0,
+        "observed_hit30": 0,
+        "observed_hit50": 0
+      },
+      "controls": {
+        "total": 80,
+        "with_future_samples": 77,
+        "observed_hit10": 1,
+        "observed_hit30": 0,
+        "observed_hit50": 0
+      },
+      "paired_with_both_observed": 16,
+      "pairs": [
+        {
+          "symbol": "AURA",
+          "control_count": 5,
+          "paper_max_pct": 2.1369,
+          "control_mean_max_pct": 1.2739,
+          "paper_hit30": false,
+          "control_hit30_count": 0
+        },
+        {
+          "symbol": "PSIG",
+          "control_count": 5,
+          "paper_max_pct": 1.9915,
+          "control_mean_max_pct": 4.2377,
+          "paper_hit30": false,
+          "control_hit30_count": 0
+        },
+        {
+          "symbol": "BRBS",
+          "control_count": 5,
+          "paper_max_pct": -0.641,
+          "control_mean_max_pct": 0.9683,
+          "paper_hit30": false,
+          "control_hit30_count": 0
+        },
+        {
+          "symbol": "NTLA",
+          "control_count": 5,
+          "paper_max_pct": 4.5941,
+          "control_mean_max_pct": 2.2704,
+          "paper_hit30": false,
+          "control_hit30_count": 0
+        },
+        {
+          "symbol": "KDK",
+          "control_count": 5,
+          "paper_max_pct": 2.6786,
+          "control_mean_max_pct": 0.8052,
+          "paper_hit30": false,
+          "control_hit30_count": 0
+        },
+        {
+          "symbol": "BORR",
+          "control_count": 4,
+          "paper_max_pct": 2.4599,
+          "control_mean_max_pct": 0.7833,
+          "paper_hit30": false,
+          "control_hit30_count": 0
+        },
+        {
+          "symbol": "ACB",
+          "control_count": 5,
+          "paper_max_pct": 1.908,
+          "control_mean_max_pct": 0.8004,
+          "paper_hit30": false,
+          "control_hit30_count": 0
+        },
+        {
+          "symbol": "WYFI",
+          "control_count": 5,
+          "paper_max_pct": 0.1582,
+          "control_mean_max_pct": 2.2266,
+          "paper_hit30": false,
+          "control_hit30_count": 0
+        },
+        {
+          "symbol": "METC",
+          "control_count": 5,
+          "paper_max_pct": 1.9307,
+          "control_mean_max_pct": 1.7574,
+          "paper_hit30": false,
+          "control_hit30_count": 0
+        },
+        {
+          "symbol": "SFIX",
+          "control_count": 5,
+          "paper_max_pct": 2.5225,
+          "control_mean_max_pct": 2.4136,
+          "paper_hit30": false,
+          "control_hit30_count": 0
+        },
+        {
+          "symbol": "RCKT",
+          "control_count": 5,
+          "paper_max_pct": 0.1908,
+          "control_mean_max_pct": 0.4101,
+          "paper_hit30": false,
+          "control_hit30_count": 0
+        },
+        {
+          "symbol": "AI",
+          "control_count": 5,
+          "paper_max_pct": 0.7302,
+          "control_mean_max_pct": 2.3671,
+          "paper_hit30": false,
+          "control_hit30_count": 0
+        },
+        {
+          "symbol": "FCEL",
+          "control_count": 5,
+          "paper_max_pct": 1.9737,
+          "control_mean_max_pct": 0.2247,
+          "paper_hit30": false,
+          "control_hit30_count": 0
+        },
+        {
+          "symbol": "CYPH",
+          "control_count": 5,
+          "paper_max_pct": 1.1667,
+          "control_mean_max_pct": 0.6182,
+          "paper_hit30": false,
+          "control_hit30_count": 0
+        },
+        {
+          "symbol": "AMPX",
+          "control_count": 4,
+          "paper_max_pct": 0.6882,
+          "control_mean_max_pct": 0.4761,
+          "paper_hit30": false,
+          "control_hit30_count": 0
+        },
+        {
+          "symbol": "MLTX",
+          "control_count": 4,
+          "paper_max_pct": -0.0928,
+          "control_mean_max_pct": -0.0815,
+          "paper_hit30": false,
+          "control_hit30_count": 0
+        }
+      ]
+    }
+  },
+  "method": "Same-run scout change_pct baseline, future scout change_pct samples only, 60m and 240m from initial scout snapshot. Controls fixed pre-outcome by v1.4.",
+  "limitations": [
+    "Scout sample changes are not executable returns, intrabar highs, or IEX entry ask",
+    "Only rows with future samples counted; censored rows are NOT losses",
+    "Missing feed coverage may bias comparisons; controls are not known losers",
+    "Some controls may repeat across pairs; no independence or significance claim",
+    "Frozen production BUY rules untouched"
+  ]
+}

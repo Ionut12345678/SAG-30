@@ -1,0 +1,122 @@
+{
+  "cadence_gap_seconds": 492.122,
+  "candidate_count": 3,
+  "candidate_v034": {
+    "lanes": {
+      "FRESH": 1,
+      "SECOND_IMPULSE": 2
+    },
+    "last_signal": {
+      "change_pct": 32.92181069958848,
+      "lane": "FRESH",
+      "proof": "reacceleration >=2pp after acceptance",
+      "retrieval_ts": "2026-10-09T19:47:36.736005+00:00",
+      "state": "C34-LATE-SHADOW",
+      "symbol": "QSI"
+    },
+    "signals_total": 1062,
+    "states": {
+      "C34-DATA_QUALITY": 3
+    },
+    "status": "CANDIDATE_SHADOW_ONLY"
+  },
+  "candidate_v034r2": {
+    "last_signal": {
+      "change_pct": 516.1137440758293,
+      "lane": "FRESH",
+      "proof": "reacceleration >=2pp after acceptance",
+      "retrieval_ts": "2026-10-09T21:00:55.876118+00:00",
+      "state": "C34R2-LATE-SHADOW",
+      "symbol": "WFF"
+    },
+    "signals_total": 1427,
+    "states": {
+      "C34R2-DATA_QUALITY": 3
+    },
+    "status": "CANDIDATE_SHADOW_CHALLENGER"
+  },
+  "checkpoint_freshness": "STALE_OUTSIDE_SESSION",
+  "checkpoint_is_current_cycle": false,
+  "evaluation_states": {
+    "UNKNOWN/DATA_QUALITY": 3
+  },
+  "evidence_health": "UNEXPECTED_MODEL_DATA_GAP",
+  "fast_scout": {
+    "eligible_count": 0,
+    "fetch_seconds": 1.637,
+    "selected_count": 0,
+    "status": "DATA_GAP",
+    "sticky_count": 0,
+    "total_seconds": 1.648,
+    "universe_count": 3185
+  },
+  "frozen_version": "SAG-30 Early Radar v0.3.3 FROZEN SHADOW",
+  "generated_ts": "2026-10-10T00:27:32.106136+00:00",
+  "health": "DEGRADED",
+  "last_signal": null,
+  "latest_run": {
+    "detail": "DISCOVERY_DATA_GAP eligible=0/3185; fallback existing shortlist 3 observations; full-universe discovery unhealthy; deep real-time feed has 0 valid observations",
+    "finished": "2026-10-09T23:58:37.301268+00:00",
+    "id": 460,
+    "started": "2026-10-09T23:58:33.784441+00:00",
+    "status": "MONITOR_DATA_GAP"
+  },
+  "model_readiness": {
+    "activity_confirmable_packets": 0,
+    "status": "NO_VALID_OBSERVATIONS"
+  },
+  "observation_window_active": false,
+  "observations": {
+    "data_quality": 3,
+    "ok": 0,
+    "rejection_reasons": {
+      "future_or_stale_source": 3
+    },
+    "source_trade_age_bins": {
+      "0_60s": 0,
+      "300_900s": 0,
+      "60_300s": 0,
+      "future": 0,
+      "missing_or_invalid": 0,
+      "over_900s": 3
+    },
+    "total": 3
+  },
+  "pending_bridge_events": 0,
+  "semantic_shadow": {
+    "new_observed_highs": 0,
+    "packets": 3,
+    "two_positive_intervals": 0,
+    "with_history_samples": 0,
+    "with_observed_volume_ratio": 0
+  },
+  "spec_sha256": "65c3c170d42e0b4bb8eca75b38d32a3c551f1ba7101eef825c745d588fdabc31",
+  "v0412_downstream": {
+    "note": "Only same-run post-route snapshots; no historical backfill or BUY",
+    "same_run_routes": 0,
+    "status": "SHADOW_NOT_MODEL_EVIDENCE",
+    "with_post_route_observation": 0,
+    "with_valid_post_route_observation": 0,
+    "without_valid_post_route_observation": 0
+  },
+  "v0412_session_iex_conversion": {
+    "converted_symbols": [
+      "GLND",
+      "KOPN",
+      "OLB",
+      "SMJF",
+      "VIVK"
+    ],
+    "note": "valid_after_08_et counts retrievals; valid_source_after_08_et requires source trade time >=08:00 ET. Prospective audit only, not BUY.",
+    "observed_after_route": 5,
+    "routed_symbols": 5,
+    "status": "PROSPECTIVE_SHADOW_NOT_BUY",
+    "valid_after_08_et": 5,
+    "valid_after_route": 5,
+    "valid_source_after_08_et": 5
+  },
+  "workflow": {
+    "bridge_rc": 0,
+    "scan_rc": 0
+  }
+}

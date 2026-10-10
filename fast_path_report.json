@@ -1,0 +1,1025 @@
+{
+  "authoritative": false,
+  "buy": false,
+  "candidates": [
+    {
+      "catalyst": "",
+      "change_pct": 5.83524027459954,
+      "last_seen_ts": "2026-10-09T19:52:16.573988+00:00",
+      "peak_change_pct": 6.407322654462244,
+      "positive_flow_count": 2,
+      "seen_count": 48,
+      "state": "TRIGGER_SHADOW",
+      "symbol": "TLS"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 5.709876543209869,
+      "last_seen_ts": "2026-10-09T19:45:19.820449+00:00",
+      "peak_change_pct": 5.709876543209869,
+      "positive_flow_count": 6,
+      "seen_count": 24,
+      "state": "TRIGGER_SHADOW",
+      "symbol": "RPD"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 3.9184952978056353,
+      "last_seen_ts": "2026-10-09T18:12:20.734739+00:00",
+      "peak_change_pct": 5.198537095088818,
+      "positive_flow_count": 3,
+      "seen_count": 123,
+      "state": "TRIGGER_SHADOW",
+      "symbol": "VOR"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 4.402789886660852,
+      "last_seen_ts": "2026-10-09T19:45:19.820449+00:00",
+      "peak_change_pct": 5.0566695727986,
+      "positive_flow_count": 2,
+      "seen_count": 24,
+      "state": "TRIGGER_SHADOW",
+      "symbol": "CMPS"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 4.693295292439381,
+      "last_seen_ts": "2026-10-09T16:19:24.785777+00:00",
+      "peak_change_pct": 4.693295292439381,
+      "positive_flow_count": 2,
+      "seen_count": 6,
+      "state": "TRIGGER_SHADOW",
+      "symbol": "IVVD"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 3.6453201970443327,
+      "last_seen_ts": "2026-10-09T18:59:57.344504+00:00",
+      "peak_change_pct": 3.6453201970443327,
+      "positive_flow_count": 2,
+      "seen_count": 9,
+      "state": "TRIGGER_SHADOW",
+      "symbol": "PWP"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 3.4383954154727725,
+      "last_seen_ts": "2026-10-09T17:38:55.758287+00:00",
+      "peak_change_pct": 3.4383954154727725,
+      "positive_flow_count": 2,
+      "seen_count": 3,
+      "state": "TRIGGER_SHADOW",
+      "symbol": "ALMS"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 2.463503649635035,
+      "last_seen_ts": "2026-10-09T19:25:01.422885+00:00",
+      "peak_change_pct": 2.463503649635035,
+      "positive_flow_count": 3,
+      "seen_count": 9,
+      "state": "TRIGGER_SHADOW",
+      "symbol": "FWRG"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 8.41616964877403,
+      "last_seen_ts": "2026-10-10T00:25:22.813472+00:00",
+      "peak_change_pct": 13.452617627567932,
+      "positive_flow_count": 2,
+      "seen_count": 258,
+      "state": "PREARM_FLOW",
+      "symbol": "IMUX"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 4.634581105169344,
+      "last_seen_ts": "2026-10-10T00:25:22.813472+00:00",
+      "peak_change_pct": 12.477718360071277,
+      "positive_flow_count": 3,
+      "seen_count": 291,
+      "state": "PREARM_FLOW",
+      "symbol": "CYPH"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 6.249999999999978,
+      "last_seen_ts": "2026-10-09T20:28:22.661271+00:00",
+      "peak_change_pct": 11.16071428571428,
+      "positive_flow_count": 2,
+      "seen_count": 27,
+      "state": "PREARM_FLOW",
+      "symbol": "TLSA"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 9.920115243583027,
+      "last_seen_ts": "2026-10-09T16:46:06.088116+00:00",
+      "peak_change_pct": 9.920115243583027,
+      "positive_flow_count": 2,
+      "seen_count": 21,
+      "state": "PREARM_FLOW",
+      "symbol": "ATEX"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 8.058017727639012,
+      "last_seen_ts": "2026-10-10T00:25:22.813472+00:00",
+      "peak_change_pct": 9.427880741337624,
+      "positive_flow_count": 2,
+      "seen_count": 273,
+      "state": "PREARM_FLOW",
+      "symbol": "QDEL"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 8.978071990070324,
+      "last_seen_ts": "2026-10-10T00:25:22.813472+00:00",
+      "peak_change_pct": 9.309060819197356,
+      "positive_flow_count": 3,
+      "seen_count": 291,
+      "state": "PREARM_FLOW",
+      "symbol": "BRUN"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 7.789142407553085,
+      "last_seen_ts": "2026-10-09T18:29:49.788324+00:00",
+      "peak_change_pct": 7.789142407553085,
+      "positive_flow_count": 2,
+      "seen_count": 6,
+      "state": "PREARM_FLOW",
+      "symbol": "FDMT"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 7.0175438596491,
+      "last_seen_ts": "2026-10-10T00:25:22.813472+00:00",
+      "peak_change_pct": 7.0175438596491,
+      "positive_flow_count": 3,
+      "seen_count": 276,
+      "state": "PREARM_FLOW",
+      "symbol": "BRBR"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 6.4166666666666705,
+      "last_seen_ts": "2026-10-09T18:48:24.024232+00:00",
+      "peak_change_pct": 6.4166666666666705,
+      "positive_flow_count": 4,
+      "seen_count": 21,
+      "state": "PREARM_FLOW",
+      "symbol": "AZTA"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 3.609658949464767,
+      "last_seen_ts": "2026-10-10T00:25:22.813472+00:00",
+      "peak_change_pct": 6.248444112521767,
+      "positive_flow_count": 2,
+      "seen_count": 285,
+      "state": "PREARM_FLOW",
+      "symbol": "RELL"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 3.4653465346534684,
+      "last_seen_ts": "2026-10-10T00:25:22.813472+00:00",
+      "peak_change_pct": 6.188118811881194,
+      "positive_flow_count": 2,
+      "seen_count": 294,
+      "state": "PREARM_FLOW",
+      "symbol": "ALEC"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 5.8758923668314145,
+      "last_seen_ts": "2026-10-09T18:29:49.788324+00:00",
+      "peak_change_pct": 5.8758923668314145,
+      "positive_flow_count": 2,
+      "seen_count": 12,
+      "state": "PREARM_FLOW",
+      "symbol": "APMD"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 5.443786982248522,
+      "last_seen_ts": "2026-10-09T18:12:20.734739+00:00",
+      "peak_change_pct": 5.443786982248522,
+      "positive_flow_count": 2,
+      "seen_count": 21,
+      "state": "PREARM_FLOW",
+      "symbol": "USAS"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 3.5758323057953234,
+      "last_seen_ts": "2026-10-10T00:25:22.813472+00:00",
+      "peak_change_pct": 5.363748458692985,
+      "positive_flow_count": 2,
+      "seen_count": 201,
+      "state": "PREARM_FLOW",
+      "symbol": "VSTM"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 4.61136890951277,
+      "last_seen_ts": "2026-10-10T00:25:22.813472+00:00",
+      "peak_change_pct": 4.61136890951277,
+      "positive_flow_count": 2,
+      "seen_count": 282,
+      "state": "PREARM_FLOW",
+      "symbol": "FCEL"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 3.855278766310799,
+      "last_seen_ts": "2026-10-10T00:25:22.813472+00:00",
+      "peak_change_pct": 4.507710557532629,
+      "positive_flow_count": 2,
+      "seen_count": 267,
+      "state": "PREARM_FLOW",
+      "symbol": "SHLS"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 4.287067740407391,
+      "last_seen_ts": "2026-10-09T17:23:11.345072+00:00",
+      "peak_change_pct": 4.287067740407391,
+      "positive_flow_count": 2,
+      "seen_count": 6,
+      "state": "PREARM_FLOW",
+      "symbol": "LWAY"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 3.580246913580254,
+      "last_seen_ts": "2026-10-09T18:59:57.344504+00:00",
+      "peak_change_pct": 3.580246913580254,
+      "positive_flow_count": 2,
+      "seen_count": 18,
+      "state": "PREARM_FLOW",
+      "symbol": "UNCY"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 3.547147502216985,
+      "last_seen_ts": "2026-10-09T16:24:53.425084+00:00",
+      "peak_change_pct": 3.547147502216985,
+      "positive_flow_count": 3,
+      "seen_count": 51,
+      "state": "PREARM_FLOW",
+      "symbol": "CYRX"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 3.451407811080842,
+      "last_seen_ts": "2026-10-09T16:19:24.785777+00:00",
+      "peak_change_pct": 3.451407811080842,
+      "positive_flow_count": 3,
+      "seen_count": 9,
+      "state": "PREARM_FLOW",
+      "symbol": "ZVRA"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 3.4482758620689724,
+      "last_seen_ts": "2026-10-09T18:36:10.025211+00:00",
+      "peak_change_pct": 3.4482758620689724,
+      "positive_flow_count": 3,
+      "seen_count": 21,
+      "state": "PREARM_FLOW",
+      "symbol": "CTMX"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 3.409090909090917,
+      "last_seen_ts": "2026-10-09T19:19:04.710424+00:00",
+      "peak_change_pct": 3.409090909090917,
+      "positive_flow_count": 2,
+      "seen_count": 39,
+      "state": "PREARM_FLOW",
+      "symbol": "LENZ"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 1.3569321533923429,
+      "last_seen_ts": "2026-10-10T00:25:22.813472+00:00",
+      "peak_change_pct": 3.303834808259598,
+      "positive_flow_count": 2,
+      "seen_count": 285,
+      "state": "PREARM_FLOW",
+      "symbol": "BLMN"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 3.2928942807625816,
+      "last_seen_ts": "2026-10-09T18:00:22.149975+00:00",
+      "peak_change_pct": 3.2928942807625816,
+      "positive_flow_count": 3,
+      "seen_count": 81,
+      "state": "PREARM_FLOW",
+      "symbol": "BIRD"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 1.6586921850079817,
+      "last_seen_ts": "2026-10-09T19:52:16.573988+00:00",
+      "peak_change_pct": 2.4242424242424176,
+      "positive_flow_count": 6,
+      "seen_count": 54,
+      "state": "PREARM_FLOW",
+      "symbol": "TNDM"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 1.7722066133563974,
+      "last_seen_ts": "2026-10-09T16:19:24.785777+00:00",
+      "peak_change_pct": 1.7722066133563974,
+      "positive_flow_count": 3,
+      "seen_count": 9,
+      "state": "PREARM_FLOW",
+      "symbol": "ANAB"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 1.5675835551612005,
+      "last_seen_ts": "2026-10-09T13:40:41.592376+00:00",
+      "peak_change_pct": 1.5675835551612005,
+      "positive_flow_count": 2,
+      "seen_count": 6,
+      "state": "PREARM_FLOW",
+      "symbol": "SNDX"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 1.502414594884649,
+      "last_seen_ts": "2026-10-09T14:22:51.835298+00:00",
+      "peak_change_pct": 1.502414594884649,
+      "positive_flow_count": 2,
+      "seen_count": 21,
+      "state": "PREARM_FLOW",
+      "symbol": "JAKK"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 1.3779527559055094,
+      "last_seen_ts": "2026-10-09T19:45:19.820449+00:00",
+      "peak_change_pct": 1.3779527559055094,
+      "positive_flow_count": 2,
+      "seen_count": 3,
+      "state": "PREARM_FLOW",
+      "symbol": "SATL"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 1.3048635824436383,
+      "last_seen_ts": "2026-10-09T16:19:24.785777+00:00",
+      "peak_change_pct": 1.3048635824436383,
+      "positive_flow_count": 2,
+      "seen_count": 6,
+      "state": "PREARM_FLOW",
+      "symbol": "BXDC"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 1.1824324324324342,
+      "last_seen_ts": "2026-10-09T18:36:10.025211+00:00",
+      "peak_change_pct": 1.1824324324324342,
+      "positive_flow_count": 2,
+      "seen_count": 6,
+      "state": "PREARM_FLOW",
+      "symbol": "STRZ"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 0.9031454375583836,
+      "last_seen_ts": "2026-10-09T13:40:41.592376+00:00",
+      "peak_change_pct": 0.9031454375583836,
+      "positive_flow_count": 2,
+      "seen_count": 3,
+      "state": "PREARM_FLOW",
+      "symbol": "PSNL"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 0.5747126436781658,
+      "last_seen_ts": "2026-10-09T16:13:56.802063+00:00",
+      "peak_change_pct": 0.5747126436781658,
+      "positive_flow_count": 2,
+      "seen_count": 9,
+      "state": "PREARM_FLOW",
+      "symbol": "NEOV"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 0.4222648752399305,
+      "last_seen_ts": "2026-10-09T16:56:33.155483+00:00",
+      "peak_change_pct": 0.4222648752399305,
+      "positive_flow_count": 3,
+      "seen_count": 6,
+      "state": "PREARM_FLOW",
+      "symbol": "DOLE"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 1491.8045705279746,
+      "last_seen_ts": "2026-10-09T14:28:10.435393+00:00",
+      "peak_change_pct": 1491.8045705279746,
+      "positive_flow_count": 0,
+      "seen_count": 9,
+      "state": "LATE_SHADOW",
+      "symbol": "ITOC"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 516.1137440758293,
+      "last_seen_ts": "2026-10-10T00:25:22.813472+00:00",
+      "peak_change_pct": 752.1327014218009,
+      "positive_flow_count": 0,
+      "seen_count": 273,
+      "state": "LATE_SHADOW",
+      "symbol": "WFF"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 108.13008130081303,
+      "last_seen_ts": "2026-10-09T20:35:48.328278+00:00",
+      "peak_change_pct": 119.51219512195124,
+      "positive_flow_count": 0,
+      "seen_count": 33,
+      "state": "LATE_SHADOW",
+      "symbol": "ZYBT"
+    },
+    {
+      "catalyst": "",
+      "change_pct": -15.12415349887133,
+      "last_seen_ts": "2026-10-10T00:25:22.813472+00:00",
+      "peak_change_pct": 82.61851015801356,
+      "positive_flow_count": 0,
+      "seen_count": 312,
+      "state": "DISCOVERED",
+      "symbol": "VIVK"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 46.75324675324677,
+      "last_seen_ts": "2026-10-09T20:43:19.130945+00:00",
+      "peak_change_pct": 77.14285714285714,
+      "positive_flow_count": 0,
+      "seen_count": 231,
+      "state": "LATE_SHADOW",
+      "symbol": "VEEA"
+    },
+    {
+      "catalyst": "",
+      "change_pct": -10.565693430656943,
+      "last_seen_ts": "2026-10-10T00:25:22.813472+00:00",
+      "peak_change_pct": 73.24723247232473,
+      "positive_flow_count": 0,
+      "seen_count": 306,
+      "state": "DISCOVERED",
+      "symbol": "OLB"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 55.81395348837208,
+      "last_seen_ts": "2026-10-10T00:25:22.813472+00:00",
+      "peak_change_pct": 72.86821705426357,
+      "positive_flow_count": 0,
+      "seen_count": 87,
+      "state": "LATE_SHADOW",
+      "symbol": "YMAT"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 49.603460706560924,
+      "last_seen_ts": "2026-10-10T00:25:22.813472+00:00",
+      "peak_change_pct": 70.0312424897861,
+      "positive_flow_count": 0,
+      "seen_count": 294,
+      "state": "LATE_SHADOW",
+      "symbol": "JZ"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 20.01881910138792,
+      "last_seen_ts": "2026-10-09T19:45:19.820449+00:00",
+      "peak_change_pct": 62.90284638908492,
+      "positive_flow_count": 0,
+      "seen_count": 204,
+      "state": "LATE_SHADOW",
+      "symbol": "OFAL"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 14.459247648902828,
+      "last_seen_ts": "2026-10-09T19:52:16.573988+00:00",
+      "peak_change_pct": 41.06583072100314,
+      "positive_flow_count": 0,
+      "seen_count": 171,
+      "state": "DISCOVERED",
+      "symbol": "FRGT"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 1.347525761521906,
+      "last_seen_ts": "2026-10-10T00:25:22.813472+00:00",
+      "peak_change_pct": 37.017325331219574,
+      "positive_flow_count": 1,
+      "seen_count": 303,
+      "state": "DISCOVERED",
+      "symbol": "MI"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 30.452674897119337,
+      "last_seen_ts": "2026-10-09T19:52:16.573988+00:00",
+      "peak_change_pct": 36.21399176954731,
+      "positive_flow_count": 0,
+      "seen_count": 204,
+      "state": "LATE_SHADOW",
+      "symbol": "QSI"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 21.513944223107572,
+      "last_seen_ts": "2026-10-10T00:25:22.813472+00:00",
+      "peak_change_pct": 35.458167330677306,
+      "positive_flow_count": 0,
+      "seen_count": 312,
+      "state": "LATE_SHADOW",
+      "symbol": "SMJF"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 31.96842624568328,
+      "last_seen_ts": "2026-10-09T19:52:16.573988+00:00",
+      "peak_change_pct": 34.43512580167738,
+      "positive_flow_count": 0,
+      "seen_count": 9,
+      "state": "LATE_SHADOW",
+      "symbol": "SLSN"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 29.468599033816446,
+      "last_seen_ts": "2026-10-09T19:45:19.820449+00:00",
+      "peak_change_pct": 34.29951690821256,
+      "positive_flow_count": 0,
+      "seen_count": 102,
+      "state": "LATE_SHADOW",
+      "symbol": "PDSB"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 22.615803814713907,
+      "last_seen_ts": "2026-10-10T00:25:22.813472+00:00",
+      "peak_change_pct": 32.97002724795641,
+      "positive_flow_count": 0,
+      "seen_count": 294,
+      "state": "LATE_SHADOW",
+      "symbol": "NAUT"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 25.045126353790614,
+      "last_seen_ts": "2026-10-10T00:25:22.813472+00:00",
+      "peak_change_pct": 30.37003610108304,
+      "positive_flow_count": 0,
+      "seen_count": 288,
+      "state": "LATE_SHADOW",
+      "symbol": "CUE"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 28.000000000000004,
+      "last_seen_ts": "2026-10-09T19:52:16.573988+00:00",
+      "peak_change_pct": 28.000000000000004,
+      "positive_flow_count": 0,
+      "seen_count": 3,
+      "state": "LATE_SHADOW",
+      "symbol": "NXGL"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 26.71957671957672,
+      "last_seen_ts": "2026-10-09T13:56:38.644752+00:00",
+      "peak_change_pct": 26.71957671957672,
+      "positive_flow_count": 0,
+      "seen_count": 12,
+      "state": "LATE_SHADOW",
+      "symbol": "MOGU"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 24.66487935656838,
+      "last_seen_ts": "2026-10-09T19:12:33.142245+00:00",
+      "peak_change_pct": 26.54155495978552,
+      "positive_flow_count": 0,
+      "seen_count": 15,
+      "state": "LATE_SHADOW",
+      "symbol": "AGRZ"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 25.531914893617014,
+      "last_seen_ts": "2026-10-09T14:22:51.835298+00:00",
+      "peak_change_pct": 25.531914893617014,
+      "positive_flow_count": 0,
+      "seen_count": 9,
+      "state": "LATE_SHADOW",
+      "symbol": "NSPR"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 24.252491694352173,
+      "last_seen_ts": "2026-10-09T16:13:56.802063+00:00",
+      "peak_change_pct": 24.252491694352173,
+      "positive_flow_count": 0,
+      "seen_count": 9,
+      "state": "LATE_SHADOW",
+      "symbol": "ARTW"
+    },
+    {
+      "catalyst": "",
+      "change_pct": -1.179941002949858,
+      "last_seen_ts": "2026-10-09T18:59:57.344504+00:00",
+      "peak_change_pct": 23.893805309734507,
+      "positive_flow_count": 0,
+      "seen_count": 39,
+      "state": "DISCOVERED",
+      "symbol": "EMAT"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 14.790996784565923,
+      "last_seen_ts": "2026-10-09T20:35:48.328278+00:00",
+      "peak_change_pct": 23.633440514469473,
+      "positive_flow_count": 0,
+      "seen_count": 18,
+      "state": "DISCOVERED",
+      "symbol": "SVC"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 6.299078183680451,
+      "last_seen_ts": "2026-10-10T00:25:22.813472+00:00",
+      "peak_change_pct": 23.48924547627178,
+      "positive_flow_count": 0,
+      "seen_count": 228,
+      "state": "DISCOVERED",
+      "symbol": "QNCX"
+    },
+    {
+      "catalyst": "",
+      "change_pct": -19.19770773638969,
+      "last_seen_ts": "2026-10-10T00:25:22.813472+00:00",
+      "peak_change_pct": 22.807017543859654,
+      "positive_flow_count": 0,
+      "seen_count": 312,
+      "state": "DISCOVERED",
+      "symbol": "XRTX"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 18.181818181818166,
+      "last_seen_ts": "2026-10-09T17:44:05.200541+00:00",
+      "peak_change_pct": 21.818181818181827,
+      "positive_flow_count": 0,
+      "seen_count": 18,
+      "state": "DISCOVERED",
+      "symbol": "VRXA"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 10.105580693815996,
+      "last_seen_ts": "2026-10-10T00:25:22.813472+00:00",
+      "peak_change_pct": 21.719457013574672,
+      "positive_flow_count": 0,
+      "seen_count": 282,
+      "state": "DISCOVERED",
+      "symbol": "FEAM"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 20.75471698113209,
+      "last_seen_ts": "2026-10-09T16:13:56.802063+00:00",
+      "peak_change_pct": 20.75471698113209,
+      "positive_flow_count": 0,
+      "seen_count": 27,
+      "state": "LATE_SHADOW",
+      "symbol": "CNXU"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 20.306513409961703,
+      "last_seen_ts": "2026-10-10T00:25:22.813472+00:00",
+      "peak_change_pct": 20.306513409961703,
+      "positive_flow_count": 0,
+      "seen_count": 114,
+      "state": "LATE_SHADOW",
+      "symbol": "NCPL"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 20.175438596491247,
+      "last_seen_ts": "2026-10-09T18:23:55.038383+00:00",
+      "peak_change_pct": 20.175438596491247,
+      "positive_flow_count": 0,
+      "seen_count": 3,
+      "state": "LATE_SHADOW",
+      "symbol": "LNAI"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 14.625550660792964,
+      "last_seen_ts": "2026-10-10T00:25:22.813472+00:00",
+      "peak_change_pct": 18.942731277533053,
+      "positive_flow_count": 0,
+      "seen_count": 294,
+      "state": "DISCOVERED",
+      "symbol": "DNA"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 18.739352640545135,
+      "last_seen_ts": "2026-10-09T15:47:38.566974+00:00",
+      "peak_change_pct": 18.739352640545135,
+      "positive_flow_count": 0,
+      "seen_count": 9,
+      "state": "DISCOVERED",
+      "symbol": "YDES"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 15.863636363636346,
+      "last_seen_ts": "2026-10-10T00:25:22.813472+00:00",
+      "peak_change_pct": 18.409090909090907,
+      "positive_flow_count": 0,
+      "seen_count": 294,
+      "state": "DISCOVERED",
+      "symbol": "NVAX"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 14.399999999999991,
+      "last_seen_ts": "2026-10-09T19:31:27.377097+00:00",
+      "peak_change_pct": 17.200000000000017,
+      "positive_flow_count": 0,
+      "seen_count": 21,
+      "state": "DISCOVERED",
+      "symbol": "ZSQR"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 16.40425531914895,
+      "last_seen_ts": "2026-10-09T18:42:20.079736+00:00",
+      "peak_change_pct": 16.40425531914895,
+      "positive_flow_count": 0,
+      "seen_count": 18,
+      "state": "DISCOVERED",
+      "symbol": "ENSC"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 15.294117647058814,
+      "last_seen_ts": "2026-10-09T16:56:33.155483+00:00",
+      "peak_change_pct": 16.078431372549005,
+      "positive_flow_count": 0,
+      "seen_count": 66,
+      "state": "DISCOVERED",
+      "symbol": "ABSI"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 11.111111111111116,
+      "last_seen_ts": "2026-10-09T13:51:17.621332+00:00",
+      "peak_change_pct": 15.811965811965823,
+      "positive_flow_count": 0,
+      "seen_count": 3,
+      "state": "DISCOVERED",
+      "symbol": "NAII"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 5.116959064327498,
+      "last_seen_ts": "2026-10-09T18:59:57.344504+00:00",
+      "peak_change_pct": 15.49707602339183,
+      "positive_flow_count": 0,
+      "seen_count": 6,
+      "state": "DISCOVERED",
+      "symbol": "MGN"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 11.592178770949712,
+      "last_seen_ts": "2026-10-10T00:25:22.813472+00:00",
+      "peak_change_pct": 15.363128491620115,
+      "positive_flow_count": 0,
+      "seen_count": 294,
+      "state": "DISCOVERED",
+      "symbol": "PRME"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 0.0,
+      "last_seen_ts": "2026-10-09T19:19:04.710424+00:00",
+      "peak_change_pct": 15.308988764044962,
+      "positive_flow_count": 0,
+      "seen_count": 27,
+      "state": "DISCOVERED",
+      "symbol": "CANG"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 1.388888888888884,
+      "last_seen_ts": "2026-10-10T00:25:22.813472+00:00",
+      "peak_change_pct": 14.999999999999991,
+      "positive_flow_count": 1,
+      "seen_count": 288,
+      "state": "DISCOVERED",
+      "symbol": "BIYA"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 9.14826498422714,
+      "last_seen_ts": "2026-10-10T00:25:22.813472+00:00",
+      "peak_change_pct": 14.82649842271293,
+      "positive_flow_count": 1,
+      "seen_count": 294,
+      "state": "DISCOVERED",
+      "symbol": "ADCT"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 14.732142857142838,
+      "last_seen_ts": "2026-10-09T14:28:10.435393+00:00",
+      "peak_change_pct": 14.732142857142838,
+      "positive_flow_count": 0,
+      "seen_count": 3,
+      "state": "DISCOVERED",
+      "symbol": "GRAN"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 6.93650793650793,
+      "last_seen_ts": "2026-10-09T15:47:38.566974+00:00",
+      "peak_change_pct": 14.269841269841276,
+      "positive_flow_count": 0,
+      "seen_count": 9,
+      "state": "DISCOVERED",
+      "symbol": "NXAT"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 5.049396267837558,
+      "last_seen_ts": "2026-10-10T00:25:22.813472+00:00",
+      "peak_change_pct": 13.940724478594957,
+      "positive_flow_count": 0,
+      "seen_count": 261,
+      "state": "DISCOVERED",
+      "symbol": "JAGX"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 13.66058906030856,
+      "last_seen_ts": "2026-10-09T17:18:02.536814+00:00",
+      "peak_change_pct": 13.66058906030856,
+      "positive_flow_count": 0,
+      "seen_count": 9,
+      "state": "DISCOVERED",
+      "symbol": "HRTX"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 9.198813056379818,
+      "last_seen_ts": "2026-10-10T00:25:22.813472+00:00",
+      "peak_change_pct": 13.353115727002951,
+      "positive_flow_count": 1,
+      "seen_count": 240,
+      "state": "DISCOVERED",
+      "symbol": "QTEX"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 10.084033613445364,
+      "last_seen_ts": "2026-10-10T00:25:22.813472+00:00",
+      "peak_change_pct": 12.791783380018673,
+      "positive_flow_count": 0,
+      "seen_count": 222,
+      "state": "DISCOVERED",
+      "symbol": "HELP"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 3.1818181818181746,
+      "last_seen_ts": "2026-10-09T18:59:57.344504+00:00",
+      "peak_change_pct": 12.72727272727272,
+      "positive_flow_count": 0,
+      "seen_count": 18,
+      "state": "DISCOVERED",
+      "symbol": "NAMM"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 12.456747404844304,
+      "last_seen_ts": "2026-10-09T14:44:04.535400+00:00",
+      "peak_change_pct": 12.456747404844304,
+      "positive_flow_count": 0,
+      "seen_count": 3,
+      "state": "DISCOVERED",
+      "symbol": "AQB"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 12.385321100917434,
+      "last_seen_ts": "2026-10-09T16:19:24.785777+00:00",
+      "peak_change_pct": 12.385321100917434,
+      "positive_flow_count": 0,
+      "seen_count": 3,
+      "state": "DISCOVERED",
+      "symbol": "FGL"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 12.162162162162172,
+      "last_seen_ts": "2026-10-09T15:52:52.083844+00:00",
+      "peak_change_pct": 12.212212212212226,
+      "positive_flow_count": 0,
+      "seen_count": 51,
+      "state": "DISCOVERED",
+      "symbol": "KLRA"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 0.42030391205947204,
+      "last_seen_ts": "2026-10-10T00:25:22.813472+00:00",
+      "peak_change_pct": 12.156482379566746,
+      "positive_flow_count": 1,
+      "seen_count": 288,
+      "state": "DISCOVERED",
+      "symbol": "SOAR"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 12.10088209715494,
+      "last_seen_ts": "2026-10-09T19:38:21.152687+00:00",
+      "peak_change_pct": 12.10088209715494,
+      "positive_flow_count": 0,
+      "seen_count": 6,
+      "state": "DISCOVERED",
+      "symbol": "XTIA"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 11.423550087873458,
+      "last_seen_ts": "2026-10-10T00:25:22.813472+00:00",
+      "peak_change_pct": 11.950790861159932,
+      "positive_flow_count": 0,
+      "seen_count": 291,
+      "state": "DISCOVERED",
+      "symbol": "CCCC"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 11.818181818181817,
+      "last_seen_ts": "2026-10-09T15:58:10.052251+00:00",
+      "peak_change_pct": 11.818181818181817,
+      "positive_flow_count": 0,
+      "seen_count": 6,
+      "state": "DISCOVERED",
+      "symbol": "CIRC"
+    },
+    {
+      "catalyst": "",
+      "change_pct": 7.777777777777772,
+      "last_seen_ts": "2026-10-10T00:25:22.813472+00:00",
+      "peak_change_pct": 11.746031746031749,
+      "positive_flow_count": 0,
+      "seen_count": 147,
+      "state": "DISCOVERED",
+      "symbol": "RLMD"
+    }
+  ],
+  "data_quality": {
+    "ask_available_count": 31086,
+    "consecutive_1m_bar_rate": 0.11172231872868815,
+    "minute_bar_present_rate": 1.0,
+    "observations": 31086
+  },
+  "execution": {
+    "avg_prearm_trigger_spread_pct": 10.416555247683362
+  },
+  "generated_at": "2026-10-10T00:25:23.547905+00:00",
+  "note": "Research-only. v0.3.3 FROZEN and r2 gates unchanged. TRIGGER_SHADOW is not BUY.",
+  "session": "2026-10-09",
+  "states": {
+    "DISCOVERED": 579,
+    "LATE_SHADOW": 21,
+    "PREARM_FLOW": 34,
+    "TRIGGER_SHADOW": 8
+  },
+  "status": "FAST_PATH_V0.4.1_CALIBRATION_SHADOW"
+}

@@ -1,0 +1,196 @@
+{
+  "version": "SAG30_PAPER_DIAGNOSTIC_V13",
+  "status": "DESCRIPTIVE_SHADOW_NOT_BUY",
+  "checked": 207,
+  "quote_passes": 84,
+  "stages": {
+    "WATCH_OR_REJECT": 123,
+    "EARLY_PAPER_ENTRY_REVIEW": 84
+  },
+  "blockers": {
+    "MISSING_STALE_QUOTE": 41,
+    "SPREAD_OVER_2_PCT": 57,
+    "ASK_PREMIUM_OVER_3_PCT": 37,
+    "MISSING_STALE_TRADE": 106,
+    "NOT_EARLY_UNDER_10": 3
+  },
+  "cases": [
+    {
+      "symbol": "AURA",
+      "entry_ask": 6.54,
+      "discovery_pct": 0.5417956656346812,
+      "entry_spread_pct": 0.9217,
+      "later_trades": 64,
+      "max_observed_pct": 2.1407,
+      "last_observed_pct": 0.4587,
+      "observed_10_plus": false,
+      "observed_30_plus": false
+    },
+    {
+      "symbol": "PSIG",
+      "entry_ask": 4.89,
+      "discovery_pct": 3.731343283582089,
+      "entry_spread_pct": 0.8214,
+      "later_trades": 63,
+      "max_observed_pct": 5.2147,
+      "last_observed_pct": 4.7035,
+      "observed_10_plus": false,
+      "observed_30_plus": false
+    },
+    {
+      "symbol": "BRBS",
+      "entry_ask": 3.88,
+      "discovery_pct": 0.0,
+      "entry_spread_pct": 0.2581,
+      "later_trades": 58,
+      "max_observed_pct": -0.1289,
+      "last_observed_pct": -0.7732,
+      "observed_10_plus": false,
+      "observed_30_plus": false
+    },
+    {
+      "symbol": "NTLA",
+      "entry_ask": 12.62,
+      "discovery_pct": 0.27799841143765214,
+      "entry_spread_pct": 0.1586,
+      "later_trades": 57,
+      "max_observed_pct": 4.794,
+      "last_observed_pct": 4.4374,
+      "observed_10_plus": false,
+      "observed_30_plus": false
+    },
+    {
+      "symbol": "KDK",
+      "entry_ask": 1.7,
+      "discovery_pct": 1.81818181818183,
+      "entry_spread_pct": 0.59,
+      "later_trades": 56,
+      "max_observed_pct": 1.4706,
+      "last_observed_pct": -1.1765,
+      "observed_10_plus": false,
+      "observed_30_plus": false
+    },
+    {
+      "symbol": "BORR",
+      "entry_ask": 4.68,
+      "discovery_pct": 1.4099783080260275,
+      "entry_spread_pct": 0.2139,
+      "later_trades": 52,
+      "max_observed_pct": 2.5641,
+      "last_observed_pct": 2.1368,
+      "observed_10_plus": false,
+      "observed_30_plus": false
+    },
+    {
+      "symbol": "ACB",
+      "entry_ask": 4.46,
+      "discovery_pct": 0.33783783783782884,
+      "entry_spread_pct": 0.2245,
+      "later_trades": 36,
+      "max_observed_pct": 2.2422,
+      "last_observed_pct": 2.13,
+      "observed_10_plus": false,
+      "observed_30_plus": false
+    },
+    {
+      "symbol": "WYFI",
+      "entry_ask": 15.82,
+      "discovery_pct": 0.41296060991105055,
+      "entry_spread_pct": 0.1898,
+      "later_trades": 39,
+      "max_observed_pct": 0.0632,
+      "last_observed_pct": -1.2642,
+      "observed_10_plus": false,
+      "observed_30_plus": false
+    },
+    {
+      "symbol": "METC",
+      "entry_ask": 8.81,
+      "discovery_pct": 3.4665099882491113,
+      "entry_spread_pct": 0.1136,
+      "later_trades": 35,
+      "max_observed_pct": 1.8729,
+      "last_observed_pct": -1.5891,
+      "observed_10_plus": false,
+      "observed_30_plus": false
+    },
+    {
+      "symbol": "SFIX",
+      "entry_ask": 2.78,
+      "discovery_pct": 1.6483516483516425,
+      "entry_spread_pct": 0.3604,
+      "later_trades": 35,
+      "max_observed_pct": 2.3381,
+      "last_observed_pct": 1.9784,
+      "observed_10_plus": false,
+      "observed_30_plus": false
+    },
+    {
+      "symbol": "RCKT",
+      "entry_ask": 2.62,
+      "discovery_pct": 0.0,
+      "entry_spread_pct": 0.3824,
+      "later_trades": 34,
+      "max_observed_pct": 0.1908,
+      "last_observed_pct": -2.2901,
+      "observed_10_plus": false,
+      "observed_30_plus": false
+    },
+    {
+      "symbol": "AI",
+      "entry_ask": 11.65,
+      "discovery_pct": 2.7360988526037078,
+      "entry_spread_pct": 0.0859,
+      "later_trades": 18,
+      "max_observed_pct": 0.6438,
+      "last_observed_pct": -1.03,
+      "observed_10_plus": false,
+      "observed_30_plus": false
+    },
+    {
+      "symbol": "FCEL",
+      "entry_ask": 17.49,
+      "discovery_pct": 1.3921113689095321,
+      "entry_spread_pct": 0.1144,
+      "later_trades": 17,
+      "max_observed_pct": 1.9726,
+      "last_observed_pct": 1.9726,
+      "observed_10_plus": false,
+      "observed_30_plus": false
+    },
+    {
+      "symbol": "CYPH",
+      "entry_ask": 3.01,
+      "discovery_pct": 6.951871657753994,
+      "entry_spread_pct": 0.3328,
+      "later_trades": 11,
+      "max_observed_pct": 0.4983,
+      "last_observed_pct": -3.9867,
+      "observed_10_plus": false,
+      "observed_30_plus": false
+    },
+    {
+      "symbol": "AMPX",
+      "entry_ask": 9.45,
+      "discovery_pct": 0.4787234042553212,
+      "entry_spread_pct": 0.1059,
+      "later_trades": 10,
+      "max_observed_pct": 0.9524,
+      "last_observed_pct": 0.2646,
+      "observed_10_plus": false,
+      "observed_30_plus": false
+    },
+    {
+      "symbol": "MLTX",
+      "entry_ask": 10.79,
+      "discovery_pct": 1.9867549668874052,
+      "entry_spread_pct": 0.0927,
+      "later_trades": 3,
+      "max_observed_pct": -0.1854,
+      "last_observed_pct": -0.1854,
+      "observed_10_plus": false,
+      "observed_30_plus": false
+    }
+  ],
+  "warning": "Quote eligibility is not momentum prediction. Sparse IEX samples; no actual fills, highs, or final outcomes."
+}

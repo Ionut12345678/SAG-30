@@ -1,0 +1,28 @@
+{
+  "authoritative": false,
+  "base_selected_in_scored_pool": 1,
+  "dual_extra_selected": 0,
+  "high_recall_count": 1,
+  "latest_run_id": 439,
+  "max_watchpool_seen_count": 74,
+  "note": "Research-only. Score weights and high-recall routing are challenger hypotheses; v0.3.3 and r2 gates are unchanged.",
+  "persistent_watchpool_symbols": 2172,
+  "scored_symbols": 1,
+  "status": "MULTI_ENGINE_SHADOW",
+  "top_dual_extras": [],
+  "top_ranker": [
+    {
+      "acceleration": 0.0,
+      "base_selected": 1,
+      "change_pct": 9.198813056379818,
+      "dual_selected": 0,
+      "high_recall": 1,
+      "impulse": 0.0,
+      "score": 0.0,
+      "score_rank": 1,
+      "symbol": "QTEX",
+      "turnover": 0.007109487901193248
+    }
+  ],
+  "watchpool_symbols": 3109
+}
