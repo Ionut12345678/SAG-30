@@ -51,6 +51,17 @@ jobs:
             if [ "$status" -ne 2 ]; then exit "$status"; fi
           fi
 
+      - name: Restore isolated SHADOW first-WATCH journal
+        if: ${{ steps.restore.outcome == 'success' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in shadow_first_watch.jsonl shadow_watch_observations.jsonl; do
+            if git cat-file -e FETCH_HEAD:"$file" 2>/dev/null; then
+              git show FETCH_HEAD:"$file" > "state/$file"
+            fi
+          done
+
       - name: Run v0.4.12 EARLY-PREMARKET ROUTING SHADOW
         if: ${{ always() && steps.restore.outcome == 'success' }}
         shell: bash
@@ -143,6 +154,13 @@ jobs:
           python -m radar.v048_conversion_challenger \
             --db state/radar.sqlite3 \
             --out state/v048_conversion_challenger_report.json
+
+      - name: Capture immutable prospective SHADOW first WATCH and source observations
+        if: ${{ always() && steps.restore.outcome == 'success' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m radar.shadow_watch_capture --db state/radar.sqlite3 --state-dir state
 
       - name: Publish pending signal batch to ChatGPT bridge
         id: bridge
@@ -292,6 +310,9 @@ jobs:
             exit 1
           fi
           cp state/health.json /tmp/radar-state/health.json
+          for file in shadow_first_watch.jsonl shadow_watch_observations.jsonl shadow_watch_status.json; do
+            if [ -f "state/$file" ]; then cp "state/$file" "/tmp/radar-state/$file"; fi
+          done
           cp state/early_paper_extra_report_v11.json /tmp/radar-state/early_paper_extra_report_v11.json
           cp state/early_paper_outcome_report_v12.json /tmp/radar-state/early_paper_outcome_report_v12.json
           cp state/early_paper_diagnostic_v13.json /tmp/radar-state/early_paper_diagnostic_v13.json
@@ -317,6 +338,9 @@ jobs:
           git remote add origin "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git"
           git config http.extraheader "$(git -C "$GITHUB_WORKSPACE" config --get http.https://github.com/.extraheader)"
           git add radar.sqlite3.gz health.json semantic_shadow_report.json candidate_v034_report.json winner_recall_report.json multi_engine_report.json
+          for file in shadow_first_watch.jsonl shadow_watch_observations.jsonl shadow_watch_status.json; do
+            if [ -f "$file" ]; then git add "$file"; fi
+          done
           git add early_paper_extra_report_v11.json early_paper_outcome_report_v12.json early_paper_diagnostic_v13.json early_paper_momentum_shadow_v14.json early_paper_matched_outcome_v15.json
           if [ -f fast_path_report.json ]; then git add fast_path_report.json; fi
           if [ -f fast_path_v047_validated_report.json ]; then git add fast_path_v047_validated_report.json; fi
