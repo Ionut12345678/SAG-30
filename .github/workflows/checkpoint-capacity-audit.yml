@@ -1,0 +1,37 @@
+name: SAG-30 checkpoint capacity audit (read-only)
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '40 23 * * 1-5'
+permissions:
+  contents: read
+jobs:
+  capacity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify capacity audit
+        run: python -m unittest discover -s tests -p 'test_checkpoint_capacity_audit.py' -v
+      - name: Read current and previous published manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p capacity-audit
+          git fetch --depth=2 origin radar-state
+          git show FETCH_HEAD:checkpoint.json > capacity-audit/current.json
+          if git rev-parse 'FETCH_HEAD^' >/dev/null 2>&1; then
+            git show 'FETCH_HEAD^:checkpoint.json' > capacity-audit/previous.json || true
+          fi
+      - name: Diagnose parts versus total growth
+        run: |
+          python -m radar.checkpoint_capacity_audit --manifest capacity-audit/current.json --previous capacity-audit/previous.json --output capacity-audit/report.json
+          cat capacity-audit/report.json >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sag30-checkpoint-capacity-diagnostic
+          path: capacity-audit/report.json
+          retention-days: 14
