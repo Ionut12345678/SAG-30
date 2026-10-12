@@ -67,3 +67,20 @@ class PublicationTests(unittest.TestCase):
         self.env.update(PATH=str(tools)+os.pathsep+os.environ['PATH'],ACK_MARKER=str(self.root/'ack'))
         result=self.publish();self.assertEqual(result.returncode,0,result.stderr)
         self.assertIn('SAG30_CHECKPOINT_PUSH_PASS',result.stdout)
+
+    def test_journal_failure_or_skipped_recovery_blocks_collection(self):
+        import re
+        workflow=Path('.github/workflows/radar.yml').read_text()
+        block=workflow.split('      - name: Observe one prospective cycle\n',1)[1].split('        id: scan',1)[0]
+        expression=block.split('if: ${{',1)[1].split('}}',1)[0].strip()
+        def ready(restore,journals,commit,recovery,cancelled=False):
+            values={'steps.restore.outcome':restore,'steps.journals.outcome':journals,'steps.restore.outputs.commit':commit,'steps.recovery.outcome':recovery}
+            parsed=expression.replace('!cancelled()',repr(not cancelled)).replace('always()','True').replace('&&','and').replace('||','or')
+            for token,value in values.items():parsed=parsed.replace(token,repr(value))
+            return eval(parsed,{'__builtins__':{}},{})
+        self.assertFalse(ready('success','failure','a'*40,'skipped'))
+        self.assertFalse(ready('success','success','a'*40,'skipped'))
+        self.assertFalse(ready('success','success','a'*40,'failure'))
+        self.assertTrue(ready('success','success','a'*40,'success'))
+        self.assertTrue(ready('success','success','NONE','skipped'))
+        self.assertFalse(ready('success','success','a'*40,'success',cancelled=True))

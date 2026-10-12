@@ -5,7 +5,7 @@
     "live_repaired_workflow": "NOT_DEPLOYED",
     "local_git_publication_lease_and_ack_loss": "PASS",
     "recovery_api_download": "MOCKED",
-    "tests_passed": 160,
+    "tests_passed": 173,
     "yaml_and_shell_syntax": "PASS"
   },
   "compressed_bytes": 98976085,
@@ -163,6 +163,25 @@
       "bridge_rc": 0,
       "scan_rc": 0
     }
+  },
+  "review_validation": {
+    "additional_fixes": [
+      "required journal/recovery success before scanning",
+      "journal inventory/hash and immutable prefix validation",
+      "published append-only evidence and global first_seen preservation checks",
+      "staging IO failure cleanup",
+      "nonpositive cadence and missing FAST-PATH evidence diagnostics",
+      "isolated GitHub artifact ZIP API contract test"
+    ],
+    "all_45_table_hashes_unchanged": true,
+    "auxiliary_transport_workflows": 20,
+    "baseline_pr_commit": "8117a3991af6d5f226c4e098424dffcd92846147",
+    "elapsed_seconds": 16.45,
+    "frozen_model_crypto_pr71": "UNCHANGED",
+    "live_deployment": "NOT_PERFORMED",
+    "published_audit_extension_guard": "PASS_REAL_SNAPSHOT",
+    "reviewed_original_files": 30,
+    "unrelated_modifications_found": 0
   },
   "source_commit": "604c23b66d6688a37fed50933cb7bb06435cec6a",
   "source_free_pages": 904,

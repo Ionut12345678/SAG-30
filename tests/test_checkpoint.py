@@ -139,3 +139,11 @@ class CheckpointTests(unittest.TestCase):
         self.assertEqual(result['checkpoint']['publication'],'PREPARED_NOT_CONFIRMED')
         self.assertEqual(result['health'],'DEGRADED')
         self.assertEqual(result['fast_scout']['status'],'DATA_GAP')
+
+    def test_journals_are_hashed_before_manifest_completion(self):
+        journals=self.root/'journals';journals.mkdir()
+        path=journals/'shadow_first_watch.jsonl';path.write_text('{"first_seen":"immutable"}\n')
+        out=self.root/'journal-checkpoint'
+        manifest=prepare(self.db_path,out,journal_dir=journals)
+        self.assertEqual(manifest['journals'],[{'name':path.name,'bytes':path.stat().st_size,'sha256':file_sha(path)}])
+        self.assertEqual((out/path.name).read_bytes(),path.read_bytes())

@@ -49,6 +49,7 @@ jobs:
           fi
 
       - name: Restore isolated SHADOW first-WATCH journal
+        id: journals
         if: ${{ steps.restore.outcome == 'success' }}
         shell: bash
         run: |
@@ -61,7 +62,7 @@ jobs:
 
       - name: Recover unpublished prospective cycle before scanning
         id: recovery
-        if: ${{ steps.restore.outcome == 'success' && steps.restore.outputs.commit != 'NONE' }}
+        if: ${{ steps.restore.outcome == 'success' && steps.journals.outcome == 'success' && steps.restore.outputs.commit != 'NONE' }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -71,7 +72,7 @@ jobs:
             --out state/radar.sqlite3 --status state/recovery-status.json --journal-dir state
 
       - name: Run v0.4.12 EARLY-PREMARKET ROUTING SHADOW
-        if: ${{ always() && steps.restore.outcome == 'success' && steps.recovery.outcome != 'failure' && steps.recovery.outcome != 'cancelled' }}
+        if: ${{ always() && !cancelled() && steps.restore.outcome == 'success' && steps.journals.outcome == 'success' && (steps.restore.outputs.commit == 'NONE' || steps.recovery.outcome == 'success') }}
         shell: bash
         run: |
           set +e
@@ -95,7 +96,7 @@ jobs:
           fi
 
       - name: Observe one prospective cycle
-        if: ${{ always() && steps.restore.outcome == 'success' && steps.recovery.outcome != 'failure' && steps.recovery.outcome != 'cancelled' }}
+        if: ${{ always() && !cancelled() && steps.restore.outcome == 'success' && steps.journals.outcome == 'success' && (steps.restore.outputs.commit == 'NONE' || steps.recovery.outcome == 'success') }}
         id: scan
         env:
           ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
@@ -144,7 +145,7 @@ jobs:
           fi
 
       - name: Run v0.4.9 ROLLING PRECURSOR SHADOW
-        if: ${{ always() && steps.restore.outcome == 'success' && steps.recovery.outcome != 'failure' && steps.recovery.outcome != 'cancelled' }}
+        if: ${{ always() && steps.restore.outcome == 'success' && steps.journals.outcome == 'success' && (steps.restore.outputs.commit == 'NONE' || steps.recovery.outcome == 'success') }}
         shell: bash
         run: |
           python -m radar.v049_rolling_precursor \
@@ -152,7 +153,7 @@ jobs:
             --out state/v049_rolling_precursor_report.json
 
       - name: Run v0.4.11 COHERENT-WINDOW PRECURSOR SHADOW
-        if: ${{ always() && steps.restore.outcome == 'success' && steps.recovery.outcome != 'failure' && steps.recovery.outcome != 'cancelled' }}
+        if: ${{ always() && steps.restore.outcome == 'success' && steps.journals.outcome == 'success' && (steps.restore.outputs.commit == 'NONE' || steps.recovery.outcome == 'success') }}
         shell: bash
         run: |
           python -m radar.v0411_coherent_window \
@@ -160,7 +161,7 @@ jobs:
             --out state/v0411_coherent_window_report.json
 
       - name: Run v0.4.8 CONVERSION CHALLENGER SHADOW
-        if: ${{ always() && steps.restore.outcome == 'success' && steps.recovery.outcome != 'failure' && steps.recovery.outcome != 'cancelled' }}
+        if: ${{ always() && steps.restore.outcome == 'success' && steps.journals.outcome == 'success' && (steps.restore.outputs.commit == 'NONE' || steps.recovery.outcome == 'success') }}
         shell: bash
         run: |
           python -m radar.v048_conversion_challenger \
@@ -168,7 +169,7 @@ jobs:
             --out state/v048_conversion_challenger_report.json
 
       - name: Capture immutable prospective SHADOW first WATCH and source observations
-        if: ${{ always() && steps.restore.outcome == 'success' && steps.recovery.outcome != 'failure' && steps.recovery.outcome != 'cancelled' }}
+        if: ${{ always() && steps.restore.outcome == 'success' && steps.journals.outcome == 'success' && (steps.restore.outputs.commit == 'NONE' || steps.recovery.outcome == 'success') }}
         shell: bash
         run: |
           set -euo pipefail
@@ -237,7 +238,7 @@ jobs:
           exit 0
 
       - name: Build machine-readable heartbeat
-        if: ${{ always() && steps.restore.outcome == 'success' && steps.recovery.outcome != 'failure' && steps.recovery.outcome != 'cancelled' }}
+        if: ${{ always() && steps.restore.outcome == 'success' && steps.journals.outcome == 'success' && (steps.restore.outputs.commit == 'NONE' || steps.recovery.outcome == 'success') }}
         shell: bash
         run: |
           python -m radar.health \
@@ -249,7 +250,7 @@ jobs:
             --fast-path-mode "${{ steps.fast_path.outputs.mode || 'UNKNOWN' }}"
 
       - name: Build semantic SHADOW calibration report
-        if: ${{ always() && steps.restore.outcome == 'success' && steps.recovery.outcome != 'failure' && steps.recovery.outcome != 'cancelled' }}
+        if: ${{ always() && steps.restore.outcome == 'success' && steps.journals.outcome == 'success' && (steps.restore.outputs.commit == 'NONE' || steps.recovery.outcome == 'success') }}
         shell: bash
         run: |
           python -m radar.shadow_report \
@@ -257,7 +258,7 @@ jobs:
             --out state/semantic_shadow_report.json
 
       - name: Build v0.3.4 candidate SHADOW report
-        if: ${{ always() && steps.restore.outcome == 'success' && steps.recovery.outcome != 'failure' && steps.recovery.outcome != 'cancelled' }}
+        if: ${{ always() && steps.restore.outcome == 'success' && steps.journals.outcome == 'success' && (steps.restore.outputs.commit == 'NONE' || steps.recovery.outcome == 'success') }}
         shell: bash
         run: |
           python -m radar.candidate_v034_report \
@@ -265,7 +266,7 @@ jobs:
             --out state/candidate_v034_report.json
 
       - name: Build winner recall audit
-        if: ${{ always() && steps.restore.outcome == 'success' && steps.recovery.outcome != 'failure' && steps.recovery.outcome != 'cancelled' }}
+        if: ${{ always() && steps.restore.outcome == 'success' && steps.journals.outcome == 'success' && (steps.restore.outputs.commit == 'NONE' || steps.recovery.outcome == 'success') }}
         shell: bash
         run: |
           python -m radar.winner_recall_report \
@@ -273,7 +274,7 @@ jobs:
             --out state/winner_recall_report.json
 
       - name: Build multi-engine SHADOW report
-        if: ${{ always() && steps.restore.outcome == 'success' && steps.recovery.outcome != 'failure' && steps.recovery.outcome != 'cancelled' }}
+        if: ${{ always() && steps.restore.outcome == 'success' && steps.journals.outcome == 'success' && (steps.restore.outputs.commit == 'NONE' || steps.recovery.outcome == 'success') }}
         shell: bash
         run: |
           python -m radar.multi_engine_report \
@@ -281,45 +282,42 @@ jobs:
             --out state/multi_engine_report.json
 
       - name: Build real early PAPER quote report
-        if: ${{ always() && steps.restore.outcome == 'success' && steps.recovery.outcome != 'failure' && steps.recovery.outcome != 'cancelled' }}
+        if: ${{ always() && steps.restore.outcome == 'success' && steps.journals.outcome == 'success' && (steps.restore.outputs.commit == 'NONE' || steps.recovery.outcome == 'success') }}
         shell: bash
         run: |
           python -m radar.early_paper_extra_report_v11 --db state/radar.sqlite3 --out state/early_paper_extra_report_v11.json
 
       - name: Build seven-day early PAPER outcomes
-        if: ${{ always() && steps.restore.outcome == 'success' && steps.recovery.outcome != 'failure' && steps.recovery.outcome != 'cancelled' }}
+        if: ${{ always() && steps.restore.outcome == 'success' && steps.journals.outcome == 'success' && (steps.restore.outputs.commit == 'NONE' || steps.recovery.outcome == 'success') }}
         shell: bash
         run: |
           python -m radar.early_paper_outcome_report_v12 --db state/radar.sqlite3 --out state/early_paper_outcome_report_v12.json
 
       - name: Build PAPER quote-versus-momentum diagnostics
-        if: ${{ always() && steps.restore.outcome == 'success' && steps.recovery.outcome != 'failure' && steps.recovery.outcome != 'cancelled' }}
+        if: ${{ always() && steps.restore.outcome == 'success' && steps.journals.outcome == 'success' && (steps.restore.outputs.commit == 'NONE' || steps.recovery.outcome == 'success') }}
         shell: bash
         run: |
           python -m radar.early_paper_diagnostic_v13 --db state/radar.sqlite3 --out state/early_paper_diagnostic_v13.json
 
       - name: Build matched momentum and turnover SHADOW audit
-        if: ${{ always() && steps.restore.outcome == 'success' && steps.recovery.outcome != 'failure' && steps.recovery.outcome != 'cancelled' }}
+        if: ${{ always() && steps.restore.outcome == 'success' && steps.journals.outcome == 'success' && (steps.restore.outputs.commit == 'NONE' || steps.recovery.outcome == 'success') }}
         shell: bash
         run: |
           python -m radar.early_paper_momentum_shadow_v14 --db state/radar.sqlite3 --out state/early_paper_momentum_shadow_v14.json
 
       - name: Build PAPER matched forward outcomes
-        if: ${{ always() && steps.restore.outcome == 'success' && steps.recovery.outcome != 'failure' && steps.recovery.outcome != 'cancelled' }}
+        if: ${{ always() && steps.restore.outcome == 'success' && steps.journals.outcome == 'success' && (steps.restore.outputs.commit == 'NONE' || steps.recovery.outcome == 'success') }}
         shell: bash
         run: |
           python -m radar.early_paper_matched_outcome_v15 --db state/radar.sqlite3 --out state/early_paper_matched_outcome_v15.json
 
       - name: Prepare lossless bounded checkpoint and size alerts
         id: checkpoint
-        if: ${{ always() && steps.restore.outcome == 'success' && steps.recovery.outcome != 'failure' && steps.recovery.outcome != 'cancelled' }}
+        if: ${{ always() && steps.restore.outcome == 'success' && steps.journals.outcome == 'success' && (steps.restore.outputs.commit == 'NONE' || steps.recovery.outcome == 'success') }}
         run: |
           python -m radar.checkpoint prepare --db state/radar.sqlite3 \
-            --out state/checkpoint --health state/health.json \
+            --out state/checkpoint --health state/health.json --journals state \
             --base-commit "${{ steps.restore.outputs.commit }}" --run-id "$GITHUB_RUN_ID"
-          for file in shadow_first_watch.jsonl shadow_watch_observations.jsonl shadow_watch_status.json; do
-            if [ -f "state/$file" ]; then cp "state/$file" "state/checkpoint/$file"; fi
-          done
 
       - name: Persist audit state and heartbeat
         id: persist

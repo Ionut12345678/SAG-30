@@ -22,6 +22,7 @@ PART_BYTES = 64 * MIB
 BLOB_LIMIT = 95 * MIB
 MANIFEST = 'checkpoint.json'
 FORMAT = 'sag30-sqlite-gzip-parts-v1'
+JOURNALS = ('shadow_first_watch.jsonl', 'shadow_watch_observations.jsonl', 'shadow_watch_status.json')
 
 
 def file_sha(path):
@@ -55,7 +56,7 @@ def check_db(path):
         return counts
 
 
-def prepare(db_path, output, health_path=None, base_commit=None, run_id=None, part_bytes=PART_BYTES):
+def prepare(db_path, output, health_path=None, base_commit=None, run_id=None, part_bytes=PART_BYTES, journal_dir=None):
     if not 0 < part_bytes < BLOB_LIMIT:
         raise ValueError('Each checkpoint part must be below the 95 MiB blob limit')
     db_path, output = Path(db_path), Path(output)
@@ -84,11 +85,18 @@ def prepare(db_path, output, health_path=None, base_commit=None, run_id=None, pa
                 (output / name).write_bytes(block)
                 parts.append({'name': name, 'bytes': len(block), 'sha256': hashlib.sha256(block).hexdigest()})
                 index += 1
+        journals = []
+        if journal_dir:
+            for name in JOURNALS:
+                path = Path(journal_dir) / name
+                if path.is_file():
+                    shutil.copyfile(path, output / name)
+                    journals.append({'name': name, 'bytes': (output / name).stat().st_size, 'sha256': file_sha(output / name)})
         manifest = {'format': FORMAT, 'created_ts': datetime.now(timezone.utc).isoformat(),
                     'base_commit': base_commit, 'workflow_run_id': run_id,
                     'database_bytes': snapshot.stat().st_size, 'database_sha256': db_sha,
                     'compressed_bytes': compressed_bytes, 'compressed_sha256': file_sha(compressed),
-                    'part_limit_bytes': part_bytes, 'parts': parts, 'table_counts': counts,
+                    'part_limit_bytes': part_bytes, 'parts': parts, 'journals': journals, 'table_counts': counts,
                     'size_status': size_status(compressed_bytes), 'audit_retention': 'ALL_ROWS_NO_PRUNING'}
         # Manifest is the completion marker; failed preparations cannot appear complete.
         (output / MANIFEST).write_text(json.dumps(manifest, indent=2, sort_keys=True) + '\n')
@@ -123,6 +131,11 @@ def validate_manifest(manifest):
             raise ValueError('Invalid checkpoint checksum')
     if sum(p['bytes'] for p in manifest['parts']) != manifest['compressed_bytes']:
         raise ValueError('Checkpoint part sizes do not match manifest')
+    names = set()
+    for journal in manifest.get('journals', []):
+        if journal['name'] not in JOURNALS or journal['name'] in names or journal['bytes'] < 0 or not re.fullmatch('[a-f0-9]{64}',journal['sha256']):
+            raise ValueError('Invalid journal manifest')
+        names.add(journal['name'])
 
 
 def git_blob(repo, ref, name, destination):
@@ -209,6 +222,7 @@ def main():
     p.add_argument('--db', required=True)
     p.add_argument('--out', required=True)
     p.add_argument('--health')
+    p.add_argument('--journals')
     p.add_argument('--base-commit')
     p.add_argument('--run-id')
     p = commands.add_parser('restore')
@@ -218,7 +232,7 @@ def main():
     p.add_argument('--out', required=True)
     args = parser.parse_args()
     if args.command == 'prepare':
-        prepare(args.db,args.out,args.health,args.base_commit,args.run_id)
+        prepare(args.db,args.out,args.health,args.base_commit,args.run_id,journal_dir=args.journals)
     elif args.directory:
         restore_directory(args.directory,args.out)
     else:

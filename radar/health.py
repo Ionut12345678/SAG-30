@@ -45,7 +45,7 @@ def build(db_path, scan_rc=0, bridge_rc=0, fast_path_outcome=None, cadence_targe
         'candidate_v034': {'status':'NO_DATA','states':{},'lanes':{},'signals_total':0,'last_signal':None},
         'candidate_v034r2': {'status':'NO_DATA','states':{},'signals_total':0,'last_signal':None},
         'fast_scout': {'status':'NO_DATA'},
-        'fast_path': {'status':'NO_DATA', 'workflow_outcome':fast_path_outcome, 'mode':fast_path_mode},
+        'fast_path': {'status':('FAIL' if fast_path_outcome in ('failure','cancelled') else 'NOT_RUN' if fast_path_outcome == 'skipped' else 'NO_DATA'), 'workflow_outcome':fast_path_outcome, 'mode':fast_path_mode},
         'cadence': {'target_seconds':cadence_target_seconds, 'status':'NO_PREVIOUS_RUN'},
     }
     current_et=now.astimezone(ZoneInfo('America/New_York'))
@@ -283,7 +283,7 @@ def build(db_path, scan_rc=0, bridge_rc=0, fast_path_outcome=None, cadence_targe
             if previous:
                 result['cadence_gap_seconds'] = round((datetime.fromisoformat(started)-datetime.fromisoformat(previous[0])).total_seconds(), 3)
                 previous_et = datetime.fromisoformat(previous[0]).astimezone(ZoneInfo('America/New_York'))
-                result['cadence']['status'] = ('SESSION_BOUNDARY' if previous_et.date() != datetime.fromisoformat(started).astimezone(ZoneInfo('America/New_York')).date()
+                result['cadence']['status'] = ('INVALID_SEQUENCE' if result['cadence_gap_seconds'] <= 0 else 'SESSION_BOUNDARY' if previous_et.date() != datetime.fromisoformat(started).astimezone(ZoneInfo('America/New_York')).date()
                     else 'MISSED_TARGET' if result['cadence_gap_seconds'] > cadence_target_seconds else 'WITHIN_TARGET')
                 result['cadence']['observed_gap_seconds'] = result['cadence_gap_seconds']
             if _table_exists(db, 'fast_path_events'):
@@ -329,7 +329,9 @@ def build(db_path, scan_rc=0, bridge_rc=0, fast_path_outcome=None, cadence_targe
             result['checkpoint_freshness']='STALE_OUTSIDE_SESSION'
         else:
             result['checkpoint_freshness']='CURRENT' if result['checkpoint_is_current_cycle'] else 'STALE'
-        if observation_window and (not result['checkpoint_is_current_cycle'] or result['fast_scout']['status'] == 'DATA_GAP' or result['cadence']['status'] == 'MISSED_TARGET') and result['health'] == 'PASS':
+        if observation_window and (not result['checkpoint_is_current_cycle'] or result['fast_scout']['status'] == 'DATA_GAP' or result['cadence']['status'] in ('MISSED_TARGET','INVALID_SEQUENCE')) and result['health'] == 'PASS':
+            result['health'] = 'DEGRADED'
+        if observation_window and result['checkpoint_is_current_cycle'] and fast_path_outcome == 'success' and fast_path_mode == 'MINUTE_LOOP' and result['fast_path']['status'] in ('NO_DATA','NO_CURRENT_EVIDENCE') and result['health'] == 'PASS':
             result['health'] = 'DEGRADED'
         recovery_path = path.parent / 'recovery-status.json'
         if recovery_path.exists():

@@ -28,7 +28,7 @@ All in-repository state consumers now use the same verified restore module. It s
 
 Publication uses a force-with-lease tied to the exact restored `radar-state` ref, never unconditional force. A concurrent writer cannot be silently overwritten. A lost push acknowledgement is recognized by checking whether the remote already holds the identical outgoing commit before retrying. Failed publication uploads `sag30-checkpoint-recovery` with the complete prepared database and first-WATCH journals; self-dispatch stops. The watchdog can restart later.
 
-Before the next scan, `radar.recovery` looks for a nonexpired artifact from `radar.yml` on main whose manifest parent exactly equals the restored state ref and whose recorded run matches the artifact's run. It verifies/restores the full snapshot and journals before collecting new observations. Artifacts from unrelated parents/branches are not silently merged. API failures, recent expired artifacts, corrupt artifacts, or unresolved recent forensic snapshots fail closed. The workflow requires `actions: read`, uses its existing GITHUB_TOKEN, and needs no new secret.
+Before the next scan, `radar.recovery` looks for a nonexpired artifact from `radar.yml` on main whose manifest parent exactly equals the restored state ref and whose recorded run matches the artifact's run. It verifies/restores the full snapshot and journals before collecting new observations. It additionally rejects removal/modification of published append-only evidence and changes to existing global first_seen/first_radar values. First-WATCH journals must extend the published byte prefix; new manifests inventory their sizes/hashes. Legacy v1 manifests without journal inventories remain readable, with prefix protection. Artifacts from unrelated parents/branches are not silently merged. API failures, recent expired artifacts, corrupt artifacts, or unresolved recent forensic snapshots fail closed. The workflow requires `actions: read`, uses its existing GITHUB_TOKEN, and needs no new secret.
 
 Preparation failures upload `sag30-checkpoint-forensic` (raw database/WAL plus available first-WATCH journals/health) for operator adjudication. Automated recovery intentionally cannot declare a corrupt raw database trustworthy. Retention is requested for **90 days**, subject to repository policy and artifact quotas. Export recovery artifacts to durable external storage before expiration. If both publication and artifact upload fail, remote preservation is unconfirmed; alerting/Actions failure notifications must be monitored. Runner cancellation before upload can also leave a gap. This PR cannot restore observations from old failed runners that never saved an artifact.
 
@@ -56,3 +56,47 @@ Check the confirmed publication receipt, fetch/restore that exact ref, inspect h
 The last saved snapshot still has DATA_GAP/stale quotes and a 492.122-second stored cadence gap. Local restoration is not a fix for provider entitlement/quote freshness or scheduler latency. No Alpaca secrets were available for live validation, and GitHub-hosted artifact upload/recovery and post-merge cadence have not run this new implementation. Old unrecoverable gaps remain gaps.
 
 Sharding removes the immediate single-blob ceiling, but total database/network cost still grows. GitHub pack/repository limits, auxiliary journals, artifact storage costs/retention and the 12-minute job budget remain operational constraints. Plan a separately reviewed durable audit archive/hot-state migration before total checkpoints become large; do not solve that by dropping audit rows. Generic auxiliary file-size limits are not changed by the SQLite format.
+
+
+## Pre-deployment review of PR #73
+
+Reviewed original head `8117a3991af6d5f226c4e098424dffcd92846147` against main `d4d33f23a65839933235700a46d879ec377bb7b5`: all 30 changed files were inspected. All 20 auxiliary workflows require multipart compatibility. Comparing parsed YAML and normalized restore blocks found no unrelated research commands, report destinations, triggers, job settings or permission changes in those original auxiliary diffs. Nothing unrelated needed removal; reverting those restore changes would break the readers when multipart state is published.
+
+Review fixes: a skipped recovery after a failed journal step can no longer authorize scanning or checkpoint preparation; success is required for existing state, with a separate fresh-initialization case. Journals now join the hashed checkpoint inventory, and recovery checks published audit/first_seen invariants before replacement. Copy failures leave the database intact and clean up staging files. Nonpositive cadence gaps are INVALID_SEQUENCE, and missing FAST-PATH evidence/failure is reported separately from a successful FAST-SCOUT or a storage-size warning.
+
+The existing rank-ledger test workflow also gains an isolated synthetic artifact contract job. It uploads a tiny checkpoint and downloads it through the exact GitHub artifact ZIP API route to verify layout, SQLite restoration and journal hashes without market secrets, production writes or model signals. Its actions:read permission is job-local. This is additional checkpoint validation, not a production deployment or a research-rule change.
+
+Per-file review inventory:
+
+| File | Review result |
+|---|---|
+| `.github/workflows/benchmark-probe.yml` | Required checkpoint transport only; original research/report/trigger/permissions unchanged |
+| `.github/workflows/broad-scout-precursor-dev.yml` | Required checkpoint transport only; original research/report/trigger/permissions unchanged |
+| `.github/workflows/compression-probe.yml` | Required checkpoint transport only; original research/report/trigger/permissions unchanged |
+| `.github/workflows/dq-diagnostic.yml` | Required checkpoint transport only; original research/report/trigger/permissions unchanged |
+| `.github/workflows/precursor-case-probe.yml` | Required checkpoint transport only; original research/report/trigger/permissions unchanged |
+| `.github/workflows/precursor-winner-gate-audit-dev.yml` | Required checkpoint transport only; original research/report/trigger/permissions unchanged |
+| `.github/workflows/radar.yml` | Persistence/recovery wiring, readiness gates, bounded state, alerts and publication receipts; rollout main-only |
+| `.github/workflows/rank-ledger-tests.yml` | Required restore compatibility; additional isolated real-artifact contract CI |
+| `.github/workflows/scout-fastpath-handoff-dev.yml` | Required checkpoint transport only; original research/report/trigger/permissions unchanged |
+| `.github/workflows/shadow-prospective-ledger.yml` | Required checkpoint transport only; original research/report/trigger/permissions unchanged |
+| `.github/workflows/topp-cross-session-dev.yml` | Required checkpoint transport only; original research/report/trigger/permissions unchanged |
+| `.github/workflows/topp-reconstruction-dev.yml` | Required checkpoint transport only; original research/report/trigger/permissions unchanged |
+| `.github/workflows/topp-reconstruction-v2-dev.yml` | Required checkpoint transport only; original research/report/trigger/permissions unchanged |
+| `.github/workflows/v0410-routing-rescue-dev.yml` | Required checkpoint transport only; original research/report/trigger/permissions unchanged |
+| `.github/workflows/v0411-clean-acceleration-dev.yml` | Required checkpoint transport only; original research/report/trigger/permissions unchanged |
+| `.github/workflows/v0411-coherent-window-dev.yml` | Required checkpoint transport only; original research/report/trigger/permissions unchanged |
+| `.github/workflows/v048-compare.yml` | Required checkpoint transport only; original research/report/trigger/permissions unchanged |
+| `.github/workflows/v048-replay-benchmark.yml` | Required checkpoint transport only; original research/report/trigger/permissions unchanged |
+| `.github/workflows/v049-precursor-dev.yml` | Required checkpoint transport only; original research/report/trigger/permissions unchanged |
+| `.github/workflows/v049-sbfm-dki-reconstruction.yml` | Required checkpoint transport only; original research/report/trigger/permissions unchanged |
+| `.github/workflows/winner-audit-dev.yml` | Required checkpoint transport only; original research/report/trigger/permissions unchanged |
+| `docs/CHECKPOINT_RECOVERY.md` | Diagnosis, provenance, recovery/rollout instructions and remaining limitations |
+| `radar/checkpoint.py` | Full WAL-aware backup, bounded parts, hashes, journal inventory, atomic restore and legacy compatibility |
+| `radar/health.py` | Operational diagnostics only; DATA_GAP/storage/cadence/FAST-PATH remain distinct |
+| `radar/recovery.py` | Parent/run provenance, published audit and first_seen protection, journal-prefix checks, fail-closed recovery |
+| `reports/checkpoint_repair_validation_20261012.json` | Read-only checkpoint row counts, logical hashes and explicitly scoped validation evidence |
+| `tests/test_checkpoint.py` | Regression/integration fixtures; no production writes or market requests |
+| `tests/test_checkpoint_health.py` | Regression/integration fixtures; no production writes or market requests |
+| `tests/test_checkpoint_publication.py` | Regression/integration fixtures; no production writes or market requests |
+| `tests/test_checkpoint_recovery.py` | Regression/integration fixtures; no production writes or market requests |
