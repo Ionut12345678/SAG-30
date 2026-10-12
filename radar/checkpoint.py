@@ -105,6 +105,8 @@ def prepare(db_path, output, health_path=None, base_commit=None, run_id=None, pa
         health['checkpoint'] = {key: manifest[key] for key in ('format','created_ts','database_bytes','compressed_bytes','size_status','database_sha256','workflow_run_id')}
         health['checkpoint'].update(part_count=len(parts), largest_part_bytes=max(p['bytes'] for p in parts),
                                     publication='PREPARED_NOT_CONFIRMED', audit_retention=manifest['audit_retention'])
+        if manifest['size_status'] != 'OK':
+            health['reason_codes'] = sorted(set(health.get('reason_codes', []) + ['CHECKPOINT_' + manifest['size_status']]))
         if manifest['size_status'] != 'OK' and health.get('health') == 'PASS':
             health['health'] = 'DEGRADED'
         # Emit the same augmented heartbeat locally and in the outgoing snapshot.
