@@ -54,6 +54,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          if git cat-file -e "${{ steps.restore.outputs.commit }}:health.json" 2>/dev/null; then
+            git show "${{ steps.restore.outputs.commit }}:health.json" > state/previous-health.json
+          fi
           for file in shadow_first_watch.jsonl shadow_watch_observations.jsonl; do
             if git cat-file -e "${{ steps.restore.outputs.commit }}:$file" 2>/dev/null; then
               git show "${{ steps.restore.outputs.commit }}:$file" > "state/$file"
@@ -445,16 +448,16 @@ jobs:
           wait_seconds="$(python - <<'PY'
           import json, sqlite3
           from datetime import datetime, timezone
+          from radar.cadence import dispatch_wait
           target=int(json.load(open('config/radar.json')).get('cadence_target_seconds',300))
           db=sqlite3.connect('state/radar.sqlite3')
-          row=db.execute('SELECT started FROM runs ORDER BY id DESC LIMIT 1').fetchone()
+          rows=db.execute('SELECT started FROM runs ORDER BY id DESC LIMIT 2').fetchall()
           db.close()
-          if not row:
-              print(0)
-          else:
-              started=datetime.fromisoformat(row[0])
-              elapsed=(datetime.now(timezone.utc)-started).total_seconds()
-              print(max(0,int(target-elapsed)))
+          prior=json.load(open('state/previous-health.json')) if __import__('pathlib').Path('state/previous-health.json').exists() else {}
+          compensation=prior.get('cadence',{}).get('dispatch_compensation_seconds',0)
+          plan=dispatch_wait([r[0] for r in rows], datetime.now(timezone.utc), target, compensation)
+          print(plan['wait_seconds'])
+          print('SAG30_CADENCE_PLAN=' + json.dumps(plan), file=__import__('sys').stderr)
           PY
           )"
           if [ "$wait_seconds" -gt 0 ]; then

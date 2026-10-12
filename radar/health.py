@@ -33,6 +33,7 @@ def build(db_path, scan_rc=0, bridge_rc=0, fast_path_outcome=None, cadence_targe
         'spec_sha256': SPEC_SHA256,
         'workflow': {'scan_rc': int(scan_rc), 'bridge_rc': int(bridge_rc)},
         'health': 'FAIL' if int(scan_rc) else ('DEGRADED' if int(bridge_rc) else 'PASS'),
+        'reason_codes': [],
         'latest_run': None,
         'observations': {'total': 0, 'ok': 0, 'data_quality': 0},
         'evaluation_states': {},
@@ -56,6 +57,7 @@ def build(db_path, scan_rc=0, bridge_rc=0, fast_path_outcome=None, cadence_targe
     if not path.exists():
         result['health'] = 'FAIL'
         result['detail'] = 'audit database missing'
+        result['reason_codes'] = ['AUDIT_DATABASE_MISSING']
         return result
     db = sqlite3.connect(path.resolve().as_uri() + '?mode=ro', uri=True)
     try:
@@ -101,6 +103,16 @@ def build(db_path, scan_rc=0, bridge_rc=0, fast_path_outcome=None, cadence_targe
                     bucket = 'missing_or_invalid'
                 age_bins[bucket] += 1
             result['observations']['source_trade_age_bins'] = age_bins
+            from .freshness import quote_diagnostic
+            quote_counts = {}
+            for payload, retrieved in db.execute('SELECT payload,retrieval_ts FROM observations WHERE run_id=?', (run_id,)):
+                diagnostic = quote_diagnostic(json.loads(payload), retrieved)
+                code = diagnostic['reason'] or diagnostic['status']
+                quote_counts[code] = quote_counts.get(code, 0) + 1
+            result['execution_diagnostics'] = {'quote_counts': quote_counts,
+                'quote_max_age_seconds': 300, 'halt_status': 'UNKNOWN',
+                'execution_actionable': 'UNKNOWN', 'authoritative': False,
+                'provider_fallback': 'NOT_INFERRED_FROM_SHADOW_ROUTING'}
 
             # Link only routes observed during this same prospective run to later
             # observations. Never use pre-route snapshots as downstream evidence.
@@ -286,6 +298,12 @@ def build(db_path, scan_rc=0, bridge_rc=0, fast_path_outcome=None, cadence_targe
                 result['cadence']['status'] = ('INVALID_SEQUENCE' if result['cadence_gap_seconds'] <= 0 else 'SESSION_BOUNDARY' if previous_et.date() != datetime.fromisoformat(started).astimezone(ZoneInfo('America/New_York')).date()
                     else 'MISSED_TARGET' if result['cadence_gap_seconds'] > cadence_target_seconds else 'WITHIN_TARGET')
                 result['cadence']['observed_gap_seconds'] = result['cadence_gap_seconds']
+                from .cadence import dispatch_wait
+                previous_health = path.parent / 'previous-health.json'
+                prior = json.loads(previous_health.read_text()) if previous_health.exists() else {}
+                compensation = prior.get('cadence', {}).get('dispatch_compensation_seconds', 0)
+                result['cadence']['dispatch_compensation_seconds'] = dispatch_wait(
+                    [started, previous[0]], now, cadence_target_seconds, compensation)['latency_compensation_seconds']
             if _table_exists(db, 'fast_path_events'):
                 fp = db.execute('SELECT MAX(retrieval_ts),COUNT(*) FROM fast_path_events WHERE retrieval_ts>=? AND retrieval_ts<=?', (started,now.isoformat())).fetchone()
                 fp_latest = db.execute('SELECT retrieval_ts FROM fast_path_events ORDER BY id DESC LIMIT 1').fetchone()
@@ -340,7 +358,23 @@ def build(db_path, scan_rc=0, bridge_rc=0, fast_path_outcome=None, cadence_targe
             result['health'] = 'DEGRADED'
     finally:
         db.close()
+    result['reason_codes'] = health_reasons(result)
     return result
+
+def health_reasons(result):
+    codes = []
+    if result['workflow']['scan_rc']: codes.append('SCAN_FAILED')
+    if result['workflow']['bridge_rc']: codes.append('BRIDGE_FAILED')
+    if (result.get('latest_run') or {}).get('status') == 'FAILED': codes.append('RUN_FAILED')
+    if result['fast_path']['status'] == 'FAIL': codes.append('FAST_PATH_FAILED')
+    if result.get('evidence_health'): codes.append(result['evidence_health'])
+    if result['pending_bridge_events']: codes.append('BRIDGE_BACKLOG')
+    if result['observation_window_active']:
+        if not result['checkpoint_is_current_cycle']: codes.append('CHECKPOINT_STALE')
+        if result['fast_scout']['status'] == 'DATA_GAP': codes.append('SCOUT_DATA_GAP')
+        if result['cadence']['status'] in ('MISSED_TARGET','INVALID_SEQUENCE'): codes.append('CADENCE_' + result['cadence']['status'])
+        if result['checkpoint_is_current_cycle'] and result['fast_path'].get('workflow_outcome') == 'success' and result['fast_path'].get('mode') == 'MINUTE_LOOP' and result['fast_path']['status'] in ('NO_DATA','NO_CURRENT_EVIDENCE'): codes.append('FAST_PATH_NO_CURRENT_EVIDENCE')
+    return sorted(set(codes))
 
 def main():
     p=argparse.ArgumentParser()
