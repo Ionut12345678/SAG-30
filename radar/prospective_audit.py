@@ -25,6 +25,8 @@ def build(db_path, session, watch_path=None, as_of=None):
     valid = defaultdict(list)
     events = defaultdict(list)
     counts = Counter()
+    rejection_reasons = Counter()
+    precursor_states = {}
     with closing(sqlite3.connect(Path(db_path).resolve().as_uri()+'?mode=ro', uri=True)) as db:
         db.row_factory = sqlite3.Row
         tables = {r[0] for r in db.execute("SELECT name FROM sqlite_master WHERE type='table'")}
@@ -43,6 +45,8 @@ def build(db_path, session, watch_path=None, as_of=None):
                 continue
             counts['deep_samples'] += 1
             counts['valid_deep_samples' if r['quality']=='OK' else 'data_quality_deep_samples'] += 1
+            if r['quality'] != 'OK':
+                rejection_reasons.update(code.strip() or 'UNKNOWN' for code in r['reason'].split(','))
             c = cohorts.setdefault(r['symbol'], {'symbol':r['symbol'], 'first_discovery_retrieval_ts': None,
                 'first_discovery_change_pct': None, 'first_discovery_source_ts':None,
                 'first_discovery_price':None, 'discovery_source_quality':'UNKNOWN_NO_SCOUT_HISTORY',
@@ -73,6 +77,16 @@ def build(db_path, session, watch_path=None, as_of=None):
                 t = stamp(r['started_ts'])
                 if t <= cutoff and t.astimezone(ZoneInfo('America/New_York')).date().isoformat()==session:
                     run_denominators.append(dict(r))
+        run_health = []
+        for r in db.execute('SELECT id,started,finished,status,detail FROM runs ORDER BY id'):
+            t = stamp(r['started'])
+            if t <= cutoff and t.astimezone(ZoneInfo('America/New_York')).date().isoformat()==session:
+                run_health.append(dict(r))
+        if 'v049_state' in tables:
+            for r in db.execute('SELECT * FROM v049_state WHERE session=?', (session,)):
+                # Mutable state is exported only as stored context, never an immutable event.
+                if r['last_eval_ts'] and stamp(r['last_eval_ts']) <= cutoff:
+                    precursor_states[r['symbol']] = dict(r)
         stored_first_seen = []
         if 'model_state' in tables:
             stored_first_seen = [dict(r) for r in db.execute('SELECT symbol,first_seen,first_radar_seen,first_radar_pct FROM model_state ORDER BY symbol') if r['symbol'] in cohorts]
@@ -91,6 +105,8 @@ def build(db_path, session, watch_path=None, as_of=None):
                 cohorts[w['symbol']]['first_watch'] = w
     for symbol,c in sorted(cohorts.items()):
         c['logged_shadow_events'] = events[symbol]
+        c['stored_precursor_context'] = precursor_states.get(symbol)
+        c['precursor_event_provenance'] = 'UNKNOWN_MUTABLE_STATE_NOT_IMMUTABLE_EVENT'
         discovery = c['first_discovery_retrieval_ts']
         basis = discovery or (c['first_deep_observation'] or {}).get('retrieval_ts')
         pct = c['first_discovery_change_pct'] if discovery else (c['first_deep_observation'] or {}).get('change_pct')
@@ -114,7 +130,8 @@ def build(db_path, session, watch_path=None, as_of=None):
         c['execution_actionable'] = 'UNKNOWN'
     return {'label': LABEL, 'status':'READ_ONLY_PROSPECTIVE_AUDIT', 'session':session,
         'as_of':cutoff.isoformat(), 'counts':dict(counts), 'cohort_count':len(cohorts),
-        'run_denominators':run_denominators, 'stored_global_first_seen':stored_first_seen,
+        'run_denominators':run_denominators, 'run_health':run_health,
+        'rejection_reasons':dict(rejection_reasons), 'stored_global_first_seen':stored_first_seen,
         'cohorts':[cohorts[s] for s in sorted(cohorts)],
         'limitations':['Discovery is routing, not EARLY-HOT. Missing discovery source/price stays UNKNOWN.',
             'Crossings are later valid deep snapshots, not exact move onset or executable gains.',
