@@ -1,0 +1,80 @@
+{
+  "market_credential_validation": "NOT_EXECUTED",
+  "production_rollout": "NOT_EXECUTED_REVIEW_REQUIRED",
+  "prospective": {
+    "as_of": "2026-10-12T17:44:58.749008+00:00",
+    "cohort_count": 1574,
+    "counts": {
+      "deep_samples": 229,
+      "scout_samples": 5122,
+      "valid_deep_samples": 229
+    },
+    "outcomes": {
+      "CENSORED_NO_FOLLOWUP": 1441,
+      "CENSORED_NO_OBSERVED_30": 133
+    },
+    "session": "2026-10-12"
+  },
+  "snapshot": {
+    "audit_retention": "ALL_ROWS_NO_PRUNING",
+    "compressed_bytes": 100934195,
+    "journal_inventory_verified": true,
+    "part_count": 2,
+    "publication": "VERIFIED_HISTORICAL_SNAPSHOT",
+    "remote_head_at_check": "84b8477aa61a5c96f453445b750543d3429eda9d",
+    "table_counts": {
+      "bridge_publications": 0,
+      "candidate_v034_events": 28872,
+      "candidate_v034_milestones": 58,
+      "candidate_v034_signals": 1062,
+      "candidate_v034_state": 3185,
+      "candidate_v034r2_events": 19133,
+      "candidate_v034r2_milestones": 253,
+      "candidate_v034r2_signals": 1427,
+      "candidate_v034r2_state": 1378,
+      "candidates": 66,
+      "early_paper_extra_observations": 219,
+      "early_paper_follow_v12": 1137,
+      "evaluations": 124989,
+      "evening_follow_shadow": 0,
+      "evening_scout_shadow": 0,
+      "evidence": 124989,
+      "fast_path_events": 102852,
+      "fast_path_state": 2359,
+      "fast_path_v047_observations": 38179,
+      "fast_path_v047_state": 2218,
+      "fast_path_v048_observations": 64,
+      "fast_path_v048_state": 64,
+      "milestones": 0,
+      "model_state": 3185,
+      "multi_engine_scores": 272960,
+      "multi_engine_watchpool": 3289,
+      "observations": 124989,
+      "outbox": 0,
+      "retention_shadow_observations": 1052,
+      "runs": 464,
+      "scout_history": 291298,
+      "scout_promotions": 18893,
+      "scout_runs": 404,
+      "scout_state": 3015,
+      "semantic_shadow": 35302,
+      "shadow_volume_baseline": 54094,
+      "signals": 0,
+      "sqlite_sequence": 1,
+      "v0410_routing_rescue": 54,
+      "v0411_meta": 2,
+      "v0411_state": 166,
+      "v0412_cycle_audit": 60,
+      "v0412_premarket_route": 1113,
+      "v048_meta": 2,
+      "v048_state": 37,
+      "v049_meta": 2,
+      "v049_state": 153
+    },
+    "verified_commit": "7b62251a7919c942e4d3151ee1279ab5d8f28b87",
+    "warning": "Receipt is checked at report time; embedded health was prepared before push. No quota or indefinite retention guarantee."
+  },
+  "tests": {
+    "local_full_suite_passed": 184
+  }
+}
