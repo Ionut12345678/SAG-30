@@ -12,10 +12,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Restore radar checkpoint
         run: |
-          git init /tmp/rs; cd /tmp/rs
-          git remote add origin https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git
-          git fetch --depth=1 origin radar-state && git checkout FETCH_HEAD
-          gzip -dc radar.sqlite3.gz > /tmp/r.db
+          git fetch --depth=1 origin radar-state
+          python -m radar.checkpoint restore --ref FETCH_HEAD --out /tmp/r.db
       - name: Reconstruct pre-10 timeline under frozen v0.4.9 gates
         run: |
           mkdir -p reports

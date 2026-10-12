@@ -11,10 +11,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: |
-          git init /tmp/rs; cd /tmp/rs
-          git remote add origin https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git
-          git fetch --depth=1 origin radar-state && git checkout FETCH_HEAD
-          gzip -dc radar.sqlite3.gz > /tmp/r.db
+          git fetch --depth=1 origin radar-state
+          python -m radar.checkpoint restore --ref FETCH_HEAD --out /tmp/r.db
       - name: Test routing rescue variants
         run: |
           mkdir -p reports

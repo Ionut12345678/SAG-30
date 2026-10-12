@@ -1,0 +1,268 @@
+{
+  "all_table_hashes_equal": true,
+  "automated_checks": {
+    "live_market_data": "NOT_RUN_CREDENTIALS_ABSENT",
+    "live_repaired_workflow": "NOT_DEPLOYED",
+    "local_git_publication_lease_and_ack_loss": "PASS",
+    "recovery_api_download": "MOCKED",
+    "tests_passed": 160,
+    "yaml_and_shell_syntax": "PASS"
+  },
+  "compressed_bytes": 98976085,
+  "elapsed_seconds": 17.61,
+  "github_run_evidence": {
+    "artifact_count": 0,
+    "cadence_dispatch_after_failure": "success",
+    "conclusion": "failure",
+    "failed_run_compressed_bytes": null,
+    "fast_path_step": "success",
+    "head_sha": "d4d33f23a65839933235700a46d879ec377bb7b5",
+    "heartbeat_step": "success",
+    "observation_step": "success",
+    "persistence_step": "failure",
+    "raw_logs": "REDIRECTED_LOG_HOST_BLOCKED",
+    "run_id": 38272567681
+  },
+  "original_compressed_bytes": 99014002,
+  "original_sqlite_bytes": 470642688,
+  "parts": [
+    67108864,
+    31867221
+  ],
+  "prospective_recovery_limit": "No saved artifacts were found for the inspected failed run; its unavailable observations were not reconstructed or backdated.",
+  "restored_health": {
+    "cadence": {
+      "observed_gap_seconds": 492.122,
+      "status": "MISSED_TARGET",
+      "target_seconds": 300
+    },
+    "cadence_gap_seconds": 492.122,
+    "candidate_count": 3,
+    "candidate_v034": {
+      "lanes": {
+        "FRESH": 1,
+        "SECOND_IMPULSE": 2
+      },
+      "last_signal": {
+        "change_pct": 32.92181069958848,
+        "lane": "FRESH",
+        "proof": "reacceleration >=2pp after acceptance",
+        "retrieval_ts": "2026-10-09T19:47:36.736005+00:00",
+        "state": "C34-LATE-SHADOW",
+        "symbol": "QSI"
+      },
+      "signals_total": 1062,
+      "states": {
+        "C34-DATA_QUALITY": 3
+      },
+      "status": "CANDIDATE_SHADOW_ONLY"
+    },
+    "candidate_v034r2": {
+      "last_signal": {
+        "change_pct": 516.1137440758293,
+        "lane": "FRESH",
+        "proof": "reacceleration >=2pp after acceptance",
+        "retrieval_ts": "2026-10-09T21:00:55.876118+00:00",
+        "state": "C34R2-LATE-SHADOW",
+        "symbol": "WFF"
+      },
+      "signals_total": 1427,
+      "states": {
+        "C34R2-DATA_QUALITY": 3
+      },
+      "status": "CANDIDATE_SHADOW_CHALLENGER"
+    },
+    "checkpoint_freshness": "STALE",
+    "checkpoint_is_current_cycle": false,
+    "evaluation_states": {
+      "UNKNOWN/DATA_QUALITY": 3
+    },
+    "evidence_health": "UNEXPECTED_MODEL_DATA_GAP",
+    "fast_path": {
+      "authoritative": false,
+      "buy": false,
+      "current_cycle_events": 0,
+      "current_cycle_latest_ts": null,
+      "last_recorded_ts": "2026-10-10T00:25:22.813472+00:00",
+      "latest_stored_run_events": 492,
+      "mode": "UNKNOWN",
+      "status": "NO_CURRENT_EVIDENCE",
+      "workflow_outcome": "success"
+    },
+    "fast_scout": {
+      "checkpoint_is_current_cycle": false,
+      "eligible_count": 0,
+      "evidence_scope": "LATEST_STORED_RUN",
+      "fetch_seconds": 1.637,
+      "selected_count": 0,
+      "status": "DATA_GAP",
+      "sticky_count": 0,
+      "total_seconds": 1.648,
+      "universe_count": 3185
+    },
+    "frozen_version": "SAG-30 Early Radar v0.3.3 FROZEN SHADOW",
+    "generated_ts": "2026-10-12T16:01:41.603751+00:00",
+    "health": "DEGRADED",
+    "last_signal": null,
+    "latest_run": {
+      "detail": "DISCOVERY_DATA_GAP eligible=0/3185; fallback existing shortlist 3 observations; full-universe discovery unhealthy; deep real-time feed has 0 valid observations",
+      "finished": "2026-10-09T23:58:37.301268+00:00",
+      "id": 460,
+      "started": "2026-10-09T23:58:33.784441+00:00",
+      "status": "MONITOR_DATA_GAP"
+    },
+    "model_readiness": {
+      "activity_confirmable_packets": 0,
+      "status": "NO_VALID_OBSERVATIONS"
+    },
+    "observation_window_active": true,
+    "observations": {
+      "data_quality": 3,
+      "ok": 0,
+      "rejection_reasons": {
+        "future_or_stale_source": 3
+      },
+      "source_trade_age_bins": {
+        "0_60s": 0,
+        "300_900s": 0,
+        "60_300s": 0,
+        "future": 0,
+        "missing_or_invalid": 0,
+        "over_900s": 3
+      },
+      "total": 3
+    },
+    "pending_bridge_events": 0,
+    "semantic_shadow": {
+      "new_observed_highs": 0,
+      "packets": 3,
+      "two_positive_intervals": 0,
+      "with_history_samples": 0,
+      "with_observed_volume_ratio": 0
+    },
+    "spec_sha256": "65c3c170d42e0b4bb8eca75b38d32a3c551f1ba7101eef825c745d588fdabc31",
+    "v0412_downstream": {
+      "note": "Only same-run post-route snapshots; no historical backfill or BUY",
+      "same_run_routes": 0,
+      "status": "SHADOW_NOT_MODEL_EVIDENCE",
+      "with_post_route_observation": 0,
+      "with_valid_post_route_observation": 0,
+      "without_valid_post_route_observation": 0
+    },
+    "v0412_session_iex_conversion": {
+      "converted_symbols": [],
+      "note": "valid_after_08_et counts retrievals; valid_source_after_08_et requires source trade time >=08:00 ET. Prospective audit only, not BUY.",
+      "observed_after_route": 0,
+      "routed_symbols": 0,
+      "status": "PROSPECTIVE_SHADOW_NOT_BUY",
+      "valid_after_08_et": 0,
+      "valid_after_route": 0,
+      "valid_source_after_08_et": 0
+    },
+    "workflow": {
+      "bridge_rc": 0,
+      "scan_rc": 0
+    }
+  },
+  "source_commit": "604c23b66d6688a37fed50933cb7bb06435cec6a",
+  "source_free_pages": 904,
+  "source_page_bytes": 4096,
+  "source_pages": 114903,
+  "source_quick_check": "ok",
+  "synthetic_over_95_mib_test": "Passed full prepare/restore of >96 MiB incompressible payload; SHA-256 of restored payload unchanged; every part <95 MiB.",
+  "table_counts": {
+    "bridge_publications": 0,
+    "candidate_v034_events": 28643,
+    "candidate_v034_milestones": 58,
+    "candidate_v034_signals": 1062,
+    "candidate_v034_state": 3185,
+    "candidate_v034r2_events": 18904,
+    "candidate_v034r2_milestones": 247,
+    "candidate_v034r2_signals": 1427,
+    "candidate_v034r2_state": 1361,
+    "candidates": 3,
+    "early_paper_extra_observations": 207,
+    "early_paper_follow_v12": 1070,
+    "evaluations": 124760,
+    "evidence": 124760,
+    "fast_path_events": 101751,
+    "fast_path_state": 2185,
+    "fast_path_v047_observations": 37630,
+    "fast_path_v047_state": 2044,
+    "fast_path_v048_observations": 64,
+    "fast_path_v048_state": 64,
+    "milestones": 0,
+    "model_state": 3185,
+    "multi_engine_scores": 268119,
+    "multi_engine_watchpool": 3109,
+    "observations": 124760,
+    "outbox": 0,
+    "retention_shadow_observations": 1022,
+    "runs": 460,
+    "scout_history": 286176,
+    "scout_promotions": 18664,
+    "scout_runs": 400,
+    "scout_state": 3012,
+    "semantic_shadow": 35073,
+    "shadow_volume_baseline": 1902,
+    "signals": 0,
+    "sqlite_sequence": 1,
+    "v0410_routing_rescue": 49,
+    "v0411_meta": 2,
+    "v0411_state": 163,
+    "v0412_cycle_audit": 60,
+    "v0412_premarket_route": 1113,
+    "v048_meta": 2,
+    "v048_state": 36,
+    "v049_meta": 2,
+    "v049_state": 150
+  },
+  "table_hashes": {
+    "bridge_publications": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "candidate_v034_events": "0425b22f88cfb8aeca8713ff28cc2f684a3809ac84d48feaa86f488495cf6acd",
+    "candidate_v034_milestones": "5a3c02d7f29eac9a88b787be9a97362d04264a592dac97891c85fcc77021b1f5",
+    "candidate_v034_signals": "c6229c278ff84f357cbd5b1cd9116e1887e334d61b3fc038afdb7b732dda4f1f",
+    "candidate_v034_state": "e70193d13b6bf00fe2a4216cfca501104067efac190c508c9f44ed301ee1148c",
+    "candidate_v034r2_events": "9279c98e3d82b1bf26fe68de4e423fc88e00ddd0a6004f2ecd47459281fa55e1",
+    "candidate_v034r2_milestones": "bdcf0c4cb0907d1a94cee88bb9b6506fc1e40ab3357d1abbc7ddada2b7c7ab80",
+    "candidate_v034r2_signals": "aae6a84d8fb654ec7771860fd0fb1f305d91c121a696fa2b3d5cb83aacee3c21",
+    "candidate_v034r2_state": "c6a23c39835a64cd43c4430e2cf301d7116566ffce463685059f6ae8598fc31a",
+    "candidates": "a0b6f4ea73826676bbb00a1b88fc1f71bfc0aa7ef82634d827533a9990109bf7",
+    "early_paper_extra_observations": "3f486b92fdf98bd00ea14654168b4dcfba7a2cf95d299a5f7ba66f169ee036f0",
+    "early_paper_follow_v12": "2f88faada177a29be23969492e6a4f174294f89d26a068b4e55b77adeec3267e",
+    "evaluations": "b52a6b912dc81acea0ed288f5889337aa83e1d9838a9af93a70503d1e3d4074f",
+    "evidence": "26d23780ed69a8d9f1f869e47f878e2673770b8020a16ff30b0c5772bd7ada27",
+    "fast_path_events": "a536468306b03d42b02f8df2203c00c63bab43773f40105c0b90261713706493",
+    "fast_path_state": "579b7db2d8a7aaf537e8c24ef2c58f90b805f6a8e94b021ad2f1d1aaa4df137b",
+    "fast_path_v047_observations": "d6ca494a272860024eb12df44f9d3d1de4116dc8154c2a0374108cbeb93ad2fa",
+    "fast_path_v047_state": "f4314d3a5537628330453bc1bf2c5ad4e2a1a4917423962954f31af39b0464e9",
+    "fast_path_v048_observations": "2f6b312f6331b0ea1354530b2bfcb125327afbdd2f51d904744abc65ab7443a3",
+    "fast_path_v048_state": "612299eb677a251555fb862c34b7990089f78c1b5a64ab1dd8d4f55c6840fd02",
+    "milestones": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "model_state": "38cbbfd31526279142ef75f7ee96bfea7d1d151b80bd6ece4cb4d37ea646d737",
+    "multi_engine_scores": "fca96bd0771236be5c67aeb29b8166dea05daa072986746727247713804f0754",
+    "multi_engine_watchpool": "2f017fd3cb9b84a00fdf5a36aef0db7b8b362544ea55cd7e570af94f2a0c642f",
+    "observations": "651b33d268e66758b757c0c84a75317e2dbc56dc0fbf18e193d1f5111b6a68ce",
+    "outbox": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retention_shadow_observations": "7e51665d13d5478321a26f717a76551ff5488a4351ba2ca68e370f11d899fd07",
+    "runs": "f1cb06ceeec4f7226c71da9dde8440148ceea0adb38bf64022bda86a03370e4d",
+    "scout_history": "31824e6466017f05b03ae93d4a1faf2d2905fa2eb138794a0a1d2bfff1adbe07",
+    "scout_promotions": "fb78072e8cb310aa9d2539c804149611ce49d9cd5013c8d4c74821816d4c3f61",
+    "scout_runs": "ac547aae8205493ce34f9fc1110c468a14b599fc1d3c3b8e9c2a636bb77a3cac",
+    "scout_state": "ecb01b436e7b7535f4bec7b0be57b34c7b3d1e171e0f61cf7ff5b3a67b66a7fe",
+    "semantic_shadow": "fa6589f218e2c611d28c0e8d07c0f7696b93a0ede035cf6e0a92b0b52d1ae9cd",
+    "shadow_volume_baseline": "c6ae0a6b1fa33c4a2b71339e1d0773d59d1d28a422d61a7ffaf0b96c12e028cb",
+    "signals": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sqlite_sequence": "7b9031dc3a5be783d2b207af6425582b095603251e7ead86f483010e8b896d2c",
+    "v0410_routing_rescue": "fca68cb54b0f921319b6e821a054382aa417cc28800a0c568862ce02f6efa233",
+    "v0411_meta": "d47039a8012fb8d114d23999551a1dcb7d081b44596951bf9d7756d6809ff960",
+    "v0411_state": "9a653e0a4ee7034342e52b3bc19693432c53ea4cef1ccc64d932c2273a155349",
+    "v0412_cycle_audit": "a4e7093c2c1db791cc77da0bfbe57dffe031cbb3f8cf0d38b4c430040e0d38fe",
+    "v0412_premarket_route": "8c824f81e1856d693249503a1e6bdd5b1516ae0b02fea8e3b31c89df7af68d2c",
+    "v048_meta": "adf15dafeeb19154d00997b944dee762ed4ed1a79cbc3d77872aae4b4e24aa53",
+    "v048_state": "878822110758b2f773d3b2e7f51caa02fdfdeeead9d6341ff303e093acf2306e",
+    "v049_meta": "05c0df1b1e82364c3d53ddec05e5e9bbcc6ea5c070b3fab3d2e2b27ba066c569",
+    "v049_state": "3310080c89deacdafc43fc53e6be0851080e9c99e96d4621f0164673aa5ca8ac"
+  },
+  "validation_scope": "READ_ONLY_REAL_SNAPSHOT_AND_LOCAL_FIXTURES_NOT_PRODUCTION_DEPLOYMENT"
+}

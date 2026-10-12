@@ -13,12 +13,14 @@ on:
       - '.github/radar-trigger'
 permissions:
   contents: write
+  actions: read
   pull-requests: write
 concurrency:
   group: sag30-state
   cancel-in-progress: false
 jobs:
   observe:
+    if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
@@ -37,18 +39,13 @@ jobs:
           mkdir -p state
           if git ls-remote --exit-code --heads origin radar-state; then
             git fetch --depth=1 origin radar-state
-            if git cat-file -e FETCH_HEAD:radar.sqlite3.gz 2>/dev/null; then
-              git show FETCH_HEAD:radar.sqlite3.gz | gzip -dc > state/radar.sqlite3
-            elif git cat-file -e FETCH_HEAD:radar.sqlite3 2>/dev/null; then
-              # One-time migration path from the legacy uncompressed state.
-              git show FETCH_HEAD:radar.sqlite3 > state/radar.sqlite3
-            else
-              echo "radar-state exists but contains no durable database"
-              exit 1
-            fi
+            state_commit="$(git rev-parse FETCH_HEAD)"
+            echo "commit=$state_commit" >> "$GITHUB_OUTPUT"
+            python -m radar.checkpoint restore --ref "$state_commit" --out state/radar.sqlite3
           else
             status=$?
             if [ "$status" -ne 2 ]; then exit "$status"; fi
+            echo "commit=NONE" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Restore isolated SHADOW first-WATCH journal
@@ -57,13 +54,24 @@ jobs:
         run: |
           set -euo pipefail
           for file in shadow_first_watch.jsonl shadow_watch_observations.jsonl; do
-            if git cat-file -e FETCH_HEAD:"$file" 2>/dev/null; then
-              git show FETCH_HEAD:"$file" > "state/$file"
+            if git cat-file -e "${{ steps.restore.outputs.commit }}:$file" 2>/dev/null; then
+              git show "${{ steps.restore.outputs.commit }}:$file" > "state/$file"
             fi
           done
 
+      - name: Recover unpublished prospective cycle before scanning
+        id: recovery
+        if: ${{ steps.restore.outcome == 'success' && steps.restore.outputs.commit != 'NONE' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python -m radar.recovery --repo "$GITHUB_REPOSITORY" \
+            --base-commit "${{ steps.restore.outputs.commit }}" \
+            --base-published-ts "$(git show -s --format=%cI '${{ steps.restore.outputs.commit }}')" \
+            --out state/radar.sqlite3 --status state/recovery-status.json --journal-dir state
+
       - name: Run v0.4.12 EARLY-PREMARKET ROUTING SHADOW
-        if: ${{ always() && steps.restore.outcome == 'success' }}
+        if: ${{ always() && steps.restore.outcome == 'success' && steps.recovery.outcome != 'failure' && steps.recovery.outcome != 'cancelled' }}
         shell: bash
         run: |
           set +e
@@ -87,6 +95,7 @@ jobs:
           fi
 
       - name: Observe one prospective cycle
+        if: ${{ always() && steps.restore.outcome == 'success' && steps.recovery.outcome != 'failure' && steps.recovery.outcome != 'cancelled' }}
         id: scan
         env:
           ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
@@ -100,6 +109,7 @@ jobs:
           exit 0
 
       - name: Run v0.4 FAST-PATH SHADOW minute loop
+        id: fast_path
         if: ${{ steps.scan.outputs.rc == '0' }}
         env:
           ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
@@ -114,11 +124,13 @@ jobs:
           et_hour=$((10#$et_hour))
           if [ "$et_hour" -lt "$realtime_start" ]; then
             echo "SAG30_FAST_PATH_SKIPPED_PREMARKET_ROUTING_ONLY et_hour=$et_hour realtime_start=$realtime_start"
+            echo "mode=PREMARKET_ROUTING_ONLY" >> "$GITHUB_OUTPUT"
             # Keep the v0.4.7 report interface current without fabricating new evidence.
             python -m radar.fast_path_v047_validated_overlay \
               --db state/radar.sqlite3 \
               --out state/fast_path_v047_validated_report.json
           else
+            echo "mode=MINUTE_LOOP" >> "$GITHUB_OUTPUT"
             for i in $(seq 1 "$iterations"); do
               sleep "$sleep_seconds"
               python -m radar.fast_path_shadow \
@@ -132,7 +144,7 @@ jobs:
           fi
 
       - name: Run v0.4.9 ROLLING PRECURSOR SHADOW
-        if: ${{ always() && steps.restore.outcome == 'success' }}
+        if: ${{ always() && steps.restore.outcome == 'success' && steps.recovery.outcome != 'failure' && steps.recovery.outcome != 'cancelled' }}
         shell: bash
         run: |
           python -m radar.v049_rolling_precursor \
@@ -140,7 +152,7 @@ jobs:
             --out state/v049_rolling_precursor_report.json
 
       - name: Run v0.4.11 COHERENT-WINDOW PRECURSOR SHADOW
-        if: ${{ always() && steps.restore.outcome == 'success' }}
+        if: ${{ always() && steps.restore.outcome == 'success' && steps.recovery.outcome != 'failure' && steps.recovery.outcome != 'cancelled' }}
         shell: bash
         run: |
           python -m radar.v0411_coherent_window \
@@ -148,7 +160,7 @@ jobs:
             --out state/v0411_coherent_window_report.json
 
       - name: Run v0.4.8 CONVERSION CHALLENGER SHADOW
-        if: ${{ always() && steps.restore.outcome == 'success' }}
+        if: ${{ always() && steps.restore.outcome == 'success' && steps.recovery.outcome != 'failure' && steps.recovery.outcome != 'cancelled' }}
         shell: bash
         run: |
           python -m radar.v048_conversion_challenger \
@@ -156,7 +168,7 @@ jobs:
             --out state/v048_conversion_challenger_report.json
 
       - name: Capture immutable prospective SHADOW first WATCH and source observations
-        if: ${{ always() && steps.restore.outcome == 'success' }}
+        if: ${{ always() && steps.restore.outcome == 'success' && steps.recovery.outcome != 'failure' && steps.recovery.outcome != 'cancelled' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -225,17 +237,19 @@ jobs:
           exit 0
 
       - name: Build machine-readable heartbeat
-        if: ${{ always() && steps.restore.outcome == 'success' }}
+        if: ${{ always() && steps.restore.outcome == 'success' && steps.recovery.outcome != 'failure' && steps.recovery.outcome != 'cancelled' }}
         shell: bash
         run: |
           python -m radar.health \
             --db state/radar.sqlite3 \
             --out state/health.json \
             --scan-rc "${{ steps.scan.outputs.rc || '1' }}" \
-            --bridge-rc "${{ steps.bridge.outputs.rc || '1' }}"
+            --bridge-rc "${{ steps.bridge.outputs.rc || '1' }}" \
+            --fast-path-outcome "${{ steps.fast_path.outcome || 'skipped' }}" \
+            --fast-path-mode "${{ steps.fast_path.outputs.mode || 'UNKNOWN' }}"
 
       - name: Build semantic SHADOW calibration report
-        if: ${{ always() && steps.restore.outcome == 'success' }}
+        if: ${{ always() && steps.restore.outcome == 'success' && steps.recovery.outcome != 'failure' && steps.recovery.outcome != 'cancelled' }}
         shell: bash
         run: |
           python -m radar.shadow_report \
@@ -243,7 +257,7 @@ jobs:
             --out state/semantic_shadow_report.json
 
       - name: Build v0.3.4 candidate SHADOW report
-        if: ${{ always() && steps.restore.outcome == 'success' }}
+        if: ${{ always() && steps.restore.outcome == 'success' && steps.recovery.outcome != 'failure' && steps.recovery.outcome != 'cancelled' }}
         shell: bash
         run: |
           python -m radar.candidate_v034_report \
@@ -251,7 +265,7 @@ jobs:
             --out state/candidate_v034_report.json
 
       - name: Build winner recall audit
-        if: ${{ always() && steps.restore.outcome == 'success' }}
+        if: ${{ always() && steps.restore.outcome == 'success' && steps.recovery.outcome != 'failure' && steps.recovery.outcome != 'cancelled' }}
         shell: bash
         run: |
           python -m radar.winner_recall_report \
@@ -259,7 +273,7 @@ jobs:
             --out state/winner_recall_report.json
 
       - name: Build multi-engine SHADOW report
-        if: ${{ always() && steps.restore.outcome == 'success' }}
+        if: ${{ always() && steps.restore.outcome == 'success' && steps.recovery.outcome != 'failure' && steps.recovery.outcome != 'cancelled' }}
         shell: bash
         run: |
           python -m radar.multi_engine_report \
@@ -267,48 +281,56 @@ jobs:
             --out state/multi_engine_report.json
 
       - name: Build real early PAPER quote report
-        if: ${{ always() && steps.restore.outcome == 'success' }}
+        if: ${{ always() && steps.restore.outcome == 'success' && steps.recovery.outcome != 'failure' && steps.recovery.outcome != 'cancelled' }}
         shell: bash
         run: |
           python -m radar.early_paper_extra_report_v11 --db state/radar.sqlite3 --out state/early_paper_extra_report_v11.json
 
       - name: Build seven-day early PAPER outcomes
-        if: ${{ always() && steps.restore.outcome == 'success' }}
+        if: ${{ always() && steps.restore.outcome == 'success' && steps.recovery.outcome != 'failure' && steps.recovery.outcome != 'cancelled' }}
         shell: bash
         run: |
           python -m radar.early_paper_outcome_report_v12 --db state/radar.sqlite3 --out state/early_paper_outcome_report_v12.json
 
       - name: Build PAPER quote-versus-momentum diagnostics
-        if: ${{ always() && steps.restore.outcome == 'success' }}
+        if: ${{ always() && steps.restore.outcome == 'success' && steps.recovery.outcome != 'failure' && steps.recovery.outcome != 'cancelled' }}
         shell: bash
         run: |
           python -m radar.early_paper_diagnostic_v13 --db state/radar.sqlite3 --out state/early_paper_diagnostic_v13.json
 
       - name: Build matched momentum and turnover SHADOW audit
-        if: ${{ always() && steps.restore.outcome == 'success' }}
+        if: ${{ always() && steps.restore.outcome == 'success' && steps.recovery.outcome != 'failure' && steps.recovery.outcome != 'cancelled' }}
         shell: bash
         run: |
           python -m radar.early_paper_momentum_shadow_v14 --db state/radar.sqlite3 --out state/early_paper_momentum_shadow_v14.json
 
       - name: Build PAPER matched forward outcomes
-        if: ${{ always() && steps.restore.outcome == 'success' }}
+        if: ${{ always() && steps.restore.outcome == 'success' && steps.recovery.outcome != 'failure' && steps.recovery.outcome != 'cancelled' }}
         shell: bash
         run: |
           python -m radar.early_paper_matched_outcome_v15 --db state/radar.sqlite3 --out state/early_paper_matched_outcome_v15.json
 
+      - name: Prepare lossless bounded checkpoint and size alerts
+        id: checkpoint
+        if: ${{ always() && steps.restore.outcome == 'success' && steps.recovery.outcome != 'failure' && steps.recovery.outcome != 'cancelled' }}
+        run: |
+          python -m radar.checkpoint prepare --db state/radar.sqlite3 \
+            --out state/checkpoint --health state/health.json \
+            --base-commit "${{ steps.restore.outputs.commit }}" --run-id "$GITHUB_RUN_ID"
+          for file in shadow_first_watch.jsonl shadow_watch_observations.jsonl shadow_watch_status.json; do
+            if [ -f "state/$file" ]; then cp "state/$file" "state/checkpoint/$file"; fi
+          done
+
       - name: Persist audit state and heartbeat
-        if: ${{ always() && steps.restore.outcome == 'success' }}
+        id: persist
+        if: ${{ always() && steps.checkpoint.outcome == 'success' }}
         shell: bash
         run: |
           set -euo pipefail
           if [ ! -f state/radar.sqlite3 ]; then exit 1; fi
           mkdir -p /tmp/radar-state
-          gzip -6 -c state/radar.sqlite3 > /tmp/radar-state/radar.sqlite3.gz
-          compressed_bytes="$(stat -c%s /tmp/radar-state/radar.sqlite3.gz)"
-          if [ "$compressed_bytes" -ge $((95 * 1024 * 1024)) ]; then
-            echo "Compressed radar state is too large: ${compressed_bytes} bytes"
-            exit 1
-          fi
+          cp state/checkpoint/* /tmp/radar-state/
+          compressed_bytes="$(python -c "import json; print(json.load(open('state/checkpoint/checkpoint.json'))['compressed_bytes'])")"
           cp state/health.json /tmp/radar-state/health.json
           for file in shadow_first_watch.jsonl shadow_watch_observations.jsonl shadow_watch_status.json; do
             if [ -f "state/$file" ]; then cp "state/$file" "/tmp/radar-state/$file"; fi
@@ -337,7 +359,7 @@ jobs:
           git config user.email 'radar@users.noreply.github.com'
           git remote add origin "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git"
           git config http.extraheader "$(git -C "$GITHUB_WORKSPACE" config --get http.https://github.com/.extraheader)"
-          git add radar.sqlite3.gz health.json semantic_shadow_report.json candidate_v034_report.json winner_recall_report.json multi_engine_report.json
+          git add checkpoint.json radar.sqlite3.gz.part-* health.json semantic_shadow_report.json candidate_v034_report.json winner_recall_report.json multi_engine_report.json
           for file in shadow_first_watch.jsonl shadow_watch_observations.jsonl shadow_watch_status.json; do
             if [ -f "$file" ]; then git add "$file"; fi
           done
@@ -354,7 +376,14 @@ jobs:
           pushed=0
           for attempt in 1 2 3 4; do
             echo "SAG30_CHECKPOINT_PUSH_ATTEMPT=$attempt bytes=$compressed_bytes"
-            if git push --force origin HEAD:radar-state; then
+            expected="${{ steps.restore.outputs.commit }}"
+            if [ "$expected" = NONE ]; then expected=""; fi
+            remote_commit="$(git ls-remote origin refs/heads/radar-state | cut -f1)"
+            if [ "$remote_commit" = "$(git rev-parse HEAD)" ]; then
+              pushed=1
+              break
+            fi
+            if git push --force-with-lease="radar-state:$expected" origin HEAD:radar-state; then
               pushed=1
               break
             fi
@@ -366,10 +395,39 @@ jobs:
             echo "SAG30_CHECKPOINT_PUSH_FAILED_AFTER_RETRIES"
             exit 1
           fi
-          echo "SAG30_CHECKPOINT_PUSH_PASS bytes=$compressed_bytes"
+          published_commit="$(git rev-parse HEAD)"
+          remote_commit="$(git ls-remote origin refs/heads/radar-state | cut -f1)"
+          if [ "$remote_commit" != "$published_commit" ]; then
+            echo "SAG30_CHECKPOINT_PUBLICATION_NOT_CONFIRMED"
+            exit 1
+          fi
+          echo "SAG30_CHECKPOINT_PUSH_PASS bytes=$compressed_bytes commit=$published_commit"
+          echo "Checkpoint publication confirmed: $published_commit" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Preserve unpublished audit checkpoint for automatic recovery
+        if: ${{ always() && steps.checkpoint.outcome == 'success' && steps.persist.outcome != 'success' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: sag30-checkpoint-recovery
+          path: state/checkpoint/
+          compression-level: 0
+          retention-days: 90
+          if-no-files-found: error
+
+      - name: Preserve forensic database if checkpoint preparation failed
+        if: ${{ always() && steps.checkpoint.outcome == 'failure' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: sag30-checkpoint-forensic
+          path: |
+            state/radar.sqlite3*
+            state/health.json
+            state/shadow_*.jsonl
+          retention-days: 90
+          if-no-files-found: error
 
       - name: Dispatch next cadence cycle
-        if: ${{ always() }}
+        if: ${{ always() && steps.persist.outcome == 'success' }}
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
@@ -424,6 +482,16 @@ jobs:
         if: ${{ always() }}
         shell: bash
         run: |
+          persist_outcome="${{ steps.persist.outcome || 'skipped' }}"
+          fast_path_outcome="${{ steps.fast_path.outcome || 'skipped' }}"
+          if [ "$persist_outcome" != success ]; then
+            echo "SAG30_CYCLE_FAIL_CHECKPOINT_NOT_PUBLISHED outcome=$persist_outcome"
+            exit 1
+          fi
+          if [ "$fast_path_outcome" = failure ] || [ "$fast_path_outcome" = cancelled ]; then
+            echo "SAG30_CYCLE_FAIL_FAST_PATH outcome=$fast_path_outcome"
+            exit 1
+          fi
           scan_rc="${{ steps.scan.outputs.rc || '1' }}"
           bridge_rc="${{ steps.bridge.outputs.rc || '1' }}"
           if [ "$scan_rc" -ne 0 ]; then
