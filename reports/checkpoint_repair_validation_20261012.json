@@ -5,7 +5,7 @@
     "live_repaired_workflow": "NOT_DEPLOYED",
     "local_git_publication_lease_and_ack_loss": "PASS",
     "recovery_api_download": "MOCKED",
-    "tests_passed": 173,
+    "tests_passed": 175,
     "yaml_and_shell_syntax": "PASS"
   },
   "compressed_bytes": 98976085,
@@ -171,13 +171,33 @@
       "published append-only evidence and global first_seen preservation checks",
       "staging IO failure cleanup",
       "nonpositive cadence and missing FAST-PATH evidence diagnostics",
-      "isolated GitHub artifact ZIP API contract test"
+      "isolated GitHub artifact ZIP API contract test",
+      "newest recovery selection by server creation time; ambiguous equal-time artifacts fail closed"
     ],
     "all_45_table_hashes_unchanged": true,
     "auxiliary_transport_workflows": 20,
     "baseline_pr_commit": "8117a3991af6d5f226c4e098424dffcd92846147",
     "elapsed_seconds": 16.45,
     "frozen_model_crypto_pr71": "UNCHANGED",
+    "github_artifact_contract": {
+      "attempts": [
+        1,
+        2
+      ],
+      "both_passed": true,
+      "newer_artifact": {
+        "created_at": "2026-10-12T16:44:57Z",
+        "id": 11759928610
+      },
+      "numeric_ids_nonmonotonic": true,
+      "older_artifact": {
+        "created_at": "2026-10-12T16:41:32Z",
+        "id": 11760855340
+      },
+      "production_deployed": false,
+      "same_name_preserved": true,
+      "workflow_run": 38279157158
+    },
     "live_deployment": "NOT_PERFORMED",
     "published_audit_extension_guard": "PASS_REAL_SNAPSHOT",
     "reviewed_original_files": 30,

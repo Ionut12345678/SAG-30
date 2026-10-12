@@ -105,7 +105,8 @@ def recover(repo, base_commit, destination, status_path, journal_dir=None, base_
             if run['path'] == '.github/workflows/radar.yml' and run['head_branch'] == 'main':
                 raise ValueError('Unresolved forensic checkpoint; restore/archive its audit data before scanning')
     artifacts = list_artifacts('sag30-checkpoint-recovery')
-    for artifact in sorted(artifacts, key=lambda a: a['id'], reverse=True):
+    # Artifact IDs are sharded and are not monotonic across attempts.
+    for artifact in sorted(artifacts, key=lambda a: datetime.fromisoformat(a['created_at'].replace('Z','+00:00')), reverse=True):
         if not newer_than_base(artifact):
             continue
         run_id = artifact['workflow_run']['id']
@@ -114,6 +115,8 @@ def recover(repo, base_commit, destination, status_path, journal_dir=None, base_
             continue
         if artifact['expired']:
             raise ValueError('Recent recovery artifact expired; audit recovery requires operator action')
+        if sum(peer['created_at'] == artifact['created_at'] for peer in artifacts) > 1:
+            raise ValueError('Ambiguous recovery creation timestamps; preserve artifacts for manual reconciliation')
         with tempfile.TemporaryDirectory(prefix='sag30-artifact-') as directory:
             root = Path(directory)
             archive = root / 'recovery.zip'

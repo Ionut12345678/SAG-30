@@ -162,3 +162,34 @@ class RecoveryTests(unittest.TestCase):
         original=file_sha(self.destination)
         with self.assertRaisesRegex(ValueError,'not declared'):self.recover()
         self.assertEqual(file_sha(self.destination),original)
+
+    def test_newest_failed_snapshot_wins_even_when_its_id_is_lower(self):
+        old_archive=self.archive.read_bytes()
+        with sqlite3.connect(self.source) as db:
+            db.execute("INSERT INTO audit VALUES(3,'newest prospective observation')")
+        shutil.rmtree(self.parts)
+        self.manifest=prepare(self.source,self.parts,base_commit='a'*40,run_id='124')
+        self.zip_parts();new_archive=self.archive.read_bytes()
+        older={'id':900,'expired':False,'created_at':'2026-10-12T13:10:00Z','workflow_run':{'id':123}}
+        newer={'id':100,'expired':False,'created_at':'2026-10-12T13:20:00Z','workflow_run':{'id':124}}
+        def api(path):
+            if 'name=sag30-checkpoint-forensic' in path:return {'artifacts':[]}
+            if 'name=sag30-checkpoint-recovery' in path:return {'artifacts':[older,newer]}
+            return self.workflow
+        def download(cmd,stdout,check):
+            stdout.write(new_archive if '/100/zip' in cmd[-1] else old_archive)
+        with patch('radar.recovery.gh_json',side_effect=api),patch('radar.recovery.subprocess.run',side_effect=download):
+            result=recover('owner/repo','a'*40,self.destination,self.root/'status.json',base_published_ts='2026-10-12T13:00:00+00:00')
+        self.assertEqual(result['artifact_id'],100)
+        with sqlite3.connect(self.destination) as db:
+            self.assertEqual(db.execute('SELECT COUNT(*) FROM audit').fetchone()[0],3)
+
+    def test_equal_creation_times_are_not_guessed_from_ids(self):
+        def api(path):
+            if 'name=sag30-checkpoint-forensic' in path:return {'artifacts':[]}
+            if 'name=sag30-checkpoint-recovery' in path:
+                return {'artifacts':[self.artifact,dict(self.artifact,id=2)]}
+            return self.workflow
+        with patch('radar.recovery.gh_json',side_effect=api):
+            with self.assertRaisesRegex(ValueError,'Ambiguous'):
+                recover('owner/repo','a'*40,self.destination,self.root/'status.json')
