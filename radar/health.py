@@ -121,7 +121,7 @@ def build(db_path, scan_rc=0, bridge_rc=0, fast_path_outcome=None, cadence_targe
                     """SELECT symbol, observed_ts FROM v0412_premarket_route
                        WHERE session=? AND status='EARLY_PREMARKET_ROUTE_SHADOW'
                          AND observed_ts>=? AND observed_ts<=?""",
-                    (current_et.date().isoformat(), (datetime.fromisoformat(started)-timedelta(minutes=5)).isoformat(), finished or utcnow()),
+                    (current_et.date().isoformat(), (datetime.fromisoformat(started)-timedelta(minutes=5)).isoformat(), min(datetime.fromisoformat(finished), now).isoformat() if finished else now.isoformat()),
                 ).fetchall()
                 valid = 0
                 any_observation = 0
@@ -168,7 +168,7 @@ def build(db_path, scan_rc=0, bridge_rc=0, fast_path_outcome=None, cadence_targe
                            FROM observations
                            WHERE symbol=? AND retrieval_ts>=?
                              AND retrieval_ts<=?""",
-                        (transition,symbol,first_route,utcnow())
+                        (transition,symbol,first_route,now.isoformat())
                     ).fetchone()
                     session_iex['observed_after_route'] += int(counts[0] or 0)>0
                     session_iex['valid_after_route'] += int(counts[1] or 0)>0
@@ -181,7 +181,7 @@ def build(db_path, scan_rc=0, bridge_rc=0, fast_path_outcome=None, cadence_targe
                            WHERE symbol=? AND quality='OK'
                              AND retrieval_ts>=? AND retrieval_ts<=?
                              AND retrieval_ts>=?""",
-                        (symbol, first_route, utcnow(), transition)
+                        (symbol, first_route, now.isoformat(), transition)
                     ):
                         if _source_at_or_after(source_ts, transition):
                             fresh_source = True
