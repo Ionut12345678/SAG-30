@@ -41,7 +41,7 @@ jobs:
         run: |
           set -euo pipefail
           git fetch --depth=1 origin radar-state
-          git show FETCH_HEAD:radar.sqlite3.gz | gzip -dc > /tmp/sag30-real.sqlite3
+          python -m radar.checkpoint restore --ref FETCH_HEAD --out /tmp/sag30-real.sqlite3
           test -s /tmp/sag30-real.sqlite3
       - name: Audit real full SCOUT cohort coverage
         run: python -m radar.audit_scout_coverage --db /tmp/sag30-real.sqlite3
@@ -97,4 +97,60 @@ jobs:
               'selected_rows':sum(x['selected'] for x in rows),
               'scout_universe_history_table':bool(scout),
               'note':'Multi-engine eligible cohort only; no forward winner/fill validation; NOT BUY'},sort_keys=True))
+          PY
+
+  checkpoint-artifact-contract:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Prepare synthetic checkpoint with immutable journal
+        run: |
+          python - <<'PY'
+          import sqlite3
+          from pathlib import Path
+          from radar.checkpoint import prepare
+          root=Path('/tmp/sag30-contract');root.mkdir()
+          db=sqlite3.connect(root/'source.sqlite3')
+          db.execute('CREATE TABLE audit(id INTEGER PRIMARY KEY, first_seen TEXT)')
+          db.execute("INSERT INTO audit VALUES(1,'2026-10-09T13:00:00Z')")
+          db.commit();db.close()
+          (root/'shadow_first_watch.jsonl').write_text('{"first_seen":"immutable"}\n')
+          prepare(root/'source.sqlite3',root/'checkpoint',journal_dir=root)
+          PY
+      - uses: actions/upload-artifact@v4
+        id: contract
+        with:
+          name: sag30-checkpoint-ci-contract
+          path: /tmp/sag30-contract/checkpoint/
+          compression-level: 0
+          retention-days: 1
+          if-no-files-found: error
+      - name: Download through recovery API route and verify flat ZIP contract
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CONTRACT_ARTIFACT_ID: ${{ steps.contract.outputs.artifact-id }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$CONTRACT_ARTIFACT_ID/zip" > /tmp/sag30-contract/recovery.zip
+          python - <<'PY'
+          import json,sqlite3,zipfile
+          from pathlib import Path
+          from radar.checkpoint import MANIFEST,restore_directory,validate_manifest
+          from radar.recovery import verify_journals
+          root=Path('/tmp/sag30-contract');download=root/'download';download.mkdir()
+          with zipfile.ZipFile(root/'recovery.zip') as archive:
+              manifest=json.loads(archive.read(MANIFEST));validate_manifest(manifest)
+              for name in [MANIFEST]+[p['name'] for p in manifest['parts']]+[p['name'] for p in manifest['journals']]:
+                  (download/name).write_bytes(archive.read(name))
+          verify_journals(download,manifest,root)
+          restore_directory(download,root/'restored.sqlite3')
+          db=sqlite3.connect(root/'restored.sqlite3')
+          assert db.execute('SELECT * FROM audit').fetchall()==[(1,'2026-10-09T13:00:00Z')]
+          assert (download/'shadow_first_watch.jsonl').read_bytes()==(root/'shadow_first_watch.jsonl').read_bytes()
+          print('PASS: actual GitHub upload/API download layout and lossless SQLite/journal restore; synthetic data only')
           PY

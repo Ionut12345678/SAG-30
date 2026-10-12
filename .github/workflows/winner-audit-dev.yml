@@ -11,8 +11,7 @@ jobs:
       - name: Build winner audit
         run: |
           git fetch --depth=1 origin radar-state
-          git show FETCH_HEAD:radar.sqlite3.gz > /tmp/r.gz
-          gzip -dc /tmp/r.gz > /tmp/r.db
+          python -m radar.checkpoint restore --ref FETCH_HEAD --out /tmp/r.db
           python - <<'PY'
           import sqlite3,json,collections
           db=sqlite3.connect('/tmp/r.db')

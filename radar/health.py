@@ -25,9 +25,10 @@ def _source_at_or_after(source_ts, transition):
 def _table_exists(db, name):
     return db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?", (name,)).fetchone() is not None
 
-def build(db_path, scan_rc=0, bridge_rc=0):
+def build(db_path, scan_rc=0, bridge_rc=0, fast_path_outcome=None, cadence_target_seconds=300, now=None, fast_path_mode='UNKNOWN'):
+    now = now or datetime.now(timezone.utc)
     result = {
-        'generated_ts': utcnow(),
+        'generated_ts': now.isoformat(),
         'frozen_version': 'SAG-30 Early Radar v0.3.3 FROZEN SHADOW',
         'spec_sha256': SPEC_SHA256,
         'workflow': {'scan_rc': int(scan_rc), 'bridge_rc': int(bridge_rc)},
@@ -44,8 +45,10 @@ def build(db_path, scan_rc=0, bridge_rc=0):
         'candidate_v034': {'status':'NO_DATA','states':{},'lanes':{},'signals_total':0,'last_signal':None},
         'candidate_v034r2': {'status':'NO_DATA','states':{},'signals_total':0,'last_signal':None},
         'fast_scout': {'status':'NO_DATA'},
+        'fast_path': {'status':('FAIL' if fast_path_outcome in ('failure','cancelled') else 'NOT_RUN' if fast_path_outcome == 'skipped' else 'NO_DATA'), 'workflow_outcome':fast_path_outcome, 'mode':fast_path_mode},
+        'cadence': {'target_seconds':cadence_target_seconds, 'status':'NO_PREVIOUS_RUN'},
     }
-    current_et=datetime.now(timezone.utc).astimezone(ZoneInfo('America/New_York'))
+    current_et=now.astimezone(ZoneInfo('America/New_York'))
     observation_window=current_et.weekday()<5 and 4<=current_et.hour<20
     result['observation_window_active']=observation_window
     result['checkpoint_is_current_cycle']=False
@@ -54,7 +57,7 @@ def build(db_path, scan_rc=0, bridge_rc=0):
         result['health'] = 'FAIL'
         result['detail'] = 'audit database missing'
         return result
-    db = sqlite3.connect(path)
+    db = sqlite3.connect(path.resolve().as_uri() + '?mode=ro', uri=True)
     try:
         latest = db.execute('SELECT id,started,finished,status,detail FROM runs ORDER BY id DESC LIMIT 1').fetchone()
         if latest:
@@ -64,7 +67,7 @@ def build(db_path, scan_rc=0, bridge_rc=0):
             # Never present that persisted run as current-cycle evidence.
             result['checkpoint_is_current_cycle'] = (
                 datetime.fromisoformat(started).astimezone(ZoneInfo('America/New_York')).date()==current_et.date()
-                and abs((datetime.now(timezone.utc)-datetime.fromisoformat(started)).total_seconds())<=900
+                and 0 <= (now-datetime.fromisoformat(started)).total_seconds() <= 900
             )
             total, ok = db.execute("SELECT COUNT(*),SUM(CASE WHEN quality='OK' THEN 1 ELSE 0 END) FROM observations WHERE run_id=?", (run_id,)).fetchone()
             total, ok = int(total or 0), int(ok or 0)
@@ -267,6 +270,8 @@ def build(db_path, scan_rc=0, bridge_rc=0):
                 if sr:
                     result['fast_scout']={
                         'status':'DATA_GAP' if int(sr[1] or 0) == 0 else 'PASS',
+                        'evidence_scope':'LATEST_STORED_RUN',
+                        'checkpoint_is_current_cycle':result['checkpoint_is_current_cycle'],
                         'universe_count':sr[0],
                         'eligible_count':sr[1],
                         'selected_count':sr[2],
@@ -277,6 +282,21 @@ def build(db_path, scan_rc=0, bridge_rc=0):
             previous = db.execute('SELECT started FROM runs WHERE id<? ORDER BY id DESC LIMIT 1', (run_id,)).fetchone()
             if previous:
                 result['cadence_gap_seconds'] = round((datetime.fromisoformat(started)-datetime.fromisoformat(previous[0])).total_seconds(), 3)
+                previous_et = datetime.fromisoformat(previous[0]).astimezone(ZoneInfo('America/New_York'))
+                result['cadence']['status'] = ('INVALID_SEQUENCE' if result['cadence_gap_seconds'] <= 0 else 'SESSION_BOUNDARY' if previous_et.date() != datetime.fromisoformat(started).astimezone(ZoneInfo('America/New_York')).date()
+                    else 'MISSED_TARGET' if result['cadence_gap_seconds'] > cadence_target_seconds else 'WITHIN_TARGET')
+                result['cadence']['observed_gap_seconds'] = result['cadence_gap_seconds']
+            if _table_exists(db, 'fast_path_events'):
+                fp = db.execute('SELECT MAX(retrieval_ts),COUNT(*) FROM fast_path_events WHERE retrieval_ts>=? AND retrieval_ts<=?', (started,now.isoformat())).fetchone()
+                fp_latest = db.execute('SELECT retrieval_ts FROM fast_path_events ORDER BY id DESC LIMIT 1').fetchone()
+                result['fast_path'].update(current_cycle_events=int(fp[1] or 0) if result['checkpoint_is_current_cycle'] else 0, current_cycle_latest_ts=fp[0] if result['checkpoint_is_current_cycle'] else None, latest_stored_run_events=int(fp[1] or 0),
+                                          last_recorded_ts=fp_latest[0] if fp_latest else None, authoritative=False, buy=False)
+                result['fast_path']['status'] = ('FAIL' if fast_path_outcome in ('failure','cancelled') else
+                    'NOT_RUN' if fast_path_outcome == 'skipped' else
+                    'EXPECTED_PREMARKET_ROUTING_ONLY' if fast_path_mode == 'PREMARKET_ROUTING_ONLY' else
+                    'CURRENT_SHADOW_EVIDENCE' if int(fp[1] or 0) and result['checkpoint_is_current_cycle'] else 'NO_CURRENT_EVIDENCE')
+            if fast_path_outcome in ('failure','cancelled'):
+                result['health'] = 'FAIL'
             if status == 'FAILED':
                 result['health'] = 'FAIL'
             elif status == 'PREMARKET_ROUTING_ONLY':
@@ -285,8 +305,9 @@ def build(db_path, scan_rc=0, bridge_rc=0):
                 if result['health'] == 'PASS':
                     result['health'] = 'DEGRADED'
                 result['evidence_health'] = 'EXPECTED_PREMARKET_ROUTING_ONLY'
-            elif status == 'MONITOR_DATA_GAP' and result['health'] == 'PASS':
-                result['health'] = 'DEGRADED'
+            elif status == 'MONITOR_DATA_GAP':
+                if result['health'] == 'PASS':
+                    result['health'] = 'DEGRADED'
                 result['evidence_health'] = 'UNEXPECTED_MODEL_DATA_GAP'
             elif total > 0 and ok == 0 and result['health'] == 'PASS':
                 result['health'] = 'DEGRADED'
@@ -308,6 +329,13 @@ def build(db_path, scan_rc=0, bridge_rc=0):
             result['checkpoint_freshness']='STALE_OUTSIDE_SESSION'
         else:
             result['checkpoint_freshness']='CURRENT' if result['checkpoint_is_current_cycle'] else 'STALE'
+        if observation_window and (not result['checkpoint_is_current_cycle'] or result['fast_scout']['status'] == 'DATA_GAP' or result['cadence']['status'] in ('MISSED_TARGET','INVALID_SEQUENCE')) and result['health'] == 'PASS':
+            result['health'] = 'DEGRADED'
+        if observation_window and result['checkpoint_is_current_cycle'] and fast_path_outcome == 'success' and fast_path_mode == 'MINUTE_LOOP' and result['fast_path']['status'] in ('NO_DATA','NO_CURRENT_EVIDENCE') and result['health'] == 'PASS':
+            result['health'] = 'DEGRADED'
+        recovery_path = path.parent / 'recovery-status.json'
+        if recovery_path.exists():
+            result['recovery'] = json.loads(recovery_path.read_text())
         if result['pending_bridge_events'] and result['health'] == 'PASS':
             result['health'] = 'DEGRADED'
     finally:
@@ -320,8 +348,12 @@ def main():
     p.add_argument('--out', required=True)
     p.add_argument('--scan-rc', type=int, default=0)
     p.add_argument('--bridge-rc', type=int, default=0)
+    p.add_argument('--fast-path-outcome', choices=['success','failure','cancelled','skipped'])
+    p.add_argument('--fast-path-mode', choices=['PREMARKET_ROUTING_ONLY','MINUTE_LOOP','UNKNOWN'], default='UNKNOWN')
+    p.add_argument('--config', default='config/radar.json')
     args=p.parse_args()
-    payload=build(args.db,args.scan_rc,args.bridge_rc)
+    target = int(json.loads(Path(args.config).read_text()).get('cadence_target_seconds',300))
+    payload=build(args.db,args.scan_rc,args.bridge_rc,args.fast_path_outcome,target,fast_path_mode=args.fast_path_mode)
     Path(args.out).parent.mkdir(parents=True,exist_ok=True)
     Path(args.out).write_text(json.dumps(payload,indent=2,sort_keys=True)+'\n')
     print(json.dumps(payload,sort_keys=True))

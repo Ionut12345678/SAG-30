@@ -32,7 +32,7 @@ jobs:
         run: |
           set -euo pipefail
           git fetch --depth=1 origin radar-state
-          git show FETCH_HEAD:radar.sqlite3.gz | gzip -dc > /tmp/sag30-real.sqlite3
+          python -m radar.checkpoint restore --ref FETCH_HEAD --out /tmp/sag30-real.sqlite3
           test -s /tmp/sag30-real.sqlite3
       - name: Restore immutable ledger from isolated state branch
         shell: bash

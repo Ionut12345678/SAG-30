@@ -15,7 +15,7 @@ jobs:
         run: |
           mkdir -p state
           git fetch origin radar-state
-          git show FETCH_HEAD:radar.sqlite3 > state/radar.sqlite3
+          python -m radar.checkpoint restore --ref FETCH_HEAD --out state/radar.sqlite3
           python - <<'PY'
           import sqlite3
           db=sqlite3.connect('state/radar.sqlite3')
