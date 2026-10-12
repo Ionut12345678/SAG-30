@@ -38,7 +38,9 @@ class ProspectiveTests(unittest.TestCase):
         self.sample('A','2026-10-12T14:00:00Z',4)
         self.sample('A','2026-10-12T14:10:00Z',50,'BAD')
         self.sample('A','2026-10-12T17:00:00Z',50)
-        c=self.audit()['cohorts'][0]
+        result=self.audit();c=result['cohorts'][0]
+        self.assertIn('missing_or_invalid_source_timestamp',result['rejection_reasons'])
+        self.assertEqual(result['run_health'][0]['status'],'DISCOVERY_OK')
         self.assertEqual(c['outcome'],'CENSORED_NO_FOLLOWUP')
         self.assertEqual(c['false_positive'],'UNKNOWN_CENSORED')
     def test_watch_uses_actual_capture_availability(self):
@@ -51,7 +53,11 @@ class ProspectiveTests(unittest.TestCase):
         self.assertEqual(c['first_watch']['captured_at_utc'],'2026-10-12T14:11:00Z')
     def test_no_inferred_watch_and_no_false_positive_claim(self):
         self.sample('A','2026-10-12T14:00:00Z',4);self.sample('A','2026-10-12T14:10:00Z',5)
+        self.db.execute('CREATE TABLE v049_state(session TEXT,symbol TEXT,first_watch_ts TEXT,last_eval_ts TEXT)')
+        self.db.execute("INSERT INTO v049_state VALUES('2026-10-12','A','2026-10-12T14:00:00Z','2026-10-12T14:10:00Z')");self.db.commit()
         c=self.audit()['cohorts'][0]
+        self.assertEqual(c['stored_precursor_context']['first_watch_ts'],'2026-10-12T14:00:00Z')
+        self.assertEqual(c['precursor_event_provenance'],'UNKNOWN_MUTABLE_STATE_NOT_IMMUTABLE_EVENT')
         self.assertIsNone(c['first_watch']);self.assertEqual(c['outcome'],'CENSORED_NO_OBSERVED_30')
     def test_scout_denominator_retains_not_selected_symbols_and_unknown_source(self):
         self.db.execute("INSERT INTO scout_history VALUES(1,'2026-10-12','UNSELECTED','2026-10-12T14:00:00Z',4,0,0,0,'minuteBar',1,1,1,1,0,0)")
