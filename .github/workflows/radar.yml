@@ -52,7 +52,7 @@ jobs:
     needs: admission
     if: ${{ github.ref == 'refs/heads/main' && needs.admission.result == 'success' && needs.admission.outputs.allowed == 'true' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 16
     steps:
       - uses: actions/checkout@v4
         with:
@@ -412,20 +412,22 @@ jobs:
           # GitHub occasionally returns a transient 5xx while accepting a large checkpoint
           # ref update. Retry the same immutable snapshot; do not rescan or alter history.
           pushed=0
-          for attempt in 1 2 3 4; do
+          # Bound network operations so a stalled push cannot consume the entire
+          # job lifetime; leave time for the failure recovery artifact upload.
+          for attempt in 1 2; do
             echo "SAG30_CHECKPOINT_PUSH_ATTEMPT=$attempt bytes=$compressed_bytes"
             expected="${{ steps.restore.outputs.commit }}"
             if [ "$expected" = NONE ]; then expected=""; fi
-            remote_commit="$(git ls-remote origin refs/heads/radar-state | cut -f1)"
+            remote_commit="$(timeout -k 5s 20s git ls-remote origin refs/heads/radar-state | cut -f1)" || remote_commit=""
             if [ "$remote_commit" = "$(git rev-parse HEAD)" ]; then
               pushed=1
               break
             fi
-            if git push --force-with-lease="radar-state:$expected" origin HEAD:radar-state; then
+            if timeout -k 5s 75s git push --force-with-lease="radar-state:$expected" origin HEAD:radar-state; then
               pushed=1
               break
             fi
-            if [ "$attempt" -lt 4 ]; then
+            if [ "$attempt" -lt 2 ]; then
               sleep $((attempt * 5))
             fi
           done
@@ -434,7 +436,7 @@ jobs:
             exit 1
           fi
           published_commit="$(git rev-parse HEAD)"
-          remote_commit="$(git ls-remote origin refs/heads/radar-state | cut -f1)"
+          remote_commit="$(timeout -k 5s 20s git ls-remote origin refs/heads/radar-state | cut -f1)" || remote_commit=""
           if [ "$remote_commit" != "$published_commit" ]; then
             echo "SAG30_CHECKPOINT_PUBLICATION_NOT_CONFIRMED"
             exit 1
