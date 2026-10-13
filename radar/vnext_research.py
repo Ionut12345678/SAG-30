@@ -23,7 +23,7 @@ def _parse(ts):
 
 def load(db):
     if not db.execute("SELECT 1 FROM sqlite_master WHERE name='scout_history' AND type='table'").fetchone():
-        return []
+        raise ValueError("Missing scout_history: cannot report zero signals from absent data")
     rows = db.execute(
         "SELECT run_id,session,symbol,retrieval_ts,change_pct,"
         "acceleration_pp_per_min,fresh_turnover_impulse_per_min,turnover,selected "
@@ -81,34 +81,52 @@ def replay(rows, cap=3, days_before=None):
 
 
 def summarize(alerts, history, limit_minutes=240):
+    """Resolve a negative only after adequate forward sampling.
+
+    Positive sampled threshold hits are evidence even if follow-up ends early.
+    A partial/noisy horizon without a hit is *unknown*, never a false positive.
+    """
+    thresholds = (15, 20, 30, 50)
     cases = []
     for a in alerts:
         future = [r for r in history[(a["session"], a["symbol"])]
                   if r["stamp"] > a["stamp"]
                   and 0 < (r["stamp"] - a["stamp"]).total_seconds() <= limit_minutes * 60]
-        if not future:
-            status, peak, hits = "CENSORED_NO_FUTURE_SAMPLE", None, None
-        else:
-            peak = max(100 * ((100 + r["pct"]) / (100 + a["pct"]) - 1)
-                       for r in future if a["pct"] > -100)
-            hits = {str(t): peak >= t for t in (15, 20, 30, 50)}
-            status = "OBSERVED_SAMPLED"
+        horizon = limit_minutes * 60
+        # Tolerate a final sample within 10 minutes of the requested horizon;
+        # require <=15-minute gaps from the signal through that final sample.
+        stamps = [a["stamp"]] + [r["stamp"] for r in future]
+        gaps = [(b - a0).total_seconds() for a0, b in zip(stamps, stamps[1:])]
+        complete = bool(future) and (
+            (future[-1]["stamp"] - a["stamp"]).total_seconds() >= horizon - min(600, horizon / 10)
+            and all(g <= 900 for g in gaps))
+        peak = (max(100 * ((100 + r["pct"]) / (100 + a["pct"]) - 1)
+                    for r in future) if future else None)
+        hits = {str(t): (True if peak is not None and peak >= t
+                          else False if complete else None) for t in thresholds}
+        status = ("OBSERVED_FULL_HORIZON" if complete else
+                  "CENSORED_PARTIAL_HORIZON" if future else
+                  "CENSORED_NO_FUTURE_SAMPLE")
         cases.append({"session": a["session"], "symbol": a["symbol"],
                       "first_signal_ts": a["retrieval_ts"], "signal_change_pct": a["pct"],
                       "entry_price": None, "source_quote_validated": False,
-                      "status": status, "forward_observation_count": len(future),
+                      "status": status, "forward_horizon_complete": complete,
+                      "forward_observation_count": len(future),
                       "max_sampled_return_pct": round(peak, 4) if peak is not None else None,
                       "hits": hits})
-    observed = [r for r in cases if r["status"] == "OBSERVED_SAMPLED"]
-    return {"signals": len(cases), "with_forward_samples": len(observed),
-            "censored": len(cases) - len(observed),
-            "hits": {str(t): sum(r["hits"][str(t)] for r in observed)
-                     for t in (15, 20, 30, 50)},
-            "precision_observed_only": {str(t): (
-                sum(r["hits"][str(t)] for r in observed) / len(observed)
-                if observed else None) for t in (15, 20, 30, 50)},
+    return {"signals": len(cases),
+            "with_forward_samples": sum(r["forward_observation_count"] > 0 for r in cases),
+            "complete_horizon": sum(r["forward_horizon_complete"] for r in cases),
+            "censored": sum(not r["forward_horizon_complete"] for r in cases),
+            "hits": {str(t): sum(r["hits"][str(t)] is True for r in cases) for t in thresholds},
+            "resolved_by_threshold": {str(t): sum(r["hits"][str(t)] is not None for r in cases)
+                                      for t in thresholds},
+            "resolved_sampled_hit_rate": {str(t): (
+                sum(r["hits"][str(t)] is True for r in cases)
+                / sum(r["hits"][str(t)] is not None for r in cases)
+                if any(r["hits"][str(t)] is not None for r in cases) else None)
+                for t in thresholds},
             "cases": cases}
-
 
 def build(db, cap=3, minutes=240, exclude_open_session=True):
     rows = load(db)
@@ -122,7 +140,8 @@ def build(db, cap=3, minutes=240, exclude_open_session=True):
                       "no_future_features": True},
             "limitations": [
                 "Same source scout_history; unknown source freshness, spread, halt, executable ask.",
-                "Sampled forward observations can miss highs; censored candidates are not losses.",
+                "Sampled forward observations can miss highs; incomplete negative follow-up is censored.",
+                "Resolved-only hit rates are selection-biased when partial positives are counted.",
                 "Backtest is in-sample research, not independent out-of-sample validation.",
                 "Equal alert budget per cycle, but differing eligibility and signal counts.",
                 "No real-time connection, production workflow change, or frozen BUY decision."],
