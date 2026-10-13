@@ -41,8 +41,8 @@ def request(url, headers=None, data=None):
     raise RuntimeError('Request retries exhausted')
 
 def session_window(now):
-    local = now.astimezone(ZoneInfo('America/New_York'))
-    return local.weekday() < 5 and 4 <= local.hour < 20
+    from .cadence import observation_window
+    return observation_window(now)
 
 def load_universe(path):
     with open(path, newline='') as file:

@@ -50,7 +50,8 @@ def build(db_path, scan_rc=0, bridge_rc=0, fast_path_outcome=None, cadence_targe
         'cadence': {'target_seconds':cadence_target_seconds, 'status':'NO_PREVIOUS_RUN'},
     }
     current_et=now.astimezone(ZoneInfo('America/New_York'))
-    observation_window=current_et.weekday()<5 and 4<=current_et.hour<20
+    from .cadence import observation_window as in_observation_window
+    observation_window=in_observation_window(now)
     result['observation_window_active']=observation_window
     result['checkpoint_is_current_cycle']=False
     path = Path(db_path)
@@ -87,8 +88,9 @@ def build(db_path, scan_rc=0, bridge_rc=0, fast_path_outcome=None, cadence_targe
             # Age is measured from the provider's trade timestamp, not the HTTP response.
             age_bins = {'future': 0, '0_60s': 0, '60_300s': 0,
                         '300_900s': 0, 'over_900s': 0, 'missing_or_invalid': 0}
-            for retrieval_ts, source_ts in db.execute(
-                'SELECT retrieval_ts,source_ts FROM observations WHERE run_id=?', (run_id,)
+            valid_source_latest = None
+            for retrieval_ts, source_ts, quality in db.execute(
+                'SELECT retrieval_ts,source_ts,quality FROM observations WHERE run_id=?', (run_id,)
             ):
                 try:
                     retrieved_dt = datetime.fromisoformat(retrieval_ts)
@@ -96,6 +98,8 @@ def build(db_path, scan_rc=0, bridge_rc=0, fast_path_outcome=None, cadence_targe
                     if retrieved_dt.tzinfo is None or source_dt.tzinfo is None:
                         raise ValueError('timezone missing')
                     age = (retrieved_dt-source_dt).total_seconds()
+                    if quality == 'OK' and age >= 0:
+                        valid_source_latest = max(valid_source_latest, source_dt) if valid_source_latest else source_dt
                     bucket = ('future' if age < 0 else '0_60s' if age <= 60
                               else '60_300s' if age <= 300 else '300_900s'
                               if age <= 900 else 'over_900s')
@@ -103,6 +107,7 @@ def build(db_path, scan_rc=0, bridge_rc=0, fast_path_outcome=None, cadence_targe
                     bucket = 'missing_or_invalid'
                 age_bins[bucket] += 1
             result['observations']['source_trade_age_bins'] = age_bins
+            result['observations']['valid_source_latest_ts'] = valid_source_latest.isoformat() if valid_source_latest else None
             from .freshness import quote_diagnostic
             quote_counts = {}
             for payload, retrieved in db.execute('SELECT payload,retrieval_ts FROM observations WHERE run_id=?', (run_id,)):

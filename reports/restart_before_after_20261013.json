@@ -1,0 +1,28 @@
+{
+  "checked_ts": "2026-10-13T13:42:09.690620+00:00",
+  "evidence_scope": "READ_ONLY_REAL_METADATA_AND_OFFLINE_PROPOSED_ADMISSION_NOT_LIVE_RESTART",
+  "before": {
+    "last_confirmed_workflow_run_id": 38327971689,
+    "checkpoint_commit": "f5965d40fd6677d8c3c1c9f29a5f64a93f739b7a",
+    "checkpoint_restore_drill_run_id": 38364865234,
+    "chain_stop_log": "2026-10-13T00:42:39.9830640Z Outside U.S. observation window; cadence chain stops.",
+    "valid_observations": 0,
+    "scout_status": "PASS",
+    "fast_path_status": "NO_CURRENT_EVIDENCE",
+    "generated_ts": "2026-10-13T00:42:06.665158+00:00"
+  },
+  "after_offline": {
+    "generated_ts": "2026-10-13T13:42:09.690620+00:00",
+    "allowed": true,
+    "status": "DUE",
+    "reason": "MISSING_CADENCE_EXECUTION",
+    "market_data_status": "DATA_GAP",
+    "checkpoint_verification": "REQUIRED_BEFORE_COLLECTION",
+    "buy": false,
+    "previous_run_id": 38327971689,
+    "elapsed_seconds": 47205.69062
+  },
+  "production_triggered": false,
+  "production_stopped": false,
+  "merged": false
+}

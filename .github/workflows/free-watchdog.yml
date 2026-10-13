@@ -3,7 +3,8 @@ on:
   workflow_dispatch:
   schedule:
     # Diagnostic during US market activity; no dispatches or recovery writes.
-    - cron: "0,30 13-23 * * 1-5"
+    - cron: '7,22,37,52 8-23 * * 1-5'
+    - cron: '7,22,37,52 0 * * 2-6'
 permissions:
   contents: read
 jobs:
@@ -29,9 +30,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python -m radar.free_watchdog --health watchdog-output/health.json --output watchdog-output/diagnostic.json
+          python -m radar.free_watchdog --health watchdog-output/health.json --output watchdog-output/diagnostic.json --fail-on-active-warning
           cat watchdog-output/diagnostic.json >> "$GITHUB_STEP_SUMMARY"
       - name: Preserve diagnostic evidence
+        if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: sag30-free-watchdog

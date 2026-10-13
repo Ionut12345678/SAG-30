@@ -4,6 +4,14 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 
 
+def observation_window(now):
+    """One operational window in exchange time; reject ambiguous naive clocks."""
+    if now.tzinfo is None:
+        raise ValueError('timezone-aware clock required')
+    local = now.astimezone(ZoneInfo('America/New_York'))
+    return local.weekday() < 5 and 4 <= local.hour < 20
+
+
 def dispatch_wait(starts, now, target=300, previous_compensation=0):
     if target <= 0:
         raise ValueError('positive cadence target required')

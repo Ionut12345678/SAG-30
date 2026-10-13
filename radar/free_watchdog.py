@@ -3,6 +3,7 @@ import argparse
 import json
 from datetime import datetime, timezone
 from pathlib import Path
+from .cadence import observation_window
 
 
 def evaluate(health, now, max_age_seconds=1200):
@@ -46,6 +47,7 @@ def main():
     parser.add_argument("--health", type=Path, required=True)
     parser.add_argument("--output", type=Path)
     parser.add_argument("--max-age-seconds", type=int, default=1200)
+    parser.add_argument("--fail-on-active-warning", action="store_true")
     args = parser.parse_args()
     if not args.health.exists():
         result = {"status": "WARN", "reasons": ["HEALTH_FILE_MISSING"],
@@ -61,7 +63,11 @@ def main():
     if args.output:
         args.output.write_text(serialized + "\n", encoding="utf-8")
     print(serialized)
+    if args.fail_on_active_warning and observation_window(datetime.now(timezone.utc)) and result['status'] == 'WARN':
+        print('::error::SAG30_WATCHDOG_WARNING: ' + ','.join(result['reasons']))
+        return 1
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
