@@ -1,9 +1,11 @@
 name: SAG-30 radar
 on:
   schedule:
-    # Watchdog only. Primary cadence self-chains through repository_dispatch.
-    - cron: '12,42 4-19 * * 1-5'
-      timezone: 'America/New_York'
+    # Independent UTC kickoffs cover EST and EDT; admission uses New York time.
+    # Repeated wakeups repair a broken dispatch chain without overlapping scans.
+    - cron: '0 8,9 * * 1-5'
+    - cron: '2/5 8-23 * * 1-5'
+    - cron: '2/5 0 * * 2-6'
   repository_dispatch:
     types: [sag30-cadence]
   workflow_dispatch:
@@ -19,8 +21,36 @@ concurrency:
   group: sag30-state
   cancel-in-progress: false
 jobs:
-  observe:
+  admission:
     if: ${{ github.ref == 'refs/heads/main' }}
+    permissions:
+      contents: read
+      actions: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      allowed: ${{ steps.gate.outputs.allowed }}
+      recovery-run-id: ${{ steps.gate.outputs.recovery-run-id }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Admit only due and recoverable radar cycles
+        id: gate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python -m radar.restart --repo "$GITHUB_REPOSITORY" --output restart-diagnostic.json
+      - name: Preserve restart decision
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: sag30-restart-diagnostic
+          path: restart-diagnostic.json
+          retention-days: 14
+  observe:
+    needs: admission
+    if: ${{ github.ref == 'refs/heads/main' && needs.admission.result == 'success' && needs.admission.outputs.allowed == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
@@ -68,11 +98,18 @@ jobs:
         if: ${{ steps.restore.outcome == 'success' && steps.journals.outcome == 'success' && steps.restore.outputs.commit != 'NONE' }}
         env:
           GH_TOKEN: ${{ github.token }}
+          REQUIRED_RECOVERY_RUN_ID: ${{ needs.admission.outputs.recovery-run-id }}
         run: |
           python -m radar.recovery --repo "$GITHUB_REPOSITORY" \
             --base-commit "${{ steps.restore.outputs.commit }}" \
             --base-published-ts "$(git show -s --format=%cI '${{ steps.restore.outputs.commit }}')" \
             --out state/radar.sqlite3 --status state/recovery-status.json --journal-dir state
+          python - <<'PY'
+          import json, os
+          from radar.restart import verify_required_recovery
+          verify_required_recovery(json.load(open('state/recovery-status.json')),
+                                   os.getenv('REQUIRED_RECOVERY_RUN_ID', ''))
+          PY
 
       - name: Run v0.4.12 EARLY-PREMARKET ROUTING SHADOW
         if: ${{ always() && !cancelled() && steps.restore.outcome == 'success' && steps.journals.outcome == 'success' && (steps.restore.outputs.commit == 'NONE' || steps.recovery.outcome == 'success') }}
@@ -428,7 +465,7 @@ jobs:
           if-no-files-found: error
 
       - name: Dispatch next cadence cycle
-        if: ${{ always() && steps.persist.outcome == 'success' }}
+        if: ${{ always() && !cancelled() && steps.persist.outcome == 'success' }}
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
@@ -436,9 +473,9 @@ jobs:
           set -euo pipefail
           should_chain="$(python - <<'PY'
           from datetime import datetime
-          from zoneinfo import ZoneInfo
-          now=datetime.now(ZoneInfo('America/New_York'))
-          print('1' if now.weekday() < 5 and 4 <= now.hour < 20 else '0')
+          from datetime import timezone
+          from radar.cadence import observation_window
+          print('1' if observation_window(datetime.now(timezone.utc)) else '0')
           PY
           )"
           if [ "$should_chain" != "1" ]; then
@@ -463,6 +500,11 @@ jobs:
           if [ "$wait_seconds" -gt 0 ]; then
             echo "SAG30_CADENCE_WAIT_SECONDS=$wait_seconds"
             sleep "$wait_seconds"
+          fi
+          # A wait may cross 20:00 ET or a weekend boundary. Never chain on an old decision.
+          if ! python -c 'from datetime import datetime, timezone; from radar.cadence import observation_window; raise SystemExit(0 if observation_window(datetime.now(timezone.utc)) else 1)'; then
+            echo "SAG30_CADENCE_WINDOW_ENDED_AFTER_WAIT"
+            exit 0
           fi
           dispatched=0
           for attempt in 1 2 3; do
@@ -503,4 +545,6 @@ jobs:
             echo "SAG30_BRIDGE_FAILED rc=$bridge_rc"
             exit "$bridge_rc"
           fi
-          echo "SAG30_CYCLE_PASS"
+          python -m radar.restart --health state/health.json --output state/cycle-result.json
+          cat state/cycle-result.json
+          echo "SAG30_CYCLE_TECHNICAL_PASS (market evidence reported separately)"
