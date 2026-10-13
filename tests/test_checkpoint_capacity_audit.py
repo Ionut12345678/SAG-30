@@ -16,7 +16,7 @@ class CapacityAuditTests(unittest.TestCase):
         self.assertFalse(x["restore_verified"])
 
     def test_small_checkpoint_is_structurally_passable(self):
-        x=diagnose(checkpoint((1000000,)))
+        x=diagnose(checkpoint((1000000,)), checkpoint((1000000,)))
         self.assertEqual(x["status"],"STRUCTURAL_CHECK_PASS")
 
     def test_growth_is_explicit(self):
