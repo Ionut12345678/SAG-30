@@ -45,7 +45,7 @@ jobs:
               { ...context.repo, workflow_id: 'checkpoint-capacity-audit.yml',
                 status: 'success', per_page: 100 }
             )) {
-              for (const run of response.data.workflow_runs) {
+              for (const run of response.data) {
                 if (run.id === context.runId || run.run_number >= Number(context.runNumber)) continue;
                 if (![branch, 'main'].includes(run.head_branch)) continue;
                 if (!['schedule', 'workflow_dispatch'].includes(run.event)) continue;
