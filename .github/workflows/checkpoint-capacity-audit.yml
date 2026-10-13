@@ -5,6 +5,10 @@ on:
     - cron: '40 23 * * 1-5'
 permissions:
   contents: read
+  actions: read
+concurrency:
+  group: sag30-checkpoint-capacity-audit
+  cancel-in-progress: false
 jobs:
   capacity:
     runs-on: ubuntu-latest
@@ -24,11 +28,50 @@ jobs:
           git fetch --depth=2 origin radar-state
           git show FETCH_HEAD:checkpoint.json > capacity-audit/current.json
           if git rev-parse 'FETCH_HEAD^' >/dev/null 2>&1; then
-            git show 'FETCH_HEAD^:checkpoint.json' > capacity-audit/previous.json || true
+            if git show 'FETCH_HEAD^:checkpoint.json' > capacity-audit/previous.json.tmp; then
+              mv capacity-audit/previous.json.tmp capacity-audit/previous.json
+            else
+              rm -f capacity-audit/previous.json.tmp
+            fi
           fi
+      - name: Locate previous successful capacity audit artifact
+        id: prior-audit
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const branch = context.ref.replace('refs/heads/', '');
+            for await (const response of github.paginate.iterator(
+              github.rest.actions.listWorkflowRuns,
+              { ...context.repo, workflow_id: 'checkpoint-capacity-audit.yml',
+                status: 'success', per_page: 100 }
+            )) {
+              for (const run of response.data.workflow_runs) {
+                if (run.id === context.runId || run.run_number >= Number(context.runNumber)) continue;
+                if (![branch, 'main'].includes(run.head_branch)) continue;
+                if (!['schedule', 'workflow_dispatch'].includes(run.event)) continue;
+                const artifacts = await github.paginate(github.rest.actions.listWorkflowRunArtifacts,
+                  { ...context.repo, run_id: run.id, per_page: 100 });
+                const artifact = artifacts.find(a =>
+                  a.name === 'sag30-checkpoint-capacity-diagnostic' && !a.expired);
+                if (artifact) {
+                  core.setOutput('run-id', String(run.id));
+                  core.info('Growth baseline audit run: ' + run.id);
+                  return;
+                }
+              }
+            }
+            core.info('No previous audit artifact available; missing history will be explicit.');
+      - name: Download previous audit report
+        if: steps.prior-audit.outputs.run-id != ''
+        uses: actions/download-artifact@v4
+        with:
+          name: sag30-checkpoint-capacity-diagnostic
+          path: capacity-audit/prior-audit
+          github-token: ${{ github.token }}
+          run-id: ${{ steps.prior-audit.outputs.run-id }}
       - name: Diagnose parts versus total growth
         run: |
-          python -m radar.checkpoint_capacity_audit --manifest capacity-audit/current.json --previous capacity-audit/previous.json --output capacity-audit/report.json
+          python -m radar.checkpoint_capacity_audit --manifest capacity-audit/current.json --previous capacity-audit/previous.json --previous-report capacity-audit/prior-audit/report.json --output capacity-audit/report.json
           cat capacity-audit/report.json >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         with:
