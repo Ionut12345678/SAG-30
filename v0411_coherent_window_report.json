@@ -1,0 +1,245 @@
+{
+  "activated_at": "2026-10-07T18:44:55.312671+00:00",
+  "authoritative": false,
+  "buy": false,
+  "counts": {
+    "coherent_window_watch": 20
+  },
+  "gates": {
+    "activity_ratio_min": 1.5,
+    "activity_window_minutes": 3.0,
+    "entry_change_pct": [
+      1.0,
+      8.0
+    ],
+    "max_spread_pct": 2.0,
+    "max_step_gap_minutes": 5.0,
+    "positive_steps": 2
+  },
+  "generated_at": "2026-10-13T15:35:03.132231+00:00",
+  "note": "Future-only challenger. Activity may confirm within trailing 3 event minutes; entry, 2-step structure and execution remain current. v0.4.9 unchanged. Never BUY.",
+  "session": "2026-10-13",
+  "signals": [
+    {
+      "current_activity_ratio": 1.9352276199205622,
+      "entry_change_pct": 4.989154013015185,
+      "first_watch_ts": "2026-10-13T14:25:47.891547+00:00",
+      "last_eval_ts": "2026-10-13T14:25:48.650635+00:00",
+      "source_ts": "2026-10-13T14:24:00Z",
+      "spread_pct": 0.4123711340206281,
+      "status": "COHERENT_WINDOW_WATCH",
+      "symbol": "BBAI",
+      "window_max_activity_ratio": 1.9352276199205622
+    },
+    {
+      "current_activity_ratio": 6.6867052023121385,
+      "entry_change_pct": 7.026348808030103,
+      "first_watch_ts": "2026-10-13T14:30:29.070227+00:00",
+      "last_eval_ts": "2026-10-13T14:31:25.453956+00:00",
+      "source_ts": "2026-10-13T14:29:00Z",
+      "spread_pct": 0.4716981132075371,
+      "status": "COHERENT_WINDOW_WATCH",
+      "symbol": "ZURA",
+      "window_max_activity_ratio": 6.6867052023121385
+    },
+    {
+      "current_activity_ratio": 2.001766784452297,
+      "entry_change_pct": 1.6177957532861553,
+      "first_watch_ts": "2026-10-13T15:01:44.393964+00:00",
+      "last_eval_ts": "2026-10-13T15:01:45.352444+00:00",
+      "source_ts": "2026-10-13T15:00:00Z",
+      "spread_pct": 0.09965122072745178,
+      "status": "COHERENT_WINDOW_WATCH",
+      "symbol": "ASAN",
+      "window_max_activity_ratio": 2.001766784452297
+    },
+    {
+      "current_activity_ratio": 0.24937655860349128,
+      "entry_change_pct": 3.4223134839151292,
+      "first_watch_ts": "2026-10-13T15:05:22.332351+00:00",
+      "last_eval_ts": "2026-10-13T15:07:14.245204+00:00",
+      "source_ts": "2026-10-13T15:03:00Z",
+      "spread_pct": 0.39630118890356997,
+      "status": "COHERENT_WINDOW_WATCH",
+      "symbol": "GPRE",
+      "window_max_activity_ratio": 1.5935828877005347
+    },
+    {
+      "current_activity_ratio": 2.6471774193548385,
+      "entry_change_pct": 1.331018518518512,
+      "first_watch_ts": "2026-10-13T15:05:22.332351+00:00",
+      "last_eval_ts": "2026-10-13T15:07:14.246964+00:00",
+      "source_ts": "2026-10-13T15:04:00Z",
+      "spread_pct": 0.11422044545973487,
+      "status": "COHERENT_WINDOW_WATCH",
+      "symbol": "UPWK",
+      "window_max_activity_ratio": 2.6471774193548385
+    },
+    {
+      "current_activity_ratio": 0.7371681415929203,
+      "entry_change_pct": 1.163793103448274,
+      "first_watch_ts": "2026-10-13T15:07:13.521007+00:00",
+      "last_eval_ts": "2026-10-13T15:07:14.243687+00:00",
+      "source_ts": "2026-10-13T15:06:00Z",
+      "spread_pct": 0.08521516829995558,
+      "status": "COHERENT_WINDOW_WATCH",
+      "symbol": "AI",
+      "window_max_activity_ratio": 1.6139147476727094
+    },
+    {
+      "current_activity_ratio": 0.6480881399870383,
+      "entry_change_pct": 2.970297029702973,
+      "first_watch_ts": "2026-10-13T15:07:13.521007+00:00",
+      "last_eval_ts": "2026-10-13T15:07:14.243917+00:00",
+      "source_ts": "2026-10-13T15:06:00Z",
+      "spread_pct": 0.240096038415361,
+      "status": "COHERENT_WINDOW_WATCH",
+      "symbol": "ALHC",
+      "window_max_activity_ratio": 10.514925373134329
+    },
+    {
+      "current_activity_ratio": 2.029143897996357,
+      "entry_change_pct": 2.3136246786632286,
+      "first_watch_ts": "2026-10-13T15:07:13.521007+00:00",
+      "last_eval_ts": "2026-10-13T15:07:14.244009+00:00",
+      "source_ts": "2026-10-13T15:06:00Z",
+      "spread_pct": 0.1257071024512858,
+      "status": "COHERENT_WINDOW_WATCH",
+      "symbol": "ARCO",
+      "window_max_activity_ratio": 2.109289617486339
+    },
+    {
+      "current_activity_ratio": 1.462686567164179,
+      "entry_change_pct": 3.621621621621629,
+      "first_watch_ts": "2026-10-13T15:07:13.521007+00:00",
+      "last_eval_ts": "2026-10-13T15:07:14.244498+00:00",
+      "source_ts": "2026-10-13T15:06:00Z",
+      "spread_pct": 0.10411244143674948,
+      "status": "COHERENT_WINDOW_WATCH",
+      "symbol": "CERT",
+      "window_max_activity_ratio": 2.7191601049868765
+    },
+    {
+      "current_activity_ratio": 0.4672897196261682,
+      "entry_change_pct": 2.5882352941176467,
+      "first_watch_ts": "2026-10-13T15:10:57.687944+00:00",
+      "last_eval_ts": "2026-10-13T15:12:50.921909+00:00",
+      "source_ts": "2026-10-13T15:08:00Z",
+      "spread_pct": 0.22805017103762343,
+      "status": "COHERENT_WINDOW_WATCH",
+      "symbol": "EVH",
+      "window_max_activity_ratio": 3.3816425120772946
+    },
+    {
+      "current_activity_ratio": 0.012811479085260393,
+      "entry_change_pct": 2.7808676307007785,
+      "first_watch_ts": "2026-10-13T15:11:53.681184+00:00",
+      "last_eval_ts": "2026-10-13T15:12:50.922493+00:00",
+      "source_ts": "2026-10-13T15:10:00Z",
+      "spread_pct": 0.21668472372697264,
+      "status": "COHERENT_WINDOW_WATCH",
+      "symbol": "GT",
+      "window_max_activity_ratio": 155.11
+    },
+    {
+      "current_activity_ratio": 1.6818181818181819,
+      "entry_change_pct": 2.4733268671192965,
+      "first_watch_ts": "2026-10-13T15:12:49.702361+00:00",
+      "last_eval_ts": "2026-10-13T15:12:50.924727+00:00",
+      "source_ts": "2026-10-13T15:11:00Z",
+      "spread_pct": 0.4105479235749218,
+      "status": "COHERENT_WINDOW_WATCH",
+      "symbol": "THRM",
+      "window_max_activity_ratio": 8.280303030303031
+    },
+    {
+      "current_activity_ratio": 2.6357142857142857,
+      "entry_change_pct": 2.023121387283222,
+      "first_watch_ts": "2026-10-13T15:12:49.702361+00:00",
+      "last_eval_ts": "2026-10-13T15:12:50.925378+00:00",
+      "source_ts": "2026-10-13T15:11:00Z",
+      "spread_pct": 0.14134275618374256,
+      "status": "COHERENT_WINDOW_WATCH",
+      "symbol": "YEXT",
+      "window_max_activity_ratio": 2.6357142857142857
+    },
+    {
+      "current_activity_ratio": 0.7741935483870968,
+      "entry_change_pct": 2.9891304347826164,
+      "first_watch_ts": "2026-10-13T15:16:27.356055+00:00",
+      "last_eval_ts": "2026-10-13T15:18:20.010014+00:00",
+      "source_ts": "2026-10-13T15:13:00Z",
+      "spread_pct": 0.17590149516272074,
+      "status": "COHERENT_WINDOW_WATCH",
+      "symbol": "CXM",
+      "window_max_activity_ratio": 5.1940298507462686
+    },
+    {
+      "current_activity_ratio": 2.020366598778004,
+      "entry_change_pct": 1.5193852602165547,
+      "first_watch_ts": "2026-10-13T15:22:00.802529+00:00",
+      "last_eval_ts": "2026-10-13T15:23:55.081398+00:00",
+      "source_ts": "2026-10-13T15:20:00Z",
+      "spread_pct": 0.5517241379310227,
+      "status": "COHERENT_WINDOW_WATCH",
+      "symbol": "HELE",
+      "window_max_activity_ratio": 3.0578512396694215
+    },
+    {
+      "current_activity_ratio": 31.687898089171973,
+      "entry_change_pct": 4.346092503987253,
+      "first_watch_ts": "2026-10-13T15:23:53.526524+00:00",
+      "last_eval_ts": "2026-10-13T15:23:55.080305+00:00",
+      "source_ts": "2026-10-13T15:22:00Z",
+      "spread_pct": 0.07624857033930452,
+      "status": "COHERENT_WINDOW_WATCH",
+      "symbol": "DXC",
+      "window_max_activity_ratio": 31.687898089171973
+    },
+    {
+      "current_activity_ratio": 1.527363184079602,
+      "entry_change_pct": 2.876480541455151,
+      "first_watch_ts": "2026-10-13T15:23:53.526524+00:00",
+      "last_eval_ts": "2026-10-13T15:23:55.081729+00:00",
+      "source_ts": "2026-10-13T15:22:00Z",
+      "spread_pct": 0.3284072249589421,
+      "status": "COHERENT_WINDOW_WATCH",
+      "symbol": "IMSR",
+      "window_max_activity_ratio": 1.527363184079602
+    },
+    {
+      "current_activity_ratio": 7.0,
+      "entry_change_pct": 1.0727056019070202,
+      "first_watch_ts": "2026-10-13T15:29:29.391566+00:00",
+      "last_eval_ts": "2026-10-13T15:29:31.308904+00:00",
+      "source_ts": "2026-10-13T15:28:00Z",
+      "spread_pct": 0.4716981132075371,
+      "status": "COHERENT_WINDOW_WATCH",
+      "symbol": "CCOI",
+      "window_max_activity_ratio": 7.0
+    },
+    {
+      "current_activity_ratio": 1.629822732012513,
+      "entry_change_pct": 2.0270270270270396,
+      "first_watch_ts": "2026-10-13T15:29:29.391566+00:00",
+      "last_eval_ts": "2026-10-13T15:29:31.314316+00:00",
+      "source_ts": "2026-10-13T15:28:00Z",
+      "spread_pct": 0.16542597187758123,
+      "status": "COHERENT_WINDOW_WATCH",
+      "symbol": "TDOC",
+      "window_max_activity_ratio": 1.629822732012513
+    },
+    {
+      "current_activity_ratio": 1.9954545454545454,
+      "entry_change_pct": 6.456043956043955,
+      "first_watch_ts": "2026-10-13T15:35:01.257798+00:00",
+      "last_eval_ts": "2026-10-13T15:35:03.124259+00:00",
+      "source_ts": "2026-10-13T15:34:00Z",
+      "spread_pct": 0.2952029520295271,
+      "status": "COHERENT_WINDOW_WATCH",
+      "symbol": "CNXC",
+      "window_max_activity_ratio": 1.9954545454545454
+    }
+  ],
+  "status": "SAG-30-v0.4.11-COHERENT-WINDOW-PROSPECTIVE-SHADOW"
+}

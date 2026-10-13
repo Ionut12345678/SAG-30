@@ -1,0 +1,23 @@
+{
+  "authoritative": false,
+  "coverage": {
+    "history_ge_1": 15660,
+    "history_ge_10": 8594,
+    "history_ge_3": 13222,
+    "history_ge_5": 11628,
+    "volume_ratio_available": 15628
+  },
+  "packets": 39788,
+  "path_events": {
+    "new_observed_high": 4924,
+    "two_positive_intervals": 3813
+  },
+  "status": "SHADOW_ONLY",
+  "volume_ratio_distribution": {
+    "median": 2.3148588124360545,
+    "p75": 4.894538606403013,
+    "p90": 16.590320538643034,
+    "p95": 69.6511111111111
+  },
+  "warning": "Research telemetry only. No candidate baseline, threshold, or semantic gate is authorized for v0.3.3 FROZEN."
+}

@@ -1,0 +1,100 @@
+{
+  "activated_at": "2026-10-07T15:25:48.796330+00:00",
+  "authoritative": false,
+  "buy": false,
+  "counts": {
+    "EXPIRED_NO_CONVERSION": 5
+  },
+  "generated_at": "2026-10-13T15:35:03.190073+00:00",
+  "note": "Future-only; pre-activation signals receive zero credit. v0.3.3/v0.4.7 unchanged. Never BUY.",
+  "preregistered_gates": {
+    "confirmation_window_minutes": [
+      2,
+      10
+    ],
+    "entry_change_pct": [
+      1.5,
+      8.0
+    ],
+    "max_giveback_fraction": 0.4,
+    "max_spread_pct": 2.0,
+    "min_activity_ratio": 2.0,
+    "min_advance_pp": 2.0,
+    "min_positive_steps": 2,
+    "min_volume_retention": 0.5
+  },
+  "session": "2026-10-13",
+  "signals": [
+    {
+      "activity_ratio": 6.6867052023121385,
+      "entry_change_pct": 7.026348808030103,
+      "giveback_fraction": 1.0,
+      "max_change_pct": 7.026348808030103,
+      "positive_steps": 0,
+      "signal_spread_pct": 0.4716981132075371,
+      "source_signal_ts": "2026-10-13T14:30:29.070227+00:00",
+      "stage2_change_pct": null,
+      "stage2_ts": null,
+      "status": "EXPIRED_NO_CONVERSION",
+      "symbol": "ZURA",
+      "volume_retention": 0.06258644536652835
+    },
+    {
+      "activity_ratio": 2.001766784452297,
+      "entry_change_pct": 1.6177957532861553,
+      "giveback_fraction": 0.0,
+      "max_change_pct": 2.1739130434782483,
+      "positive_steps": 4,
+      "signal_spread_pct": 0.09965122072745178,
+      "source_signal_ts": "2026-10-13T15:01:44.393964+00:00",
+      "stage2_change_pct": null,
+      "stage2_ts": null,
+      "status": "EXPIRED_NO_CONVERSION",
+      "symbol": "ASAN",
+      "volume_retention": 0.8093556928508385
+    },
+    {
+      "activity_ratio": 2.029143897996357,
+      "entry_change_pct": 2.3136246786632286,
+      "giveback_fraction": 0.0,
+      "max_change_pct": 2.7634961439588768,
+      "positive_steps": 3,
+      "signal_spread_pct": 0.1257071024512858,
+      "source_signal_ts": "2026-10-13T15:07:13.521007+00:00",
+      "stage2_change_pct": null,
+      "stage2_ts": null,
+      "status": "EXPIRED_NO_CONVERSION",
+      "symbol": "ARCO",
+      "volume_retention": 0.1124326750448833
+    },
+    {
+      "activity_ratio": 2.6357142857142857,
+      "entry_change_pct": 2.023121387283222,
+      "giveback_fraction": 0.0,
+      "max_change_pct": 2.673410404624277,
+      "positive_steps": 2,
+      "signal_spread_pct": 0.14134275618374256,
+      "source_signal_ts": "2026-10-13T15:12:49.702361+00:00",
+      "stage2_change_pct": null,
+      "stage2_ts": null,
+      "status": "EXPIRED_NO_CONVERSION",
+      "symbol": "YEXT",
+      "volume_retention": 3.692411924119241
+    },
+    {
+      "activity_ratio": 2.020366598778004,
+      "entry_change_pct": 1.5193852602165547,
+      "giveback_fraction": 1.0,
+      "max_change_pct": 1.5193852602165547,
+      "positive_steps": 0,
+      "signal_spread_pct": 0.5517241379310227,
+      "source_signal_ts": "2026-10-13T15:22:00.802529+00:00",
+      "stage2_change_pct": null,
+      "stage2_ts": null,
+      "status": "EXPIRED_NO_CONVERSION",
+      "symbol": "HELE",
+      "volume_retention": 0.7459677419354839
+    }
+  ],
+  "status": "SAG-30-v0.4.8-CONVERSION-CHALLENGER-PROSPECTIVE-SHADOW"
+}

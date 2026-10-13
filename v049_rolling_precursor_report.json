@@ -1,0 +1,224 @@
+{
+  "activated_at": "2026-10-07T16:31:13.827732+00:00",
+  "authoritative": false,
+  "buy": false,
+  "counts": {
+    "rolling_precursor_watch": 20
+  },
+  "gates": {
+    "entry_change_pct": [
+      1.0,
+      8.0
+    ],
+    "max_spread_pct": 2.0,
+    "max_step_gap_minutes": 5.0,
+    "min_activity_ratio": 1.5,
+    "positive_steps": 2
+  },
+  "generated_at": "2026-10-13T15:35:03.065536+00:00",
+  "note": "Future-only rolling precursor WATCH. Broad scout is routing only. No changes to v0.3.3/v0.4.7/v0.4.8. Never BUY.",
+  "session": "2026-10-13",
+  "signals": [
+    {
+      "activity_ratio": 1.9352276199205622,
+      "entry_change_pct": 4.989154013015185,
+      "first_watch_ts": "2026-10-13T14:25:47.891547+00:00",
+      "last_eval_ts": "2026-10-13T14:25:48.579455+00:00",
+      "source_ts": "2026-10-13T14:24:00Z",
+      "spread_pct": 0.4123711340206281,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "BBAI"
+    },
+    {
+      "activity_ratio": 6.6867052023121385,
+      "entry_change_pct": 7.026348808030103,
+      "first_watch_ts": "2026-10-13T14:30:29.070227+00:00",
+      "last_eval_ts": "2026-10-13T14:31:25.401384+00:00",
+      "source_ts": "2026-10-13T14:29:00Z",
+      "spread_pct": 0.4716981132075371,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "ZURA"
+    },
+    {
+      "activity_ratio": 2.001766784452297,
+      "entry_change_pct": 1.6177957532861553,
+      "first_watch_ts": "2026-10-13T15:01:44.393964+00:00",
+      "last_eval_ts": "2026-10-13T15:01:45.255429+00:00",
+      "source_ts": "2026-10-13T15:00:00Z",
+      "spread_pct": 0.09965122072745178,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "ASAN"
+    },
+    {
+      "activity_ratio": 2.6471774193548385,
+      "entry_change_pct": 1.331018518518512,
+      "first_watch_ts": "2026-10-13T15:05:22.332351+00:00",
+      "last_eval_ts": "2026-10-13T15:07:14.166926+00:00",
+      "source_ts": "2026-10-13T15:04:00Z",
+      "spread_pct": 0.11422044545973487,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "UPWK"
+    },
+    {
+      "activity_ratio": 2.029143897996357,
+      "entry_change_pct": 2.3136246786632286,
+      "first_watch_ts": "2026-10-13T15:07:13.521007+00:00",
+      "last_eval_ts": "2026-10-13T15:07:14.164549+00:00",
+      "source_ts": "2026-10-13T15:06:00Z",
+      "spread_pct": 0.1257071024512858,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "ARCO"
+    },
+    {
+      "activity_ratio": 1.662,
+      "entry_change_pct": 3.279702970297027,
+      "first_watch_ts": "2026-10-13T15:10:57.687944+00:00",
+      "last_eval_ts": "2026-10-13T15:12:50.846331+00:00",
+      "source_ts": "2026-10-13T15:09:00Z",
+      "spread_pct": 0.23923444976076047,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "ALHC"
+    },
+    {
+      "activity_ratio": 1.8666666666666667,
+      "entry_change_pct": 3.8918918918918965,
+      "first_watch_ts": "2026-10-13T15:10:57.687944+00:00",
+      "last_eval_ts": "2026-10-13T15:12:50.846817+00:00",
+      "source_ts": "2026-10-13T15:09:00Z",
+      "spread_pct": 0.10389610389612014,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "CERT"
+    },
+    {
+      "activity_ratio": 10.10318331503842,
+      "entry_change_pct": 1.379310344827589,
+      "first_watch_ts": "2026-10-13T15:11:53.681184+00:00",
+      "last_eval_ts": "2026-10-13T15:12:50.846125+00:00",
+      "source_ts": "2026-10-13T15:10:00Z",
+      "spread_pct": 0.08507018290089143,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "AI"
+    },
+    {
+      "activity_ratio": 17.145,
+      "entry_change_pct": 3.529411764705892,
+      "first_watch_ts": "2026-10-13T15:12:49.702361+00:00",
+      "last_eval_ts": "2026-10-13T15:12:50.847259+00:00",
+      "source_ts": "2026-10-13T15:11:00Z",
+      "spread_pct": 0.22753128555177876,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "EVH"
+    },
+    {
+      "activity_ratio": 1.6818181818181819,
+      "entry_change_pct": 2.4733268671192965,
+      "first_watch_ts": "2026-10-13T15:12:49.702361+00:00",
+      "last_eval_ts": "2026-10-13T15:12:50.849057+00:00",
+      "source_ts": "2026-10-13T15:11:00Z",
+      "spread_pct": 0.4105479235749218,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "THRM"
+    },
+    {
+      "activity_ratio": 2.6357142857142857,
+      "entry_change_pct": 2.023121387283222,
+      "first_watch_ts": "2026-10-13T15:12:49.702361+00:00",
+      "last_eval_ts": "2026-10-13T15:12:50.849487+00:00",
+      "source_ts": "2026-10-13T15:11:00Z",
+      "spread_pct": 0.14134275618374256,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "YEXT"
+    },
+    {
+      "activity_ratio": 1.9580419580419581,
+      "entry_change_pct": 3.079710144927561,
+      "first_watch_ts": "2026-10-13T15:17:23.138338+00:00",
+      "last_eval_ts": "2026-10-13T15:18:19.920507+00:00",
+      "source_ts": "2026-10-13T15:16:00Z",
+      "spread_pct": 0.17590149516272074,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "CXM"
+    },
+    {
+      "activity_ratio": 26.40954274353877,
+      "entry_change_pct": 2.8921023359288034,
+      "first_watch_ts": "2026-10-13T15:22:00.802529+00:00",
+      "last_eval_ts": "2026-10-13T15:23:54.991761+00:00",
+      "source_ts": "2026-10-13T15:21:00Z",
+      "spread_pct": 0.21621621621621162,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "GT"
+    },
+    {
+      "activity_ratio": 2.020366598778004,
+      "entry_change_pct": 1.5193852602165547,
+      "first_watch_ts": "2026-10-13T15:22:00.802529+00:00",
+      "last_eval_ts": "2026-10-13T15:23:54.991861+00:00",
+      "source_ts": "2026-10-13T15:20:00Z",
+      "spread_pct": 0.5517241379310227,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "HELE"
+    },
+    {
+      "activity_ratio": 31.687898089171973,
+      "entry_change_pct": 4.346092503987253,
+      "first_watch_ts": "2026-10-13T15:23:53.526524+00:00",
+      "last_eval_ts": "2026-10-13T15:23:54.990934+00:00",
+      "source_ts": "2026-10-13T15:22:00Z",
+      "spread_pct": 0.07624857033930452,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "DXC"
+    },
+    {
+      "activity_ratio": 1.527363184079602,
+      "entry_change_pct": 2.876480541455151,
+      "first_watch_ts": "2026-10-13T15:23:53.526524+00:00",
+      "last_eval_ts": "2026-10-13T15:23:54.992079+00:00",
+      "source_ts": "2026-10-13T15:22:00Z",
+      "spread_pct": 0.3284072249589421,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "IMSR"
+    },
+    {
+      "activity_ratio": 1.5027624309392265,
+      "entry_change_pct": 4.380561259411375,
+      "first_watch_ts": "2026-10-13T15:27:35.849513+00:00",
+      "last_eval_ts": "2026-10-13T15:29:31.232469+00:00",
+      "source_ts": "2026-10-13T15:26:00Z",
+      "spread_pct": 1.3829436944352922,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "GPRE"
+    },
+    {
+      "activity_ratio": 7.0,
+      "entry_change_pct": 1.0727056019070202,
+      "first_watch_ts": "2026-10-13T15:29:29.391566+00:00",
+      "last_eval_ts": "2026-10-13T15:29:31.230868+00:00",
+      "source_ts": "2026-10-13T15:28:00Z",
+      "spread_pct": 0.4716981132075371,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "CCOI"
+    },
+    {
+      "activity_ratio": 1.629822732012513,
+      "entry_change_pct": 2.0270270270270396,
+      "first_watch_ts": "2026-10-13T15:29:29.391566+00:00",
+      "last_eval_ts": "2026-10-13T15:29:31.234588+00:00",
+      "source_ts": "2026-10-13T15:28:00Z",
+      "spread_pct": 0.16542597187758123,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "TDOC"
+    },
+    {
+      "activity_ratio": 1.9954545454545454,
+      "entry_change_pct": 6.456043956043955,
+      "first_watch_ts": "2026-10-13T15:35:01.257798+00:00",
+      "last_eval_ts": "2026-10-13T15:35:03.060160+00:00",
+      "source_ts": "2026-10-13T15:34:00Z",
+      "spread_pct": 0.2952029520295271,
+      "status": "ROLLING_PRECURSOR_WATCH",
+      "symbol": "CNXC"
+    }
+  ],
+  "status": "SAG-30-v0.4.9-ROLLING-PRECURSOR-PROSPECTIVE-SHADOW"
+}

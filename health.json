@@ -1,0 +1,181 @@
+{
+  "cadence": {
+    "dispatch_compensation_seconds": 60,
+    "observed_gap_seconds": 330.236,
+    "status": "MISSED_TARGET",
+    "target_seconds": 300
+  },
+  "cadence_gap_seconds": 330.236,
+  "candidate_count": 69,
+  "candidate_v034": {
+    "lanes": {
+      "FRESH": 58,
+      "SECOND_IMPULSE": 11
+    },
+    "last_signal": {
+      "change_pct": -3.7054409005628517,
+      "lane": "FRESH",
+      "proof": "new observed high after acceptance",
+      "retrieval_ts": "2026-10-13T15:32:11.779246+00:00",
+      "state": "C34-HOT-SHADOW",
+      "symbol": "WLTH"
+    },
+    "signals_total": 1102,
+    "states": {
+      "C34-ACCEPTED": 2,
+      "C34-BLOCKED-LANE": 11,
+      "C34-DATA_QUALITY": 2,
+      "C34-HOT-SHADOW": 5,
+      "C34-LOW": 44,
+      "C34-WAIT-ABSORPTION": 1,
+      "C34-WATCH": 4
+    },
+    "status": "CANDIDATE_SHADOW_ONLY"
+  },
+  "candidate_v034r2": {
+    "last_signal": {
+      "change_pct": 4.4469783352337515,
+      "lane": "FRESH",
+      "proof": "two positive intervals with rising observed highs",
+      "retrieval_ts": "2026-10-13T15:32:11.779246+00:00",
+      "state": "C34R2-HOT-SHADOW",
+      "symbol": "CRNC"
+    },
+    "signals_total": 1489,
+    "states": {
+      "C34R2-ACCEPTED": 1,
+      "C34R2-BLOCKED-LANE": 11,
+      "C34R2-CONVERSION": 1,
+      "C34R2-DATA_QUALITY": 2,
+      "C34R2-HOT-SHADOW": 5,
+      "C34R2-LOW": 39,
+      "C34R2-WAIT-ABSORPTION": 2,
+      "C34R2-WATCH": 8
+    },
+    "status": "CANDIDATE_SHADOW_CHALLENGER"
+  },
+  "checkpoint": {
+    "audit_retention": "ALL_ROWS_NO_PRUNING",
+    "compressed_bytes": 116907269,
+    "created_ts": "2026-10-13T15:35:25.105226+00:00",
+    "database_bytes": 540790784,
+    "database_sha256": "9107abf54ff554a4670576a5be678c2631fbc824591f5d99dc62fc3a9a1874a5",
+    "format": "sag30-sqlite-gzip-parts-v1",
+    "largest_part_bytes": 67108864,
+    "part_count": 2,
+    "publication": "PREPARED_NOT_CONFIRMED",
+    "size_status": "CRITICAL_90_MIB",
+    "workflow_run_id": "38422640857"
+  },
+  "checkpoint_freshness": "CURRENT",
+  "checkpoint_is_current_cycle": true,
+  "evaluation_states": {
+    "RADAR-LOW": 67,
+    "UNKNOWN/DATA_QUALITY": 2
+  },
+  "execution_diagnostics": {
+    "authoritative": false,
+    "execution_actionable": "UNKNOWN",
+    "halt_status": "UNKNOWN",
+    "provider_fallback": "NOT_INFERRED_FROM_SHADOW_ROUTING",
+    "quote_counts": {
+      "FRESH_QUOTE_ONLY": 68,
+      "STALE_QUOTE": 1
+    },
+    "quote_max_age_seconds": 300
+  },
+  "fast_path": {
+    "authoritative": false,
+    "buy": false,
+    "current_cycle_events": 348,
+    "current_cycle_latest_ts": "2026-10-13T15:35:01.257798+00:00",
+    "last_recorded_ts": "2026-10-13T15:35:01.257798+00:00",
+    "latest_stored_run_events": 348,
+    "mode": "MINUTE_LOOP",
+    "status": "CURRENT_SHADOW_EVIDENCE",
+    "workflow_outcome": "success"
+  },
+  "fast_scout": {
+    "checkpoint_is_current_cycle": true,
+    "eligible_count": 1367,
+    "evidence_scope": "LATEST_STORED_RUN",
+    "fetch_seconds": 1.161,
+    "selected_count": 69,
+    "status": "PASS",
+    "sticky_count": 11,
+    "total_seconds": 2.869,
+    "universe_count": 3185
+  },
+  "frozen_version": "SAG-30 Early Radar v0.3.3 FROZEN SHADOW",
+  "generated_ts": "2026-10-13T15:35:03.520858+00:00",
+  "health": "DEGRADED",
+  "last_signal": null,
+  "latest_run": {
+    "detail": "FAST_SCOUT 3185 universe -> 69 deep observations",
+    "finished": "2026-10-13T15:32:12.739580+00:00",
+    "id": 539,
+    "started": "2026-10-13T15:31:50.884250+00:00",
+    "status": "DISCOVERY_OK"
+  },
+  "model_readiness": {
+    "activity_confirmable_packets": 0,
+    "status": "BLOCKED_SEMANTIC_EVIDENCE"
+  },
+  "observation_window_active": true,
+  "observations": {
+    "data_quality": 2,
+    "ok": 67,
+    "rejection_reasons": {
+      "invalid_previous_close_time": 2
+    },
+    "source_trade_age_bins": {
+      "0_60s": 31,
+      "300_900s": 8,
+      "60_300s": 30,
+      "future": 0,
+      "missing_or_invalid": 0,
+      "over_900s": 0
+    },
+    "total": 69,
+    "valid_source_latest_ts": "2026-10-13T15:32:11.310827+00:00"
+  },
+  "pending_bridge_events": 0,
+  "reason_codes": [
+    "CADENCE_MISSED_TARGET",
+    "CHECKPOINT_CRITICAL_90_MIB"
+  ],
+  "recovery": {
+    "base_commit": "0b1f9057a41ad24a8742acc2d37400c9b09e2799",
+    "status": "NO_COMPATIBLE_RECOVERY_ARTIFACT"
+  },
+  "semantic_shadow": {
+    "new_observed_highs": 11,
+    "packets": 69,
+    "two_positive_intervals": 9,
+    "with_history_samples": 60,
+    "with_observed_volume_ratio": 60
+  },
+  "spec_sha256": "65c3c170d42e0b4bb8eca75b38d32a3c551f1ba7101eef825c745d588fdabc31",
+  "v0412_downstream": {
+    "note": "Only same-run post-route snapshots; no historical backfill or BUY",
+    "same_run_routes": 0,
+    "status": "SHADOW_NOT_MODEL_EVIDENCE",
+    "with_post_route_observation": 0,
+    "with_valid_post_route_observation": 0,
+    "without_valid_post_route_observation": 0
+  },
+  "v0412_session_iex_conversion": {
+    "converted_symbols": [],
+    "note": "valid_after_08_et counts retrievals; valid_source_after_08_et requires source trade time >=08:00 ET. Prospective audit only, not BUY.",
+    "observed_after_route": 0,
+    "routed_symbols": 0,
+    "status": "PROSPECTIVE_SHADOW_NOT_BUY",
+    "valid_after_08_et": 0,
+    "valid_after_route": 0,
+    "valid_source_after_08_et": 0
+  },
+  "workflow": {
+    "bridge_rc": 0,
+    "scan_rc": 0
+  }
+}

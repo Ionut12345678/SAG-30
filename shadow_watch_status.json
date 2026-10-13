@@ -1,0 +1,4576 @@
+{
+  "capture_ts_utc": "2026-10-13T15:35:03.242142+00:00",
+  "future_skipped": 0,
+  "latest_run_id": 539,
+  "market_session_et": "2026-10-13",
+  "new_observations": 126,
+  "new_watches": 5,
+  "outcomes": [
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CYH"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CBLL"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CDLX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CEPU"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ATEC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "AVXL"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "AISP"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "AIXI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ALHC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ALLT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "APRE"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "APUS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ABTC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ADCT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "BORR"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "BRNX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "BURU"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "BXDC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "BHR"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CLGN"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CMTL"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CNTB"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CODX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CPRI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CRNC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ELOG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "EMBC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "EMPD"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ENSC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ETRA"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "HLF"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "HNRG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "HUBG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "HUHU"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "IART"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ICU"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "GOGO"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "GOTU"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "GPRK"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "GRML"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "HAIN"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "HELE"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "FUN"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "DWSN"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "KDK"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "KLTR"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "FRGT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "INGN"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "INV"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "IRIX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "LDI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "LNKS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "NAT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "NCPL"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "NIVF"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "NPWR"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "LSAK"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "LVWR"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "MAZE"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "MEDS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "MGPI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "NTWK"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "NUS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "OLB"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "MNDR"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "OMCL"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "OPTU"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "PALI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "PDSB"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "PKE"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "PMI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "PRCT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "PRKS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "RILY"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "RYAM"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "PTLO"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "QTTB"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "REKR"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SHFS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SHOE"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SJT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SKYA"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "TRAX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "USEA"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "VERI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "VNCE"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "VRA"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "TEN"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "TG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "THRM"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "TIC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "TITN"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "XRTX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "YMAT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ZBAO"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "WBUY"
+    },
+    {
+      "reason": "coverage_gap_watch_to_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "WFF"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "WOOF"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CDRE"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CABR"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "AVAT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CRBU"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "BBNX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "EVCM"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "HUYA"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "RMR"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "TCRT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "XPOF"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "DDL"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "GLSI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "PWP"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "RENT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SLND"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "VBNK"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "TCRX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "FLUX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "IQMX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "MIST"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SKIL"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "STRZ"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "STXS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "USNA"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "BNTC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "BLKB"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "HQI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "GRO"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "MBAI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "OMH"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "RYOJ"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "TRUG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "WS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "WTI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "YHC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ASC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "BLNK"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "FET"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "FSP"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "METC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "NINE"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "RDNW"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "APMD"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ATNI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "AVX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CLWT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "DNUT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "GCL"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "HTCO"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ICG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "KOS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "NUR"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SNGX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CCHH"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "BMBL"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CULP"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "GIXI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "FLO"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "FNRN"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "GURE"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "EP"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "EZPW"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "TMCI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "TVRD"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "VAI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ZIP"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "BGS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CANF"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "EDBL"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "STLN"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "AQMS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SLMT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "NPCE"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ONIT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "OPRT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "LILA"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SAM"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CBAT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CV"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "IPW"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "JUNS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "PROF"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SMJF"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SPCB"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SVRN"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "XELB"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ENHA"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ODD"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "PRQR"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "TOVX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SWAG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "WCT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ZNB"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ZSQR"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "LMAT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "MIMI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SAFX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "DTCX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ONFO"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "PCSA"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "TELA"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "NAUT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SOTK"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "RPGL"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ATPC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "PAR"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "PASG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ALGS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ENVX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "IKT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "MDXG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "STAK"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SWRD"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "WATR"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "BOF"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "AHG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "DKI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CRBP"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "EVH"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ARAI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "MSGM"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "BGLC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CIX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SAGT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "TDOC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SENS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "NYXH"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ANIK"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "AIFU"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "BVS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "BZUN"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "IBIO"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SHEN"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "TTEC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "APYX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "BGMS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "DPU"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "NAII"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SENEA"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CABO"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ADIG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "LUCK"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "MDXH"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CMCT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "BTBD"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "AGL"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CD"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "IFBD"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "HRTX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "IVF"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "OPTT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "OIG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "AUC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "BAFN"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "DRK"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ENOV"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "EQ"
+    },
+    {
+      "acceleration_onset_ts": "2026-10-12T20:17:24.333373+00:00",
+      "first_scout_ts": "2026-10-12T19:47:23.751948+00:00",
+      "first_watch_ts": "2026-10-12T19:47:23.751948+00:00",
+      "lead_minutes": 30.01,
+      "onset_definition": "first observed start of >=20% price-relative rise within <=10m; max 6m adjacent gaps",
+      "scout_lead_minutes": 30.01,
+      "session": "2026-10-12",
+      "status": "EARLY_10M",
+      "symbol": "FCHL",
+      "warning": "SHADOW evaluation only; observed onset is not the physical start or an executable entry."
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "IHT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "LONA"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "NFE"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CUPR"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CDZI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ECX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "FIRY"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "GXAI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "GCTK"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "MASK"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "NCRA"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "MNOV"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "RLMD"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SJ"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "WETH"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "APVO"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "COSM"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "MWC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ONEN"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "RAIN"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "XBIT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "RPC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "RYDE"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SNWV"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "BESS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CSV"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ACTU"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "AGMH"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "AIIR"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CLRO"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "COOT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "AMSS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "FC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "FGL"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "FLX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "FLXS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "FMFC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "FOCL"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "FOFO"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "FOIL"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "HLP"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "HSCS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "DLXY"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "JCSE"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "MYPS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "NEON"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "NHTC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "NIKI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "MLP"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "KXIN"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "LGCL"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "LIQT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "NWTG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "NXGL"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "OESX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "OIO"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "POAS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "PWCM"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "RCT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SKK"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SNES"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "TGE"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "REVB"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ROLR"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "TZOO"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "VMAR"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "WAFU"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "WYHG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CDTG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "BMR"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "BSET"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CURR"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "BCDA"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "BGL"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CNET"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "AACG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ACIC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "AEON"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "AHT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "EPOW"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "FBDT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "DFLI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "EDRY"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "FISN"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "GDTC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "GRAN"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "INLF"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "IOR"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "IPDN"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "HUBC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "IZEA"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "LICN"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "LSTA"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "MDCX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ONCY"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ONMD"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "MRKR"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SGRX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "PXS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "RCON"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SUGP"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SMXT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SNTI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "STKE"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "VEEE"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "VS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "WLDS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "AXG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "BDL"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "BGDE"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "BGIN"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CBUS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CDXS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CHGG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CIIT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ADIL"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "AHMA"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CVKD"
+    },
+    {
+      "acceleration_onset_ts": "2026-10-12T21:02:38.123664+00:00",
+      "first_scout_ts": "2026-10-12T17:25:45.485582+00:00",
+      "first_watch_ts": "2026-10-12T20:12:24.942686+00:00",
+      "lead_minutes": 50.22,
+      "onset_definition": "first observed start of >=20% price-relative rise within <=10m; max 6m adjacent gaps",
+      "scout_lead_minutes": 216.877,
+      "session": "2026-10-12",
+      "status": "EARLY_10M",
+      "symbol": "DAIC",
+      "warning": "SHADOW evaluation only; observed onset is not the physical start or an executable entry."
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "DCX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ATHE"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "BRCC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "BRLS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "GMEX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "GOAI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "HODO"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "DMRC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "DSS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "EGG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "JXG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "KMRK"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "LNAI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "LOBO"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "MI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "MWG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "LVLU"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "MBIO"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "MGRX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "INLX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "REF"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "OPTH"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "RKDA"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ELWT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SYPR"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "TGL"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "TLF"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SOAR"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SRBK"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "STI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SGLY"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "VCIG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "XXII"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CHGA"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "BOLT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "BTTC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "BZAI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CAAS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "AAPG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ABLV"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ABTS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ABVC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ADSE"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "AGIG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ANTA"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CVR"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "AQB"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "AREC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ARL"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ATCH"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ATXG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CLLS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CPOP"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "FUSE"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "GIFT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "EQS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "IMTE"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "INDI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "INEO"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "INHD"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "IPWR"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "GTN"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "GYGY"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "HCTI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "JDZG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "JFU"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "JYD"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "HIHO"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "HKPD"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "HLSQ"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "HXHX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "DFSC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "DGXX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "EEIQ"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "FENG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "FLD"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "KSCP"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "MITQ"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "MRNO"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "MTC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "NXTC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ODYS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "LUD"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "MATH"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "MCRP"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "MDRR"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "PHOE"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "PPBT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "PROP"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "PTLE"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "REA"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "RECT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "PASW"
+    },
+    {
+      "reason": "same_cycle_watch_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SMTK"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SPHL"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SQFT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SRFM"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SCAG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SCNX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SENEB"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SIBN"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SILO"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "RETO"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "STTK"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SVIA"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "TCI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "THCH"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "NB"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "NEXM"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "TMS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "UAMY"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "VTGN"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "VVOS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "XAIR"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "XBP"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "XCUR"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "XHG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "USDE"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "UTSI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "VBIO"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "VNTG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "XTND"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "XWEL"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "YAAS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "YDKG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "YIBO"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "YJ"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "YQ"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "YXT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ZDAI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ZENA"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ZJYL"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ASBP"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "AGRZ"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "AIDX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "MEGL"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "OLOX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SNDX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SXTC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CCEL"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CMND"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "EHGO"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "NTCL"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "MSN"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "RMSG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "DARE"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CAN"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "GELS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SBFM"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ZONE"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "GLND"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "MDIA"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "PLCE"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "NUAI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SSM"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SURG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CNEY"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CAPS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "BMEA"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "TPST"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ZYBT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ADGM"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SDST"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "TNON"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "WHLR"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "GOVX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "KAPA"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "TOON"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "EPSM"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "VSME"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "VIVS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "GCDT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "GLXG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "JZ"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "MTEN"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "RIME"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SPRY"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "LUCD"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "NCI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "RKTO"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SLXN"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ANGI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "TNYA"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "VEEA"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "EHTH"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "TWG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "YYAI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "PEW"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "MSGY"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "HCAI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "LITB"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "MGN"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "LRHC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "OWLS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "ATYR"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "UCL"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SLI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "YMT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SCNI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SDEV"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "PMCB"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "TK"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "HPAI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CTRM"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "IBG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "MGX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "SUIG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "CLRB"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "POLA"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-12",
+      "status": "UNVERIFIABLE",
+      "symbol": "FWRG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "AXG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "BBAI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "BKYI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "BMBL"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "AIXI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "ALIT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "ANGI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "AOUT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "BWAY"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "CNDT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "CNXC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "COSM"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "CRSR"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "CURR"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "DEC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "CANG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "CHPT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "ABLV"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "AGBK"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "FTK"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "GLOB"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "DXC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "EDRY"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "EFOR"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "FCHL"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "FLYE"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "IZM"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "JBDI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "JELD"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "JLHL"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "JZ"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "KRSA"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "HPK"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "ENSC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "ETRA"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "GOSS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "GTM"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "LSTA"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "LXU"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "MBC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "MRNO"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "LONA"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "NAUT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "NCMI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "NCPL"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "PFAI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "PLAY"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "POAS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "PSIG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "QNC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "QNME"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "REAX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "SCNI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "SES"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "STRZ"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "SUNS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "TCRT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "SAIQ"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "VEEA"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "VRA"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "TROO"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "SMJF"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "SPHL"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "XRX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "XTND"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "YMAT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "ZURA"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "VTEX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "WBUY"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "CBAT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "CCEL"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "BRCC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "BLRX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "AIIO"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "IMCC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "FNGR"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "GRNT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "JRSH"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "KOS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "NABL"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "NXAT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "OPRX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "RYDE"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "WFF"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "WKHS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "YJ"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "ZBAO"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "ZKH"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "CLIK"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "CMDB"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "CRMT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "BAK"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "BDRX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "BHR"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "CRWS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "ACIC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "ARCO"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "AUNA"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "CERT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "CGTX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "DIBS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "ELOG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "EVER"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "HYFT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "JYD"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "MAX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "MGN"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "MSAI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "PTLO"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "QDEL"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "QNST"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "RERE"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "ONCY"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "PDSB"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "SPWR"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "SJT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "SUGP"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "SUPV"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "YHC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "AHCO"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "AUUD"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "ANNA"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "GFR"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "DVLT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "GPRE"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "IRS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "NDLS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "PWCM"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "NSTR"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "NTRP"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "SMXT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "SSM"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "ZIP"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "ALHC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "CYH"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "FSP"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "JRVR"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "OBE"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "TBCH"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "TCX"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "VMAR"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "CABO"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "CARS"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "CCTG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "CEPU"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "BHST"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "CRNC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "EVH"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "HUBC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "LUNG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "NXDR"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "API"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "ADNT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "CXM"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "FWRG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "EDSA"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "QSI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "QUCY"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "SUIG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "CLRB"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "ASAN"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "ABTC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "DNA"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "FAMI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "HCKT"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "JG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "RUBI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "XWEL"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "INHD"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "DKI"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "GLXG"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "FGC"
+    },
+    {
+      "reason": "no_observed_acceleration_onset",
+      "session": "2026-10-13",
+      "status": "UNVERIFIABLE",
+      "symbol": "RADX"
+    }
+  ],
+  "session_skipped": 0,
+  "stale_skipped": 0,
+  "status": "SHADOW_PROSPECTIVE_ONLY_NOT_BUY",
+  "timestamp_basis": "retrieval_ts; not verified exchange source trade time",
+  "total_watches": 758,
+  "warning": "WATCH is recorded only when first observed in an active run; source gaps and unobserved onset remain UNVERIFIABLE. First scout from historic SQLite is context, not first WATCH. No fills or execution proof."
+}

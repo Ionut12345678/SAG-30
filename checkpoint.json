@@ -1,0 +1,91 @@
+{
+  "audit_retention": "ALL_ROWS_NO_PRUNING",
+  "base_commit": "0b1f9057a41ad24a8742acc2d37400c9b09e2799",
+  "compressed_bytes": 116907269,
+  "compressed_sha256": "3167478ec0df809759dacf2204fe41c4877962fefa7c25c854564622b2722d58",
+  "created_ts": "2026-10-13T15:35:25.105226+00:00",
+  "database_bytes": 540790784,
+  "database_sha256": "9107abf54ff554a4670576a5be678c2631fbc824591f5d99dc62fc3a9a1874a5",
+  "format": "sag30-sqlite-gzip-parts-v1",
+  "journals": [
+    {
+      "bytes": 323535,
+      "name": "shadow_first_watch.jsonl",
+      "sha256": "1bbc4290d07522cd90c40608f0a467fcb97639da06609628ff8f5c4e3751f392"
+    },
+    {
+      "bytes": 1420313,
+      "name": "shadow_watch_observations.jsonl",
+      "sha256": "4a3111d939c36d5dc1bfb81ddb5c3fa01ba4160bb276cd71378791f5b8ce2715"
+    },
+    {
+      "bytes": 114214,
+      "name": "shadow_watch_status.json",
+      "sha256": "be3e13f5205ae303a85df9deec8e280807a8472b42b3985934c8dd3146a47db9"
+    }
+  ],
+  "part_limit_bytes": 67108864,
+  "parts": [
+    {
+      "bytes": 67108864,
+      "name": "radar.sqlite3.gz.part-00000",
+      "sha256": "33de7c62ba550587bf4cfe4c6cbcb3970266407a1fac1cab1d1dbe152704fd36"
+    },
+    {
+      "bytes": 49798405,
+      "name": "radar.sqlite3.gz.part-00001",
+      "sha256": "57bcc97bce7daf4f7124ce2d3935846a0ed97a24df0c8accaed8e83eb17a0a54"
+    }
+  ],
+  "size_status": "CRITICAL_90_MIB",
+  "table_counts": {
+    "bridge_publications": 0,
+    "candidate_v034_events": 33358,
+    "candidate_v034_milestones": 123,
+    "candidate_v034_signals": 1102,
+    "candidate_v034_state": 3185,
+    "candidate_v034r2_events": 23619,
+    "candidate_v034r2_milestones": 380,
+    "candidate_v034r2_signals": 1489,
+    "candidate_v034r2_state": 1530,
+    "candidates": 69,
+    "early_paper_extra_observations": 444,
+    "early_paper_follow_v12": 2626,
+    "evaluations": 129475,
+    "evening_follow_shadow": 28584,
+    "evening_scout_shadow": 3176,
+    "evidence": 129475,
+    "fast_path_events": 128847,
+    "fast_path_state": 3088,
+    "fast_path_v047_observations": 44889,
+    "fast_path_v047_state": 2947,
+    "fast_path_v048_observations": 64,
+    "fast_path_v048_state": 64,
+    "milestones": 0,
+    "model_state": 3185,
+    "multi_engine_scores": 336291,
+    "multi_engine_watchpool": 4439,
+    "observations": 129475,
+    "outbox": 0,
+    "retention_shadow_observations": 1792,
+    "runs": 539,
+    "scout_history": 360531,
+    "scout_promotions": 23379,
+    "scout_runs": 479,
+    "scout_state": 3180,
+    "semantic_shadow": 39788,
+    "shadow_volume_baseline": 49673,
+    "signals": 0,
+    "sqlite_sequence": 1,
+    "v0410_routing_rescue": 70,
+    "v0411_meta": 2,
+    "v0411_state": 240,
+    "v0412_cycle_audit": 60,
+    "v0412_premarket_route": 1113,
+    "v048_meta": 2,
+    "v048_state": 59,
+    "v049_meta": 2,
+    "v049_state": 217
+  },
+  "workflow_run_id": "38422640857"
+}
