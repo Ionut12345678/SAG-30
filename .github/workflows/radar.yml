@@ -30,6 +30,7 @@ jobs:
     timeout-minutes: 5
     outputs:
       allowed: ${{ steps.gate.outputs.allowed }}
+      recovery-run-id: ${{ steps.gate.outputs.recovery-run-id }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -97,11 +98,18 @@ jobs:
         if: ${{ steps.restore.outcome == 'success' && steps.journals.outcome == 'success' && steps.restore.outputs.commit != 'NONE' }}
         env:
           GH_TOKEN: ${{ github.token }}
+          REQUIRED_RECOVERY_RUN_ID: ${{ needs.admission.outputs.recovery-run-id }}
         run: |
           python -m radar.recovery --repo "$GITHUB_REPOSITORY" \
             --base-commit "${{ steps.restore.outputs.commit }}" \
             --base-published-ts "$(git show -s --format=%cI '${{ steps.restore.outputs.commit }}')" \
             --out state/radar.sqlite3 --status state/recovery-status.json --journal-dir state
+          python - <<'PY'
+          import json, os
+          from radar.restart import verify_required_recovery
+          verify_required_recovery(json.load(open('state/recovery-status.json')),
+                                   os.getenv('REQUIRED_RECOVERY_RUN_ID', ''))
+          PY
 
       - name: Run v0.4.12 EARLY-PREMARKET ROUTING SHADOW
         if: ${{ always() && !cancelled() && steps.restore.outcome == 'success' && steps.journals.outcome == 'success' && (steps.restore.outputs.commit == 'NONE' || steps.recovery.outcome == 'success') }}

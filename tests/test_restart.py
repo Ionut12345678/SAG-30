@@ -12,7 +12,7 @@ from unittest.mock import patch
 from zoneinfo import ZoneInfo
 from radar.cadence import observation_window
 from radar.restart import (admission, inspect_remote, market_data_status,
-                           main, RESTORE, RECOVERY, SCAN, ROUTE, PREPARE, PERSIST)
+                           main, verify_required_recovery, RESTORE, RECOVERY, SCAN, ROUTE, PREPARE, PERSIST)
 
 NOW = datetime(2026, 10, 13, 13, 30, tzinfo=timezone.utc)
 
@@ -100,6 +100,15 @@ class AdmissionTests(unittest.TestCase):
         self.assertTrue(result['allowed'])
         self.assertEqual(result['reason'], 'RECOVERY_REQUIRED')
         self.assertEqual(result['checkpoint_verification'], 'REQUIRED_BEFORE_COLLECTION')
+        self.assertEqual(result['required_recovery_run_id'], '10')
+
+    def test_wrong_or_missing_recovery_cannot_lose_unpublished_cycle(self):
+        for status in ({'status': 'NO_COMPATIBLE_RECOVERY_ARTIFACT'},
+                       {'status': 'RESTORED_RECOVERY_ARTIFACT', 'workflow_run_id': 9}):
+            with self.assertRaisesRegex(ValueError, 'not recovered'):
+                verify_required_recovery(status, '10')
+        verify_required_recovery({'status': 'RESTORED_RECOVERY_ARTIFACT', 'workflow_run_id': 10}, '10')
+        verify_required_recovery({'status': 'NO_COMPATIBLE_RECOVERY_ARTIFACT'}, '')
 
     def test_restore_failure_and_state_mismatch_block(self):
         previous = completed(); previous['steps'][RESTORE]['conclusion'] = 'failure'
@@ -212,6 +221,8 @@ class RemoteAndCliTests(unittest.TestCase):
         self.assertIn("github.ref == 'refs/heads/main'", workflow)
         self.assertIn("always() && !cancelled() && steps.persist.outcome == 'success'", workflow)
         self.assertIn('--force-with-lease="radar-state:$expected"', workflow)
+        recovery = workflow.split('      - name: Recover unpublished prospective cycle before scanning\n', 1)[1].split('\n      - name:', 1)[0]
+        self.assertIn('verify_required_recovery', recovery)
         self.assertIn('SAG30_CADENCE_WINDOW_ENDED_AFTER_WAIT', workflow)
 
     def test_real_dispatch_shell_does_not_dispatch_after_wait_crosses_close(self):

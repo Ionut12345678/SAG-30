@@ -92,6 +92,7 @@ def admission(now, health, runs, current_id, target=300):
                     or not previous.get('recovery_artifact_available')):
                 return decide('BLOCKED', 'UNPUBLISHED_CYCLE_WITHOUT_RECOVERY')
             # Metadata allows only entry into restore/recovery, never scanning directly.
+            result['required_recovery_run_id'] = str(previous['id'])
             return decide('DUE', 'RECOVERY_REQUIRED', True)
         if published:
             if str(health['checkpoint'].get('workflow_run_id')) != str(previous['id']):
@@ -113,6 +114,13 @@ def admission(now, health, runs, current_id, target=300):
 
 def gh_json(path):
     return json.loads(subprocess.check_output(['gh', 'api', path], text=True))
+
+
+def verify_required_recovery(status, required_run_id):
+    """A recovery artifact merely existing must never stand in for its restore."""
+    if required_run_id and (status.get('status') != 'RESTORED_RECOVERY_ARTIFACT'
+                            or str(status.get('workflow_run_id')) != str(required_run_id)):
+        raise ValueError('Required unpublished cycle was not recovered; refusing next scan')
 
 
 def inspect_remote(repo, current_id, now, target=300):
@@ -183,6 +191,7 @@ def main():
     if os.getenv('GITHUB_OUTPUT'):
         with open(os.environ['GITHUB_OUTPUT'], 'a') as outputs:
             outputs.write('allowed=' + str(result.get('allowed', False)).lower() + '\n')
+            outputs.write('recovery-run-id=' + result.get('required_recovery_run_id', '') + '\n')
     if result.get('market_data_status') == 'DATA_GAP':
         print('::warning::SAG30_DATA_GAP: technical completion is not valid market evidence')
     if result.get('reason') == 'MISSING_CADENCE_EXECUTION':
