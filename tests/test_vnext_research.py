@@ -47,8 +47,35 @@ class VNextTests(unittest.TestCase):
         self.put(1, "NOFOLLOW", 4)
         x = build(self.db, exclude_open_session=False)["strategies"]["vnext"]
         self.assertEqual(x["censored"], 1)
-        self.assertIsNone(x["precision_observed_only"]["20"])
+        self.assertIsNone(x["resolved_sampled_hit_rate"]["20"])
         self.assertIsNone(x["cases"][0]["hits"])
+
+    def test_partial_horizon_no_hit_is_unknown_not_false_positive(self):
+        self.put(1, "PARTIAL", 4, offset=0)
+        self.put(2, "PARTIAL", 5, offset=5)
+        x = build(self.db, exclude_open_session=False)["strategies"]["vnext"]
+        self.assertEqual(x["with_forward_samples"], 1)
+        self.assertEqual(x["censored"], 1)
+        self.assertEqual(x["resolved_by_threshold"]["20"], 0)
+        self.assertIsNone(x["cases"][0]["hits"]["20"])
+        self.assertEqual(x["cases"][0]["status"], "CENSORED_PARTIAL_HORIZON")
+
+    def test_full_horizon_negative_is_resolved(self):
+        self.put(1, "FULL", 4, offset=0)
+        for i in range(1, 25):
+            self.put(i + 1, "FULL", 5, offset=i * 10)
+        x = build(self.db, exclude_open_session=False)["strategies"]["vnext"]
+        self.assertEqual(x["complete_horizon"], 1)
+        self.assertEqual(x["resolved_by_threshold"]["20"], 1)
+        self.assertFalse(x["cases"][0]["hits"]["20"])
+
+    def test_missing_history_fails_instead_of_reporting_zero(self):
+        db = sqlite3.connect(":memory:")
+        try:
+            with self.assertRaisesRegex(ValueError, "Missing scout_history"):
+                build(db)
+        finally:
+            db.close()
 
     def test_no_duplicate_alerts_and_no_backdated_first_seen(self):
         self.put(1, "ABC", 3, offset=0)
