@@ -48,7 +48,7 @@ class VNextTests(unittest.TestCase):
         x = build(self.db, exclude_open_session=False)["strategies"]["vnext"]
         self.assertEqual(x["censored"], 1)
         self.assertIsNone(x["resolved_sampled_hit_rate"]["20"])
-        self.assertIsNone(x["cases"][0]["hits"])
+        self.assertEqual(x["cases"][0]["hits"], {"15": None, "20": None, "30": None, "50": None})
 
     def test_partial_horizon_no_hit_is_unknown_not_false_positive(self):
         self.put(1, "PARTIAL", 4, offset=0)
