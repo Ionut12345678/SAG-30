@@ -12,7 +12,7 @@ from unittest.mock import patch
 from zoneinfo import ZoneInfo
 from radar.cadence import observation_window
 from radar.restart import (admission, inspect_remote, market_data_status,
-                           main, verify_required_recovery, RESTORE, RECOVERY, SCAN, ROUTE, PREPARE, PERSIST)
+                           main, inspect_cadence_dispatch, verify_required_recovery, RESTORE, RECOVERY, SCAN, ROUTE, PREPARE, PERSIST)
 
 NOW = datetime(2026, 10, 13, 13, 30, tzinfo=timezone.utc)
 
@@ -151,6 +151,58 @@ class AdmissionTests(unittest.TestCase):
 
 
 class RemoteAndCliTests(unittest.TestCase):
+    def test_live_early_dispatch_waits_then_continues_chain(self):
+        # Run #559 arrived at 272.928601 seconds and previously killed the chain.
+        previous = completed(NOW - timedelta(seconds=272.928601))
+        later = NOW + timedelta(seconds=28)
+        class Clock(datetime):
+            @classmethod
+            def now(cls, tz=None): return later
+        def inspect(repo, current_id, now, target):
+            return admission(now, health(NOW), [previous], current_id, target)
+        with patch('radar.restart.inspect_remote', side_effect=inspect) as remote, \
+             patch('radar.restart.time.sleep') as sleep, patch('radar.restart.datetime', Clock):
+            result = inspect_cadence_dispatch('owner/repo', 20, NOW)
+        sleep.assert_called_once_with(28)
+        self.assertEqual(remote.call_count, 2)
+        self.assertTrue(result['allowed'])
+        self.assertEqual(result['reason'], 'CADENCE_DUE')
+        self.assertGreaterEqual(result['elapsed_seconds'], 300)
+
+    def test_early_dispatch_rechecks_close_checkpoint_and_peer_after_wait(self):
+        initial = admission(NOW, health(), [completed(NOW - timedelta(seconds=270))], 20)
+        cases = [
+            admission(datetime(2026, 10, 14, 0, tzinfo=timezone.utc), health(), [], 20),
+            admission(NOW, {}, [], 20),
+            admission(NOW, health(), [{'id': 21, 'status': 'in_progress'}], 20),
+        ]
+        for refreshed in cases:
+            with self.subTest(reason=refreshed['reason']), \
+                 patch('radar.restart.inspect_remote', side_effect=[initial, refreshed]), \
+                 patch('radar.restart.time.sleep'):
+                result = inspect_cadence_dispatch('owner/repo', 20, NOW)
+            self.assertFalse(result['allowed'])
+            self.assertEqual(result['reason'], refreshed['reason'])
+
+    def test_wait_is_bounded_and_never_releases_a_still_recent_cycle(self):
+        for elapsed, expected in [(1, 'CADENCE_WAIT_OUT_OF_BOUNDS'),
+                                  (270, 'CADENCE_CHANGED_DURING_WAIT')]:
+            initial = admission(NOW, health(), [completed(NOW - timedelta(seconds=elapsed))], 20)
+            with patch('radar.restart.inspect_remote', return_value=initial), \
+                 patch('radar.restart.time.sleep') as sleep:
+                result = inspect_cadence_dispatch('owner/repo', 20, NOW)
+            self.assertFalse(result['allowed'])
+            self.assertEqual(result['reason'], expected)
+            self.assertEqual(sleep.call_count, int(elapsed == 270))
+
+    def test_due_or_blocked_dispatch_does_not_wait(self):
+        for initial in [admission(NOW, health(), [completed()], 20),
+                        admission(NOW, {}, [], 20)]:
+            with patch('radar.restart.inspect_remote', return_value=initial), \
+                 patch('radar.restart.time.sleep') as sleep:
+                self.assertEqual(inspect_cadence_dispatch('owner/repo', 20, NOW), initial)
+            sleep.assert_not_called()
+
     def test_health_carries_only_valid_provider_source_timestamp(self):
         from radar.core import open_db, record
         from radar.health import build

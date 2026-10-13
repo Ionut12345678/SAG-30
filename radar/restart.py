@@ -6,9 +6,11 @@ still requires the existing checksum/SQLite/journal restore and recovery gates.
 import argparse
 import base64
 import json
+import math
 import os
 import re
 import subprocess
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from .cadence import observation_window
@@ -160,6 +162,27 @@ def inspect_remote(repo, current_id, now, target=300):
     return admission(now, health, runs, current_id, target)
 
 
+def inspect_cadence_dispatch(repo, current_id, now, target=300):
+    """Keep an early dispatch alive under the lock, then recheck all gates.
+
+    Dispatch latency compensation can send a successor up to 60 seconds early.
+    Waiting here preserves the 300-second minimum without ending the chain.
+    The bounded wait leaves room within admission's five-minute job timeout.
+    """
+    result = inspect_remote(repo, current_id, now, target)
+    if result['status'] == 'NOT_DUE':
+        remaining = math.ceil(target - result['elapsed_seconds'])
+        if not 0 < remaining <= 61:
+            return dict(result, status='BLOCKED', reason='CADENCE_WAIT_OUT_OF_BOUNDS')
+        print(f'SAG30_ADMISSION_WAIT_SECONDS={remaining}', flush=True)
+        time.sleep(remaining)
+        # Refresh checkpoint identity, peers, recovery, and the session window.
+        result = inspect_remote(repo, current_id, datetime.now(timezone.utc), target)
+        if result['status'] == 'NOT_DUE':
+            return dict(result, status='BLOCKED', reason='CADENCE_CHANGED_DURING_WAIT')
+    return result
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--repo')
@@ -177,7 +200,9 @@ def main():
                       'market_data_status': market_data_status(health, now, config.get('max_source_age_seconds', 900)), 'buy': False}
         else:
             target = int(json.loads(Path(args.config).read_text()).get('cadence_target_seconds', 300))
-            result = inspect_remote(args.repo, args.run_id, now, target)
+            inspector = (inspect_cadence_dispatch if os.getenv('GITHUB_EVENT_NAME') == 'repository_dispatch'
+                         else inspect_remote)
+            result = inspector(args.repo, args.run_id, now, target)
     except (ValueError, KeyError, TypeError, OSError, subprocess.CalledProcessError):
         result = {'allowed': False, 'status': 'BLOCKED',
                   'reason': 'ADMISSION_INPUT_OR_API_UNAVAILABLE', 'buy': False}
