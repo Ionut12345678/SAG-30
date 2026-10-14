@@ -92,6 +92,11 @@ class AdmissionTests(unittest.TestCase):
             result = admission(NOW, health(), [previous], 20)
             self.assertFalse(result['allowed'])
             self.assertEqual(result['reason'], 'UNPUBLISHED_CYCLE_WITHOUT_RECOVERY')
+            incident = result['incident_reconciliation']
+            self.assertEqual(incident['unpublished_workflow_run_id'], '10')
+            self.assertEqual(incident['status'], 'REQUIRES_MANUAL_EVIDENCE_RECONCILIATION')
+            self.assertTrue(incident['data_gap'])
+            self.assertFalse(incident['safe_to_resume'])
 
     def test_verified_recovery_is_required_before_further_scanning(self):
         previous = completed(); previous['steps'][PERSIST]['conclusion'] = 'failure'
