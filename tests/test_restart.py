@@ -277,6 +277,22 @@ class RemoteAndCliTests(unittest.TestCase):
         self.assertIn('verify_required_recovery', recovery)
         self.assertIn('SAG30_CADENCE_WINDOW_ENDED_AFTER_WAIT', workflow)
 
+    def test_prepublication_backup_is_required_before_checkpoint_push(self):
+        workflow = Path('.github/workflows/radar.yml').read_text()
+        backup = workflow.index('      - name: Secure pre-publication recovery artifact')
+        persist = workflow.index('      - name: Persist audit state and heartbeat')
+        cleanup = workflow.index('      - name: Remove successful pre-publication backup')
+        self.assertLess(backup, persist)
+        self.assertLess(persist, cleanup)
+        self.assertIn("steps.recovery_backup.outcome == 'success' && !cancelled()", workflow)
+        self.assertIn('name: sag30-checkpoint-recovery', workflow)
+        self.assertEqual(workflow.count('name: sag30-checkpoint-recovery'), 1)
+        self.assertIn('actions: write', workflow)
+        self.assertIn("steps.persist.outcome == 'success' && steps.recovery_backup.outcome == 'success'", workflow)
+        # Cleanup is deliberately impossible after a failed/cancelled publish.
+        self.assertNotIn('Preserve unpublished audit checkpoint for automatic recovery', workflow)
+        self.assertIn('SAG30_CHECKPOINT_PUBLICATION_NOT_CONFIRMED', workflow)
+
     def test_real_dispatch_shell_does_not_dispatch_after_wait_crosses_close(self):
         workflow = Path('.github/workflows/radar.yml').read_text()
         block = workflow.split('      - name: Dispatch next cadence cycle\n', 1)[1].split('\n      - name:', 1)[0]
