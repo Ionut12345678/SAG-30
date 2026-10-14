@@ -58,3 +58,45 @@ ranking may include feed-quality issues not represented in scout_history;
 these are **not BUY signals**. Equal per-cycle capacity does not guarantee
 equal realized counts. The prototype is a research baseline, not a claim
 that vNext is better.
+
+## Preregistered 10-session prospective acceptance protocol (2026-10-14)
+
+**NOT STARTED / NOT LIVE.** This is a locked evaluation specification, not
+evidence of ten completed sessions. Start counting only after an independently
+verified production data collection cycle and a frozen evaluator commit.
+Historical replay, backfilled rows, CI unit tests, and same-day partial sessions
+do not count toward the ten sessions.
+
+- Freeze the vNext and simple +5..+10 strategies, their three-per-cycle alert
+  cap, eligible universe, clock rules, and evaluation horizon *before* session 1.
+  Keep production SAG-30 and v0.3.3 FROZEN unchanged.
+- Use identical observed scout cycles and timestamps for both strategies.
+  Record feed identity, observation/source timestamps and age, skipped cycles,
+  DATA_GAP, invalid records, and source-coverage denominators. No synthetic
+  or retrospective `first_seen`; first alert must have a contemporaneously
+  persisted, verifiable decision timestamp.
+- Persist each session's candidate-level rows with strategy, ticker,
+  first detection time, observed change and source, and WATCH/SHADOW status.
+  Store later observed prices/changes and the first strictly post-alert
+  sampled crossings of +15/+20/+30/+50, plus lead times. Distinguish
+  **change from session reference** from **return since detection**.
+- Record `UNKNOWN` execution unless contemporaneous bid, ask, spread, halt
+  and quote freshness exist. No trading claims, no live BUY, no inferred fills.
+- Keep outcomes `HIT`, `RESOLVED_NO_HIT`, `CENSORED`, and `NO_DATA`
+  separate. Missing follow-up is not a losing trade. Publish false-alert
+  counts only for fully resolved horizons.
+- Report both absolute hits and hit rates with explicit denominators,
+  source-coverage rates, time-to-first-alert, missed later winners,
+  and alert-volume differences. Compare at equal per-cycle capacity and
+  additionally at matched realized alert count; neither is a substitute
+  for verified execution costs.
+- Publish an immutable per-session report and a ten-session aggregate,
+  with run URL, commit SHA, artifact checksum, session dates, and excluded
+  sessions/reasons. Stop and mark `EVALUATION_BLOCKED` if checkpoint
+  recovery or data provenance is not verifiable. Do not silently reset
+  the start date or substitute backtests.
+
+**Decision gate:** Ten complete, independently documented prospective
+sessions with acceptable freshness and no critical data gaps are necessary
+before even assessing superiority. Any production rollout requires separate
+authorization, review, and demonstrated execution feasibility.
