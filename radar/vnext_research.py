@@ -58,7 +58,11 @@ def rank_candidates(rows, strategy, limit):
 
 
 def replay(rows, cap=3, days_before=None):
-    """Once-per-symbol/session alert; both strategies have equal per-run capacity."""
+    """Select only after the entire cycle is available, in event-time order.
+
+    A cycle's decision time is its latest retrieval timestamp, never its
+    earliest row. Prior completed cycles cannot be overridden by stale rows.
+    """
     by_cycle = defaultdict(list)
     by_symbol = defaultdict(list)
     for r in rows:
@@ -67,16 +71,36 @@ def replay(rows, cap=3, days_before=None):
         by_cycle[(r["session"], r["run_id"])].append(r)
         by_symbol[(r["session"], r["symbol"])].append(r)
     for history in by_symbol.values():
-        history.sort(key=lambda r: (r["stamp"], r["run_id"]))
+        history.sort(key=lambda r: (r["stamp"], str(r["run_id"])))
     alerts = {"vnext": [], "simple": []}
     seen = {"vnext": set(), "simple": set()}
-    for cycle in sorted(by_cycle):
-        sample = by_cycle[cycle]
+    latest_available = {}
+    cycles = sorted(by_cycle.items(), key=lambda item: (
+        max(r["stamp"] for r in item[1]), item[0][0], str(item[0][1])))
+    for cycle, sample in cycles:
+        decision_stamp = max(r["stamp"] for r in sample)
+        # All candidate features are only known after cycle completion.
+        # A later completed cycle must not use an earlier, already superseded
+        # observation or a snapshot older than five minutes at decision time.
+        eligible = [r for r in sample
+                    if 0 <= (decision_stamp - r["stamp"]).total_seconds() <= 300
+                    and r["stamp"] > latest_available.get(
+                        (r["session"], r["symbol"]),
+                        datetime.min.replace(tzinfo=timezone.utc))]
         for strategy in ("vnext", "simple"):
-            pool = [r for r in sample if (r["session"], r["symbol"]) not in seen[strategy]]
+            pool = [r for r in eligible
+                    if (r["session"], r["symbol"]) not in seen[strategy]]
             for r in rank_candidates(pool, strategy, cap):
                 seen[strategy].add((r["session"], r["symbol"]))
-                alerts[strategy].append(r)
+                signal = dict(r)
+                signal["decision_stamp"] = decision_stamp
+                signal["decision_ts"] = decision_stamp.isoformat()
+                alerts[strategy].append(signal)
+        for r in sample:
+            key = (r["session"], r["symbol"])
+            latest_available[key] = max(
+                r["stamp"], latest_available.get(
+                    key, datetime.min.replace(tzinfo=timezone.utc)))
     return alerts, by_symbol
 
 
@@ -90,15 +114,16 @@ def summarize(alerts, history, limit_minutes=240):
     cases = []
     for a in alerts:
         future = [r for r in history[(a["session"], a["symbol"])]
-                  if r["stamp"] > a["stamp"]
-                  and 0 < (r["stamp"] - a["stamp"]).total_seconds() <= limit_minutes * 60]
+                  if r["run_id"] != a["run_id"]
+                  and r["stamp"] > a["decision_stamp"]
+                  and 0 < (r["stamp"] - a["decision_stamp"]).total_seconds() <= limit_minutes * 60]
         horizon = limit_minutes * 60
         # Tolerate a final sample within 10 minutes of the requested horizon;
         # require <=15-minute gaps from the signal through that final sample.
-        stamps = [a["stamp"]] + [r["stamp"] for r in future]
+        stamps = [a["decision_stamp"]] + [r["stamp"] for r in future]
         gaps = [(b - a0).total_seconds() for a0, b in zip(stamps, stamps[1:])]
         complete = bool(future) and (
-            (future[-1]["stamp"] - a["stamp"]).total_seconds() >= horizon - min(600, horizon / 10)
+            (future[-1]["stamp"] - a["decision_stamp"]).total_seconds() >= horizon - min(600, horizon / 10)
             and all(g <= 900 for g in gaps))
         peak = (max(100 * ((100 + r["pct"]) / (100 + a["pct"]) - 1)
                     for r in future) if future else None)
@@ -108,7 +133,10 @@ def summarize(alerts, history, limit_minutes=240):
                   "CENSORED_PARTIAL_HORIZON" if future else
                   "CENSORED_NO_FUTURE_SAMPLE")
         cases.append({"session": a["session"], "symbol": a["symbol"],
-                      "first_signal_ts": a["retrieval_ts"], "signal_change_pct": a["pct"],
+                      "first_signal_ts": a["decision_ts"],
+                      "first_observation_ts": a["retrieval_ts"],
+                      "decision_ts": a["decision_ts"],
+                      "signal_change_pct": a["pct"],
                       "entry_price": None, "source_quote_validated": False,
                       "status": status, "forward_horizon_complete": complete,
                       "forward_observation_count": len(future),
@@ -137,9 +165,12 @@ def build(db, cap=3, minutes=240, exclude_open_session=True):
             "status": "SHADOW_NOT_BUY",
             "rules": {"max_new_alerts_per_cycle": cap,
                       "forward_minutes": minutes, "exclude_utc_today": exclude_open_session,
-                      "no_future_features": True},
+                      "no_future_features": True,
+                      "decision_at_cycle_completion": True,
+                      "max_observation_age_at_decision_seconds": 300},
             "limitations": [
                 "Same source scout_history; unknown source freshness, spread, halt, executable ask.",
+                "Decision time is max retrieval timestamp in each cycle; no source-ingest timestamp.",
                 "Sampled forward observations can miss highs; incomplete negative follow-up is censored.",
                 "Resolved-only hit rates are selection-biased when partial positives are counted.",
                 "Backtest is in-sample research, not independent out-of-sample validation.",
