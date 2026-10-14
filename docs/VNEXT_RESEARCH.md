@@ -100,3 +100,55 @@ do not count toward the ten sessions.
 sessions with acceptable freshness and no critical data gaps are necessary
 before even assessing superiority. Any production rollout requires separate
 authorization, review, and demonstrated execution feasibility.
+
+## Final go/no-go trial — locked 2026-10-14
+
+**Purpose:** one bounded attempt to determine whether the extra SAG-30
+complexity is justified. This section does not authorize deployment, trading,
+merging PRs, changing frozen rules, or rewriting existing audit data.
+
+### Gate 0 — infrastructure (deadline 2026-10-16 16:00 Europe/Bucharest)
+
+- PR #92 must have green CI on its actual head and documented independent
+  checkpoint restore **plus** a genuine failed-publication -> recovery
+  end-to-end test preserving the immutable audit ledger.
+- Observe at least two fresh consecutive successful published checkpoints,
+  verifiable timestamps, DATA_GAP/locks, source-age/coverage and real
+  start-to-start gaps versus the 300-second target.
+- No inference of live health from a stale `radar-state/health.json`.
+- If not proven by deadline, classify `INFRA_STOP`: suspend further model
+  proliferation and report exact blocker. Do not automatically extend the
+  deadline or count partial/retrospective sessions.
+
+### Gate 1 — paired prospective research (only after Gate 0)
+
+Collect exactly the next 10 **complete, valid US market sessions** with
+contemporaneous persisted decisions. Freeze evaluator commit, source universe,
+observation clock, per-cycle cap (3), follow-up horizon (240 minutes),
+censorship rules and decision thresholds before session 1. Pair incumbent
+SAG-30, vNext SHADOW, and naive +5..+10 baseline on identical observable
+symbol/cycle opportunities. Report incumbent separately when its decisions
+can be linked causally; otherwise `INCUMBENT_NOT_COMPARABLE`. Any
+unobserved session is `INVALID` and cannot silently be replaced or counted.
+
+### Gate 2 — decision after 10 valid sessions
+
+- `GO_RESEARCH` only if vNext or incumbent beats the simple baseline
+  **on both +30 and +50 post-alert hit rate** at matched alert budget,
+  with no deterioration in absolute verified hits, and no worse missing
+  data/false-alert burden; require positive post-alert lead time and
+  independently verified source provenance. Treat tiny denominators and
+  statistical uncertainty as `INCONCLUSIVE`, not proof of advantage.
+- `BASELINE_ONLY` if the baseline is as good or better on verified
+  comparable metrics: stop developing the complex challenger, preserve
+  logs, and consider only a separately reviewed simple research radar.
+- `STOP` if data quality, execution evidence, or alert quality remain
+  inadequate. No real BUY or profitability claim from session-relative
+  highs; bid/ask/spread/halts remain UNKNOWN without contemporaneous data.
+- Never promote a model based on backtests, winner-only cohorts, CI green,
+  or retrospectively reconstructed first-seen timestamps.
+
+**Reporting:** one evidence-linked report per valid session and one final
+decision report; include run IDs, commit SHAs, raw counts, denominators,
+post-alert thresholds, censored/no-data, and source/quote freshness.
+No new strategy branches or threshold tuning during the trial.
