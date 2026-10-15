@@ -17,7 +17,13 @@ RECOVERY_NAME = 'sag30-checkpoint-recovery'
 def preflight(health, manifest, artifacts, *, operator_authorized=False, restore_evidence=None):
     """Verify the exact historical parent and absent artifact; never mutate state."""
     errors = []
+    if not isinstance(health, dict) or not isinstance(manifest, dict):
+        return {'preflight': 'BLOCKED', 'gate0': 'BLOCKED', 'buy': False,
+                'resume_executed': False, 'data_gap': True,
+                'errors': ['INVALID_HEALTH_OR_MANIFEST']}
     checkpoint = health.get('checkpoint') or {}
+    if not isinstance(checkpoint, dict):
+        checkpoint = {}
     if str(checkpoint.get('workflow_run_id')) != PUBLISHED_RUN:
         errors.append('PUBLISHED_RUN_CHANGED')
     if checkpoint.get('database_sha256') != PUBLISHED_DB_SHA:
@@ -31,6 +37,9 @@ def preflight(health, manifest, artifacts, *, operator_authorized=False, restore
     if not isinstance(artifacts, list):
         errors.append('ARTIFACT_INVENTORY_MISSING')
         artifacts = []
+    if any(not isinstance(item, dict) for item in artifacts):
+        errors.append('INVALID_ARTIFACT_ENTRY')
+        artifacts = [item for item in artifacts if isinstance(item, dict)]
     names = [item.get('name') for item in artifacts]
     if RECOVERY_NAME in names:
         errors.append('RECOVERY_ARTIFACT_EXISTS_USE_EXACT_RECOVERY')
