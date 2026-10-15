@@ -20,6 +20,7 @@ jobs:
       - name: Install daily data feed
         run: python -m pip install 'yfinance>=0.2.50,<2'
       - name: Retrieve isolated forward journal
+        id: read_state
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
@@ -34,15 +35,19 @@ jobs:
           pathlib.Path("pre50-out/state-sha").write_text(p["sha"])
           PY
       - name: Download real daily bars for explicit pilot
+        id: fetch_bars
         run: |
           python -m radar.pre50_fetch --tickers config/pre50_pilot_tickers.txt --out-dir pre50-out/bars --coverage pre50-out/coverage.json
       - name: Resolve prior alerts using actual next-session highs
+        id: resolve_alerts
         run: |
           python -m radar.pre50 resolve --tickers config/pre50_pilot_tickers.txt --data-dir pre50-out/bars --journal pre50-out/journal.json --output pre50-out/resolved.json
       - name: Score latest complete daily session (no trading)
+        id: scan_session
         run: |
           python -m radar.pre50 scan --tickers config/pre50_pilot_tickers.txt --data-dir pre50-out/bars --journal pre50-out/journal.json --output pre50-out/scan.json
       - name: Persist journal to isolated branch
+        id: persist_state
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
@@ -53,6 +58,26 @@ jobs:
           gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/pre50/journal.json" \
             -f branch=pre50-shadow-state -f sha="$sha" -f content="$content" \
             -f message="PRE50 prospective SHADOW audit $GITHUB_RUN_ID"
+      - name: Write workflow health evidence even after failed prerequisites
+        if: ${{ always() }}
+        env:
+          READ_OUTCOME: ${{ steps.read_state.outcome }}
+          FETCH_OUTCOME: ${{ steps.fetch_bars.outcome }}
+          RESOLVE_OUTCOME: ${{ steps.resolve_alerts.outcome }}
+          SCAN_OUTCOME: ${{ steps.scan_session.outcome }}
+          PERSIST_OUTCOME: ${{ steps.persist_state.outcome }}
+        run: |
+          mkdir -p pre50-out
+          python - <<'PY'
+          import json,os,pathlib
+          coverage_file=pathlib.Path('pre50-out/coverage.json')
+          coverage=json.loads(coverage_file.read_text()) if coverage_file.exists() else {}
+          health={'run_id':os.getenv('GITHUB_RUN_ID'), 'read_state':os.getenv('READ_OUTCOME'),
+                  'fetch':os.getenv('FETCH_OUTCOME'), 'resolve':os.getenv('RESOLVE_OUTCOME'),
+                  'scan':os.getenv('SCAN_OUTCOME'), 'persist':os.getenv('PERSIST_OUTCOME'),
+                  'coverage':coverage, 'mode':'SHADOW_ONLY', 'buy':False}
+          pathlib.Path('pre50-out/health.json').write_text(json.dumps(health,indent=2)+'\n')
+          PY
       - name: Upload real evidence and coverage even on failure
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
@@ -62,5 +87,6 @@ jobs:
             pre50-out/coverage.json
             pre50-out/scan.json
             pre50-out/resolved.json
+            pre50-out/health.json
           if-no-files-found: warn
           retention-days: 30

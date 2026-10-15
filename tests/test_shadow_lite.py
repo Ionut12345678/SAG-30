@@ -48,6 +48,21 @@ class ShadowLiteTests(unittest.TestCase):
         self.assertEqual(state["tracked"]["AAA"]["status"], "CENSORED_OR_WINDOW_COMPLETE")
         self.assertIsNone(state["tracked"]["AAA"]["max_observed_price_after"])
 
+    def test_partial_snapshot_coverage_is_explicit(self):
+        universe = ["AAA", "BBB", "CCC", "DDD"]
+        state, report = cycle(NOW, universe, {"AAA": snapshot(10.6)}, {})
+        self.assertEqual(report["universe_size"], 4)
+        self.assertEqual(report["valid_fresh_snapshots"], 1)
+        self.assertEqual(report["missing_or_stale_snapshots"], 3)
+        self.assertEqual(report["coverage_fraction"], 0.25)
+        self.assertEqual(len(report["new_watch"]), 1)
+
+    def test_zero_coverage_is_reported_not_a_negative_signal(self):
+        _, report = cycle(NOW, ["AAA", "BBB"], {}, {})
+        self.assertEqual(report["valid_fresh_snapshots"], 0)
+        self.assertEqual(report["missing_or_stale_snapshots"], 2)
+        self.assertEqual(report["coverage_fraction"], 0)
+
     def test_new_york_window(self):
         self.assertTrue(market_window(NOW))
         self.assertFalse(market_window(datetime(2026, 10, 18, 15, tzinfo=timezone.utc)))

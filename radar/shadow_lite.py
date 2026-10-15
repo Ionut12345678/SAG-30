@@ -146,6 +146,8 @@ def cycle(now, universe, snapshots, prior):
                  last_cycle=now.isoformat())
     return state, {"generated_ts": now.isoformat(), "mode": "SHADOW_ONLY",
                    "universe_size": len(universe), "valid_fresh_snapshots": len(observed),
+                   "missing_or_stale_snapshots": len(universe) - len(observed),
+                   "coverage_fraction": round(len(observed) / len(universe), 6) if universe else 0,
                    "new_watch": selected, "new_events": new_events,
                    "tracked_count": len(tracked), "max_candidates_per_cycle": MAX_CANDIDATES,
                    "horizon_minutes": HORIZON_MIN, "buy": False,
@@ -180,7 +182,8 @@ def main():
                 snapshots = fetch_snapshots(universe, key, secret)
                 state, detail = cycle(now, universe, snapshots, prior)
                 report.update(detail)
-                report["status"] = "OBSERVED" if detail["valid_fresh_snapshots"] else "DATA_GAP"
+                report["status"] = ("OBSERVED" if detail["coverage_fraction"] >= 0.8
+                                    else "PARTIAL_OBSERVED") if detail["valid_fresh_snapshots"] else "DATA_GAP"
                 if detail["valid_fresh_snapshots"]:
                     state_file.parent.mkdir(parents=True, exist_ok=True)
                     state_file.write_text(json.dumps(state, indent=2, sort_keys=True) + "\n")
@@ -191,7 +194,7 @@ def main():
                 print(f"SHADOW_LITE_DATA_GAP: {type(exc).__name__}: {exc}", file=sys.stderr)
     output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
     print(json.dumps({k: v for k, v in report.items() if k != "new_events"}, sort_keys=True))
-    return 0 if report["status"] in ("OUTSIDE_WINDOW", "OBSERVED") else 2
+    return 0 if report["status"] in ("OUTSIDE_WINDOW", "OBSERVED", "PARTIAL_OBSERVED") else 2
 
 
 if __name__ == "__main__":
