@@ -28,11 +28,20 @@ def preflight(health, manifest, artifacts, *, operator_authorized=False):
         errors.append('MANIFEST_DB_HASH_MISMATCH')
     if manifest.get('audit_retention') != 'ALL_ROWS_NO_PRUNING':
         errors.append('AUDIT_RETENTION_NOT_VERIFIED')
-    if not isinstance(artifacts, list):
+    # The GitHub Actions REST response is an object with an "artifacts" list.
+    # Accept that unmodified response as well as a deliberately extracted list.
+    if isinstance(artifacts, dict):
+        artifacts = artifacts.get('artifacts')
+    if not isinstance(artifacts, list) or any(not isinstance(a, dict) for a in artifacts):
         errors.append('ARTIFACT_INVENTORY_MISSING')
         artifacts = []
-    names = [item.get('name') for item in artifacts]
-    if RECOVERY_NAME in names:
+    for item in artifacts:
+        source_run = (item.get('workflow_run') or {}).get('id')
+        if source_run is not None and str(source_run) != INCIDENT_RUN:
+            errors.append('ARTIFACT_FROM_DIFFERENT_RUN')
+    live = [item for item in artifacts if item.get('expired') is not True]
+    names = [item.get('name') for item in live]
+    if RECOVERY_NAME in [item.get('name') for item in artifacts]:
         errors.append('RECOVERY_ARTIFACT_EXISTS_USE_EXACT_RECOVERY')
     if DIAGNOSTIC_NAME not in names:
         errors.append('INCIDENT_DIAGNOSTIC_MISSING')
