@@ -15,6 +15,8 @@ STATE_VERSION = 1
 HORIZON_MIN = 240
 MAX_CANDIDATES = 3
 BATCH_SIZE = 100
+# A 15-minute-old IEX print may be usable for coverage, not an actionable early watch.
+MAX_FIRST_WATCH_SOURCE_AGE_SECONDS = 180
 
 
 def timestamp(value):
@@ -83,6 +85,7 @@ def cycle(now, universe, snapshots, prior):
     tracked = dict(state.get("tracked") or {})
     events = list(state.get("events") or [])
     candidates, observed = [], {}
+    stale_watch_candidates = 0
     for symbol in universe:
         snap = snapshots.get(symbol)
         if not isinstance(snap, dict):
@@ -91,7 +94,11 @@ def cycle(now, universe, snapshots, prior):
         if row:
             observed[symbol] = row
             if 5 <= row["change_pct"] <= 10 and symbol not in tracked:
-                candidates.append(row)
+                source_age_seconds = (now - timestamp(row["source_ts"])).total_seconds()
+                if source_age_seconds <= MAX_FIRST_WATCH_SOURCE_AGE_SECONDS:
+                    candidates.append({**row, "source_age_seconds": round(source_age_seconds, 3)})
+                else:
+                    stale_watch_candidates += 1
     candidates.sort(key=lambda row: (-row["change_pct"], row["symbol"]))
     selected = candidates[:MAX_CANDIDATES]
     new_events = []
@@ -101,7 +108,9 @@ def cycle(now, universe, snapshots, prior):
         event = {"type": "FIRST_WATCH", "symbol": symbol, "first_seen": now.isoformat(),
                  "source_ts": row["source_ts"], "source": row["source"],
                  "feed": row["feed"], "price": row["price"],
-                 "change_pct": row["change_pct"], "decision": "SHADOW_WATCH_NOT_BUY"}
+                 "change_pct": row["change_pct"],
+                 "source_age_seconds": row["source_age_seconds"],
+                 "decision": "SHADOW_WATCH_NOT_BUY"}
         tracked[symbol] = {"first_seen": now.isoformat(), "first_price": row["price"],
                            "first_change_pct": row["change_pct"], "source_ts": row["source_ts"],
                            "max_observed_price_after": None, "max_observed_pct_after": None,
@@ -149,9 +158,12 @@ def cycle(now, universe, snapshots, prior):
                    "missing_or_stale_snapshots": len(universe) - len(observed),
                    "coverage_fraction": round(len(observed) / len(universe), 6) if universe else 0,
                    "new_watch": selected, "new_events": new_events,
+                   "stale_watch_candidates": stale_watch_candidates,
+                   "max_first_watch_source_age_seconds": MAX_FIRST_WATCH_SOURCE_AGE_SECONDS,
                    "tracked_count": len(tracked), "max_candidates_per_cycle": MAX_CANDIDATES,
                    "horizon_minutes": HORIZON_MIN, "buy": False,
-                   "caveats": ["No actual bid/ask or halt verification: UNKNOWN",
+                   "caveats": ["Snapshot coverage accepts IEX trades up to 15 minutes old; new FIRST_WATCH requires <=3 minutes",
+                               "No actual bid/ask or halt verification: UNKNOWN",
                                "Observed subsequent prices are not exchange intraday highs",
                                "Missing snapshots are censored, not negatives"]}
 
