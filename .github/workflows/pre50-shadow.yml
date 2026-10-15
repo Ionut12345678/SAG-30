@@ -45,7 +45,7 @@ jobs:
       - name: Score latest complete daily session (no trading)
         id: scan_session
         run: |
-          python -m radar.pre50 scan --expected-session "$(TZ=America/New_York date -d yesterday +%F)" --tickers config/pre50_pilot_tickers.txt --data-dir pre50-out/bars --journal pre50-out/journal.json --output pre50-out/scan.json
+          python -m radar.pre50 scan --expected-session "$(TZ=America/New_York date +%F)" --tickers config/pre50_pilot_tickers.txt --data-dir pre50-out/bars --journal pre50-out/journal.json --output pre50-out/scan.json
       - name: Persist journal to isolated branch
         id: persist_state
         env:
