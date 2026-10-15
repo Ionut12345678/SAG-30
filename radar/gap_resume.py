@@ -14,7 +14,7 @@ DIAGNOSTIC_NAME = 'sag30-restart-diagnostic'
 RECOVERY_NAME = 'sag30-checkpoint-recovery'
 
 
-def preflight(health, manifest, artifacts, *, operator_authorized=False):
+def preflight(health, manifest, artifacts, *, operator_authorized=False, restore_evidence=None):
     """Verify the exact historical parent and absent artifact; never mutate state."""
     errors = []
     checkpoint = health.get('checkpoint') or {}
@@ -43,6 +43,17 @@ def preflight(health, manifest, artifacts, *, operator_authorized=False):
             errors.append('INCIDENT_DIAGNOSTIC_RUN_UNVERIFIED')
         if diagnostic.get('expired') is not False:
             errors.append('INCIDENT_DIAGNOSTIC_AVAILABILITY_UNVERIFIED')
+    # Metadata is not proof of a readable checkpoint; demand an independent
+    # isolated restore receipt before allowing even preparation to pass.
+    if not isinstance(restore_evidence, dict):
+        errors.append('ISOLATED_RESTORE_EVIDENCE_MISSING')
+    else:
+        if restore_evidence.get('integrity_check') != 'ok':
+            errors.append('ISOLATED_RESTORE_INTEGRITY_UNVERIFIED')
+        if restore_evidence.get('audit_journals_preserved') is not True:
+            errors.append('ISOLATED_RESTORE_JOURNALS_UNVERIFIED')
+        if restore_evidence.get('database_sha256') != PUBLISHED_DB_SHA:
+            errors.append('ISOLATED_RESTORE_HASH_MISMATCH')
     if not operator_authorized:
         errors.append('OPERATOR_AUTHORIZATION_MISSING')
     return {
@@ -68,12 +79,15 @@ def main():
     parser.add_argument('--manifest', type=Path, required=True)
     parser.add_argument('--incident-artifacts', type=Path, required=True)
     parser.add_argument('--operator-authorized', action='store_true')
+    parser.add_argument('--restore-evidence', type=Path, required=True,
+                        help='Independent isolated restore receipt; no remote writes')
     parser.add_argument('--out', type=Path, required=True)
     args = parser.parse_args()
     result = preflight(json.loads(args.health.read_text()),
                        json.loads(args.manifest.read_text()),
                        json.loads(args.incident_artifacts.read_text()),
-                       operator_authorized=args.operator_authorized)
+                       operator_authorized=args.operator_authorized,
+                       restore_evidence=json.loads(args.restore_evidence.read_text()))
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(result, indent=2, sort_keys=True) + '\n')
     print(json.dumps(result, sort_keys=True))
