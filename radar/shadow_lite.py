@@ -141,6 +141,15 @@ def cycle(now, universe, snapshots, prior):
                                    "lead_minutes": round(minutes, 2),
                                    "decision": "SHADOW_NOT_BUY"})
     events.extend(new_events)
+    outcome_audit = {symbol: {
+        "first_seen": item["first_seen"],
+        "first_price": item["first_price"],
+        "max_observed_price_after": item.get("max_observed_price_after"),
+        "max_observed_pct_after": item.get("max_observed_pct_after"),
+        "milestones": item.get("milestones", []),
+        "status": item["status"],
+        "has_post_alert_evidence": item.get("max_observed_price_after") is not None,
+    } for symbol, item in sorted(tracked.items())}
     # Keep evidence bounded without rewriting first_seen of tracked candidates.
     state.update(version=STATE_VERSION, tracked=tracked, events=events[-2000:],
                  last_cycle=now.isoformat())
@@ -149,7 +158,11 @@ def cycle(now, universe, snapshots, prior):
                    "missing_or_stale_snapshots": len(universe) - len(observed),
                    "coverage_fraction": round(len(observed) / len(universe), 6) if universe else 0,
                    "new_watch": selected, "new_events": new_events,
-                   "tracked_count": len(tracked), "max_candidates_per_cycle": MAX_CANDIDATES,
+                   "tracked_count": len(tracked),
+                   "post_alert_observed_count": sum(v["has_post_alert_evidence"] for v in outcome_audit.values()),
+                   "post_alert_unobserved_count": sum(not v["has_post_alert_evidence"] for v in outcome_audit.values()),
+                   "outcome_audit": outcome_audit,
+                   "max_candidates_per_cycle": MAX_CANDIDATES,
                    "horizon_minutes": HORIZON_MIN, "buy": False,
                    "caveats": ["No actual bid/ask or halt verification: UNKNOWN",
                                "Observed subsequent prices are not exchange intraday highs",
