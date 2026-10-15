@@ -90,8 +90,15 @@ def admission(now, health, runs, current_id, target=300):
         processing = any(steps.get(name, {}).get('conclusion') != 'skipped'
                          and name in steps for name in (ROUTE, SCAN))
         if processing and not published:
-            if (steps.get(PREPARE, {}).get('conclusion') != 'success'
-                    or not previous.get('recovery_artifact_available')):
+            # Immutable incident evidence: expose the exact missing run and
+            # preservation state. Do not convert an absent snapshot into a
+            # recoverable cycle or synthesize any first_seen observations.
+            result['unpublished_run_id'] = str(previous['id'])
+            result['checkpoint_prepared'] = steps.get(PREPARE, {}).get('conclusion') == 'success'
+            result['recovery_artifact_available'] = bool(previous.get('recovery_artifact_available'))
+            if not result['checkpoint_prepared'] or not result['recovery_artifact_available']:
+                result['operator_action_required'] = 'FORENSIC_RECONCILIATION_NO_AUTOMATIC_RESUME'
+                result['unpublished_audit_status'] = 'UNKNOWN_NOT_RECOVERED'
                 return decide('BLOCKED', 'UNPUBLISHED_CYCLE_WITHOUT_RECOVERY')
             # Metadata allows only entry into restore/recovery, never scanning directly.
             result['required_recovery_run_id'] = str(previous['id'])
