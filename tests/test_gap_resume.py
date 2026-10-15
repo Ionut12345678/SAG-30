@@ -1,5 +1,9 @@
 import unittest
-from radar.gap_resume import preflight, INCIDENT_RUN, PUBLISHED_RUN, PUBLISHED_DB_SHA
+import sqlite3
+import tempfile
+import hashlib
+from pathlib import Path
+from radar.gap_resume import preflight, verify_restored_checkpoint, INCIDENT_RUN, PUBLISHED_RUN, PUBLISHED_DB_SHA
 
 def fixtures():
     health={'checkpoint':{'workflow_run_id':PUBLISHED_RUN,'database_sha256':PUBLISHED_DB_SHA}}
@@ -67,3 +71,36 @@ class GapResumeTests(unittest.TestCase):
         result=preflight(health,manifest,{'artifacts':artifacts},operator_authorized=True)
         self.assertEqual(result['preflight'],'BLOCKED')
         self.assertIn('RECOVERY_ARTIFACT_EXISTS_USE_EXACT_RECOVERY',result['errors'])
+
+    def test_local_checkpoint_verifier_fails_closed_on_mismatched_bytes(self):
+        with tempfile.TemporaryDirectory() as temp:
+            db = Path(temp) / 'radar.sqlite3'
+            with sqlite3.connect(db) as conn:
+                conn.execute('CREATE TABLE observations (id INTEGER)')
+                conn.execute('INSERT INTO observations VALUES (1)')
+            digest = hashlib.sha256(db.read_bytes()).hexdigest()
+            manifest = {'database_sha256': digest,
+                        'database_bytes': db.stat().st_size,
+                        'audit_retention': 'ALL_ROWS_NO_PRUNING',
+                        'table_counts': {'observations': 1},
+                        'journals': []}
+            # The real incident requires the known historical SHA, not a synthetic DB.
+            self.assertIn('RESTORED_SQLITE_HASH_MISMATCH',
+                          verify_restored_checkpoint(db, manifest, temp))
+            manifest['table_counts']['observations'] = 2
+            self.assertIn('PUBLISHED_TABLE_COUNTS_MISMATCH',
+                          verify_restored_checkpoint(db, manifest, temp))
+
+    def test_local_checkpoint_verifier_requires_exact_journals(self):
+        with tempfile.TemporaryDirectory() as temp:
+            db = Path(temp) / 'radar.sqlite3'
+            with sqlite3.connect(db) as conn:
+                conn.execute('CREATE TABLE observations (id INTEGER)')
+            manifest = {'database_sha256': PUBLISHED_DB_SHA,
+                        'database_bytes': db.stat().st_size,
+                        'audit_retention': 'ALL_ROWS_NO_PRUNING',
+                        'table_counts': {'observations': 0},
+                        'journals': [{'name': 'shadow_first_watch.jsonl',
+                                      'bytes': 2, 'sha256': '0' * 64}]}
+            self.assertIn('PUBLISHED_JOURNAL_MISSING_OR_SIZE_MISMATCH',
+                          verify_restored_checkpoint(db, manifest, temp))
