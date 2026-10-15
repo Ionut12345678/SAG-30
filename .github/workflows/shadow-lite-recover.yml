@@ -1,5 +1,7 @@
 name: SHADOW Lite read-only post-alert recovery
 on:
+  schedule:
+    - cron: '23 3 * * 2-6' # 03:23 UTC Tue-Sat: after US evening, best effort
   workflow_dispatch:
 permissions:
   contents: read
