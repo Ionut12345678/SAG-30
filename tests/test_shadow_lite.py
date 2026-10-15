@@ -78,7 +78,7 @@ class ShadowLiteTests(unittest.TestCase):
     def test_stale_existing_symbol_cannot_create_new_milestone(self):
         state, _ = cycle(NOW, ["AAA"], {"AAA": snapshot(10.7)}, {})
         state, report = cycle(NOW + timedelta(minutes=12), ["AAA"],
-                              {"AAA": snapshot(13.1, 1)}, state)
+                              {"AAA": snapshot(13.1, -1)}, state)
         self.assertEqual(report["new_events"], [])
         self.assertIsNone(state["tracked"]["AAA"]["max_observed_price_after"])
 
