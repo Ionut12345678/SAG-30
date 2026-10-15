@@ -34,8 +34,15 @@ def preflight(health, manifest, artifacts, *, operator_authorized=False):
     names = [item.get('name') for item in artifacts]
     if RECOVERY_NAME in names:
         errors.append('RECOVERY_ARTIFACT_EXISTS_USE_EXACT_RECOVERY')
-    if DIAGNOSTIC_NAME not in names:
-        errors.append('INCIDENT_DIAGNOSTIC_MISSING')
+    diagnostics = [item for item in artifacts if item.get('name') == DIAGNOSTIC_NAME]
+    if len(diagnostics) != 1:
+        errors.append('INCIDENT_DIAGNOSTIC_MISSING_OR_AMBIGUOUS')
+    else:
+        diagnostic = diagnostics[0]
+        if str((diagnostic.get('workflow_run') or {}).get('id')) != INCIDENT_RUN:
+            errors.append('INCIDENT_DIAGNOSTIC_RUN_UNVERIFIED')
+        if diagnostic.get('expired') is not False:
+            errors.append('INCIDENT_DIAGNOSTIC_AVAILABILITY_UNVERIFIED')
     if not operator_authorized:
         errors.append('OPERATOR_AUTHORIZATION_MISSING')
     return {
