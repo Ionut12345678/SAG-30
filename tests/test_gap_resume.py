@@ -5,7 +5,8 @@ def fixtures():
     health={'checkpoint':{'workflow_run_id':PUBLISHED_RUN,'database_sha256':PUBLISHED_DB_SHA}}
     manifest={'workflow_run_id':PUBLISHED_RUN,'database_sha256':PUBLISHED_DB_SHA,
               'audit_retention':'ALL_ROWS_NO_PRUNING'}
-    artifacts=[{'name':'sag30-restart-diagnostic','id':11827202525}]
+    artifacts=[{'name':'sag30-restart-diagnostic','id':11827202525,
+                'workflow_run': {'id': int(INCIDENT_RUN)}, 'expired': False}]
     return health,manifest,artifacts
 
 class GapResumeTests(unittest.TestCase):
@@ -40,6 +41,22 @@ class GapResumeTests(unittest.TestCase):
         artifacts.append({'name':'sag30-checkpoint-recovery'})
         result=preflight(health,manifest,artifacts,operator_authorized=True)
         self.assertIn('RECOVERY_ARTIFACT_EXISTS_USE_EXACT_RECOVERY',result['errors'])
+
+    def test_diagnostic_must_belong_to_exact_failed_run_and_be_available(self):
+        for mutation in ({'workflow_run': {'id': 99}}, {'expired': True},
+                         {'workflow_run': None}, {'expired': None}):
+            health,manifest,artifacts=fixtures()
+            artifacts[0].update(mutation)
+            result=preflight(health,manifest,artifacts,operator_authorized=True)
+            self.assertEqual(result['preflight'],'BLOCKED')
+            self.assertFalse(result['resume_executed'])
+            self.assertFalse(result['buy'])
+
+    def test_duplicate_diagnostic_is_ambiguous(self):
+        health,manifest,artifacts=fixtures()
+        artifacts.append(dict(artifacts[0]))
+        result=preflight(health,manifest,artifacts,operator_authorized=True)
+        self.assertIn('INCIDENT_DIAGNOSTIC_MISSING_OR_AMBIGUOUS',result['errors'])
 
     def test_no_inventory_or_diagnostic_fails_closed(self):
         health,manifest,_=fixtures()
