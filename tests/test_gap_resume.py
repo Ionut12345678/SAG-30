@@ -1,6 +1,12 @@
 import unittest
 from radar.gap_resume import preflight, INCIDENT_RUN, PUBLISHED_RUN, PUBLISHED_DB_SHA
 
+RESTORE_EVIDENCE = {'integrity_check':'ok', 'audit_journals_preserved':True,
+                    'database_sha256':PUBLISHED_DB_SHA}
+
+def preflight_checked(*args, **kwargs):
+    return preflight(*args, restore_evidence=RESTORE_EVIDENCE, **kwargs)
+
 def fixtures():
     health={'checkpoint':{'workflow_run_id':PUBLISHED_RUN,'database_sha256':PUBLISHED_DB_SHA}}
     manifest={'workflow_run_id':PUBLISHED_RUN,'database_sha256':PUBLISHED_DB_SHA,
@@ -11,7 +17,7 @@ def fixtures():
 
 class GapResumeTests(unittest.TestCase):
     def test_explicit_approval_prepares_only_and_preserves_gap(self):
-        result=preflight(*fixtures(),operator_authorized=True)
+        result=preflight_checked(*fixtures(),operator_authorized=True)
         self.assertEqual(result['preflight'],'PASS_PREPARATION_ONLY')
         self.assertEqual(result['incident_workflow_run_id'],INCIDENT_RUN)
         self.assertEqual(result['incident_status'],'UNKNOWN_NOT_RECOVERED')
@@ -21,8 +27,18 @@ class GapResumeTests(unittest.TestCase):
         self.assertFalse(result['resume_executed'])
         self.assertFalse(result['buy'])
 
+    def test_independent_restore_required_before_preparation(self):
+        h,m,a=fixtures()
+        for receipt in (None, {}, {'integrity_check':'ok'},
+                        dict(RESTORE_EVIDENCE, database_sha256='0'*64),
+                        dict(RESTORE_EVIDENCE, audit_journals_preserved=False)):
+            result=preflight(h,m,a,operator_authorized=True,restore_evidence=receipt)
+            self.assertEqual(result['preflight'],'BLOCKED')
+            self.assertEqual(result['gate0'],'BLOCKED')
+            self.assertFalse(result['resume_executed'])
+
     def test_approval_missing_blocks(self):
-        result=preflight(*fixtures())
+        result=preflight_checked(*fixtures())
         self.assertEqual(result['preflight'],'BLOCKED')
         self.assertIn('OPERATOR_AUTHORIZATION_MISSING',result['errors'])
 
@@ -33,13 +49,13 @@ class GapResumeTests(unittest.TestCase):
             inputs=list(fixtures())
             if side==0: inputs[0]['checkpoint'][key]=value
             else: inputs[1][key]=value
-            result=preflight(*inputs,operator_authorized=True)
+            result=preflight_checked(*inputs,operator_authorized=True)
             self.assertEqual(result['preflight'],'BLOCKED')
 
     def test_new_recovery_artifact_forces_exact_recovery_instead_of_gap_resume(self):
         health,manifest,artifacts=fixtures()
         artifacts.append({'name':'sag30-checkpoint-recovery'})
-        result=preflight(health,manifest,artifacts,operator_authorized=True)
+        result=preflight_checked(health,manifest,artifacts,operator_authorized=True)
         self.assertIn('RECOVERY_ARTIFACT_EXISTS_USE_EXACT_RECOVERY',result['errors'])
 
     def test_diagnostic_must_belong_to_exact_failed_run_and_be_available(self):
@@ -47,7 +63,7 @@ class GapResumeTests(unittest.TestCase):
                          {'workflow_run': None}, {'expired': None}):
             health,manifest,artifacts=fixtures()
             artifacts[0].update(mutation)
-            result=preflight(health,manifest,artifacts,operator_authorized=True)
+            result=preflight_checked(health,manifest,artifacts,operator_authorized=True)
             self.assertEqual(result['preflight'],'BLOCKED')
             self.assertFalse(result['resume_executed'])
             self.assertFalse(result['buy'])
@@ -55,11 +71,11 @@ class GapResumeTests(unittest.TestCase):
     def test_duplicate_diagnostic_is_ambiguous(self):
         health,manifest,artifacts=fixtures()
         artifacts.append(dict(artifacts[0]))
-        result=preflight(health,manifest,artifacts,operator_authorized=True)
+        result=preflight_checked(health,manifest,artifacts,operator_authorized=True)
         self.assertIn('INCIDENT_DIAGNOSTIC_MISSING_OR_AMBIGUOUS',result['errors'])
 
     def test_no_inventory_or_diagnostic_fails_closed(self):
         health,manifest,_=fixtures()
         for inventory in (None,[],[{'name':'irrelevant'}]):
-            result=preflight(health,manifest,inventory,operator_authorized=True)
+            result=preflight_checked(health,manifest,inventory,operator_authorized=True)
             self.assertEqual(result['preflight'],'BLOCKED')
