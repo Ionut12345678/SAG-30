@@ -1,0 +1,65 @@
+name: SAG-30 standalone SHADOW Lite
+on:
+  schedule:
+    - cron: '*/5 * * * 1-5'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: sag30-shadow-lite-state
+  cancel-in-progress: false
+jobs:
+  observe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Read isolated state
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p shadow-lite
+          gh api "repos/$GITHUB_REPOSITORY/contents/shadow_lite/state.json?ref=shadow-lite-state" > shadow-lite/remote.json
+          python - <<'PY'
+          import base64,json,pathlib
+          payload=json.loads(pathlib.Path('shadow-lite/remote.json').read_text())
+          pathlib.Path('shadow-lite/state.json').write_bytes(base64.b64decode(payload['content']))
+          pathlib.Path('shadow-lite/state-sha.txt').write_text(payload['sha'])
+          PY
+      - name: Collect real prospective snapshots (SHADOW, never BUY)
+        id: collect
+        env:
+          ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+        run: python -m radar.shadow_lite --state shadow-lite/state.json --out shadow-lite/report.json
+      - name: Persist first_seen and post-alert evidence only on successful collection
+        if: ${{ steps.collect.outcome == 'success' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,pathlib
+          r=json.loads(pathlib.Path('shadow-lite/report.json').read_text())
+          pathlib.Path('shadow-lite/should-publish').write_text('1' if r['status']=='OBSERVED' else '0')
+          PY
+          if [ "$(cat shadow-lite/should-publish)" != 1 ]; then exit 0; fi
+          content="$(base64 -w0 shadow-lite/state.json)"
+          sha="$(cat shadow-lite/state-sha.txt)"
+          gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/shadow_lite/state.json" \
+            -f branch=shadow-lite-state -f sha="$sha" -f content="$content" \
+            -f message="Record prospective SHADOW Lite observations for $GITHUB_RUN_ID"
+      - name: Upload report regardless of data availability
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: sag30-shadow-lite-report
+          path: shadow-lite/report.json
+          if-no-files-found: warn
+          retention-days: 30
