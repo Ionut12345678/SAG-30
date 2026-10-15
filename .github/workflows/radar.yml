@@ -51,8 +51,12 @@ jobs:
   observe:
     needs: admission
     if: ${{ github.ref == 'refs/heads/main' && needs.admission.result == 'success' && needs.admission.outputs.allowed == 'true' }}
+    permissions:
+      contents: write
+      actions: write  # Remove successful pre-push backup only after confirmed publication.
+      pull-requests: write
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 16
     steps:
       - uses: actions/checkout@v4
         with:
@@ -359,9 +363,22 @@ jobs:
             --out state/checkpoint --health state/health.json --journals state \
             --base-commit "${{ steps.restore.outputs.commit }}" --run-id "$GITHUB_RUN_ID"
 
+      # Upload BEFORE the first remote git push. A cancellation during push
+      # skips later always() steps, so a post-failure-only upload is unsafe.
+      - name: Secure pre-publication recovery artifact
+        id: recovery_backup
+        if: ${{ steps.checkpoint.outcome == 'success' && !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: sag30-checkpoint-recovery
+          path: state/checkpoint/
+          compression-level: 0
+          retention-days: 90
+          if-no-files-found: error
+
       - name: Persist audit state and heartbeat
         id: persist
-        if: ${{ always() && steps.checkpoint.outcome == 'success' }}
+        if: ${{ steps.checkpoint.outcome == 'success' && steps.recovery_backup.outcome == 'success' && !cancelled() }}
         shell: bash
         run: |
           set -euo pipefail
@@ -412,20 +429,22 @@ jobs:
           # GitHub occasionally returns a transient 5xx while accepting a large checkpoint
           # ref update. Retry the same immutable snapshot; do not rescan or alter history.
           pushed=0
-          for attempt in 1 2 3 4; do
+          # Bound network operations so a stalled push cannot consume the entire
+          # job lifetime; leave time for the failure recovery artifact upload.
+          for attempt in 1 2; do
             echo "SAG30_CHECKPOINT_PUSH_ATTEMPT=$attempt bytes=$compressed_bytes"
             expected="${{ steps.restore.outputs.commit }}"
             if [ "$expected" = NONE ]; then expected=""; fi
-            remote_commit="$(git ls-remote origin refs/heads/radar-state | cut -f1)"
+            remote_commit="$(timeout -k 5s 20s git ls-remote origin refs/heads/radar-state | cut -f1)" || remote_commit=""
             if [ "$remote_commit" = "$(git rev-parse HEAD)" ]; then
               pushed=1
               break
             fi
-            if git push --force-with-lease="radar-state:$expected" origin HEAD:radar-state; then
+            if timeout -k 5s 75s git push --force-with-lease="radar-state:$expected" origin HEAD:radar-state; then
               pushed=1
               break
             fi
-            if [ "$attempt" -lt 4 ]; then
+            if [ "$attempt" -lt 2 ]; then
               sleep $((attempt * 5))
             fi
           done
@@ -434,7 +453,7 @@ jobs:
             exit 1
           fi
           published_commit="$(git rev-parse HEAD)"
-          remote_commit="$(git ls-remote origin refs/heads/radar-state | cut -f1)"
+          remote_commit="$(timeout -k 5s 20s git ls-remote origin refs/heads/radar-state | cut -f1)" || remote_commit=""
           if [ "$remote_commit" != "$published_commit" ]; then
             echo "SAG30_CHECKPOINT_PUBLICATION_NOT_CONFIRMED"
             exit 1
@@ -442,15 +461,25 @@ jobs:
           echo "SAG30_CHECKPOINT_PUSH_PASS bytes=$compressed_bytes commit=$published_commit"
           echo "Checkpoint publication confirmed: $published_commit" >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Preserve unpublished audit checkpoint for automatic recovery
-        if: ${{ always() && steps.checkpoint.outcome == 'success' && steps.persist.outcome != 'success' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: sag30-checkpoint-recovery
-          path: state/checkpoint/
-          compression-level: 0
-          retention-days: 90
-          if-no-files-found: error
+      # If publication fails or is cancelled, the already-uploaded artifact
+      # remains available for exact-cycle recovery and journal verification.
+      # Never delete it on failure.
+
+      - name: Remove successful pre-publication backup
+        if: ${{ steps.persist.outcome == 'success' && steps.recovery_backup.outcome == 'success' && !cancelled() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Best-effort storage cleanup; a cleanup failure must not undo
+          # the published checkpoint or suppress the next scan.
+          artifact_id="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts?per_page=100" \
+            --jq '.artifacts[] | select(.name == "sag30-checkpoint-recovery" and .expired == false) | .id' | head -n1)" || true
+          if [ -n "$artifact_id" ]; then
+            gh api --method DELETE "repos/$GITHUB_REPOSITORY/actions/artifacts/$artifact_id" \
+              || echo "::warning::SAG30_BACKUP_CLEANUP_FAILED artifact=$artifact_id"
+          fi
 
       - name: Preserve forensic database if checkpoint preparation failed
         if: ${{ always() && steps.checkpoint.outcome == 'failure' }}

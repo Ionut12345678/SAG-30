@@ -45,6 +45,53 @@ class RecoveryTests(unittest.TestCase):
     def recover(self):
         with patch('radar.recovery.gh_json',side_effect=self.api),patch('radar.recovery.subprocess.run',side_effect=self.download):
             return recover('owner/repo','a'*40,self.destination,self.root/'status.json',self.root/'journals','2026-10-12T13:00:00+00:00')
+    def test_end_to_end_failed_publication_requires_artifact_and_verified_restore(self):
+        # Model a completed prospective scan with a failed/cancelled push.
+        # No following scan is admitted until the exact prepared checkpoint
+        # has been independently restored and the published audit preserved.
+        from datetime import datetime, timezone
+        from radar.restart import (
+            admission, verify_required_recovery, RESTORE, RECOVERY, SCAN, PREPARE, PERSIST,
+        )
+        now = datetime(2026, 10, 14, 14, 0, tzinfo=timezone.utc)
+        health = {
+            'generated_ts': '2026-10-12T13:00:00+00:00',
+            'checkpoint': {'workflow_run_id': '122'},
+            'latest_run': {'started': '2026-10-12T13:00:00+00:00'},
+            'observations': {'ok': 1, 'valid_source_latest_ts': '2026-10-12T13:00:00+00:00'},
+        }
+        previous = {
+            'id': 123, 'status': 'completed',
+            'steps': {
+                RESTORE: {'conclusion': 'success'},
+                RECOVERY: {'conclusion': 'success'},
+                SCAN: {'conclusion': 'success', 'started_at': '2026-10-12T13:05:00+00:00'},
+                PREPARE: {'conclusion': 'success'},
+                PERSIST: {'conclusion': 'failure'},
+            },
+        }
+        # Missing artifact (historical cancellation) is not recoverable by fiat.
+        blocked = admission(now, health, [previous], current_id=124)
+        self.assertEqual(blocked['reason'], 'UNPUBLISHED_CYCLE_WITHOUT_RECOVERY')
+        self.assertFalse(blocked['allowed'])
+        previous['recovery_artifact_available'] = True
+        gated = admission(now, health, [previous], current_id=124)
+        self.assertTrue(gated['allowed'])
+        self.assertEqual(gated['reason'], 'RECOVERY_REQUIRED')
+        self.assertEqual(gated['required_recovery_run_id'], '123')
+        with self.assertRaises(ValueError):
+            verify_required_recovery({'status': 'NO_COMPATIBLE_RECOVERY_ARTIFACT'}, '123')
+        before = file_sha(self.destination)
+        result = self.recover()  # checksum, parent, journal, audit extension
+        self.assertEqual(result['status'], 'RESTORED_RECOVERY_ARTIFACT')
+        verify_required_recovery(result, gated['required_recovery_run_id'])
+        self.assertNotEqual(file_sha(self.destination), before)
+        with sqlite3.connect(self.destination) as db:
+            self.assertEqual(db.execute('SELECT COUNT(*) FROM audit').fetchone()[0], 2)
+        # A forged success for the wrong run must never authorize collection.
+        with self.assertRaises(ValueError):
+            verify_required_recovery(result, '567')
+
     def test_failed_push_snapshot_recovers_before_next_scan(self):
         result=self.recover()
         self.assertEqual(result['status'],'RESTORED_RECOVERY_ARTIFACT')

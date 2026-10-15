@@ -92,6 +92,16 @@ def admission(now, health, runs, current_id, target=300):
         if processing and not published:
             if (steps.get(PREPARE, {}).get('conclusion') != 'success'
                     or not previous.get('recovery_artifact_available')):
+                # Separate historical loss accounting from future automatic recovery.
+                # Never infer that the lost cycle was restored or silently scan over it.
+                result['incident_reconciliation'] = {
+                    'unpublished_workflow_run_id': str(previous['id']),
+                    'status': 'REQUIRES_MANUAL_EVIDENCE_RECONCILIATION',
+                    'recovery_artifact_available': bool(previous.get('recovery_artifact_available')),
+                    'checkpoint_prepared': steps.get(PREPARE, {}).get('conclusion') == 'success',
+                    'data_gap': True,
+                    'safe_to_resume': False,
+                }
                 return decide('BLOCKED', 'UNPUBLISHED_CYCLE_WITHOUT_RECOVERY')
             # Metadata allows only entry into restore/recovery, never scanning directly.
             result['required_recovery_run_id'] = str(previous['id'])
