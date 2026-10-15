@@ -17,7 +17,14 @@ def recover(tracked, fetch):
     for symbol, item in sorted(tracked.items()):
         first = parse_ts(item["first_seen"])
         end = first + timedelta(minutes=240)
-        rows = fetch(symbol, first, end)
+        try:
+            rows = fetch(symbol, first, end)
+        except Exception as exc:
+            outcomes[symbol] = {"first_seen": item["first_seen"], "first_price": item["first_price"],
+                                "max_bar_high_after": None, "max_pct_after": None,
+                                "minute_bars_after": 0, "status": "DATA_GAP",
+                                "reason": type(exc).__name__}
+            continue
         # A one-minute bar can straddle the alert. Exclude its entire minute;
         # otherwise its high could have happened before first_seen.
         eligible = [(parse_ts(b["t"]), float(b["h"])) for b in rows
