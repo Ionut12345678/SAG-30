@@ -22,3 +22,11 @@
 PR #92 now uploads `sag30-checkpoint-recovery` **before** the remote push, refuses publication if the backup upload fails, retains the backup on failure/cancellation, and deletes it only after successful publication. Restart diagnostics explicitly identify the blocked run and evidence status. Synthetic tests verify the guards. The extra artifact upload can increase cycle duration and must be measured; it does not resurrect run #567.
 
 **No live BUY, no trades, no frozen v0.3.3 changes, no audit rewriting.**
+
+## Operator authorization received 2026-10-15
+
+The repository owner explicitly authorized **preparation of a controlled prospective restart** from the last verified published checkpoint with the missing cycle permanently classified `DATA_GAP`. This does **not** authorize fabricated recovery, merging PRs, real trades, or declaring Gate 0 PASS.
+
+The independent preflight `python -m radar.gap_resume --health <file> --manifest <file> --incident-artifacts <file> --operator-authorized --out <report>` requires the exact published run ID `38422640857`, database SHA-256 `9107abf54ff554a4670576a5be678c2631fbc824591f5d99dc62fc3a9a1874a5`, audit retention and diagnostic evidence for missing run `38423433985`. It is read-only and returns `PASS_PREPARATION_ONLY`, never permission to scan. A new independently reviewed one-time admission and immutable incident journal would be required before any real restart. If live state or artifact inventory changes, rerun preflight and reconcile; never reuse an old approval to skip checks.
+
+**Current disposition:** authorized to prepare; **NOT YET RESUMED**. The 2026-10-16 16:00 Gate 0 deadline remains unchanged.
