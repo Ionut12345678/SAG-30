@@ -93,6 +93,22 @@ class AdmissionTests(unittest.TestCase):
             self.assertFalse(result['allowed'])
             self.assertEqual(result['reason'], 'UNPUBLISHED_CYCLE_WITHOUT_RECOVERY')
 
+    def test_unrecoverable_cycle_reports_exact_id_without_bypassing_audit(self):
+        previous = completed()
+        previous['id'] = 567
+        previous['steps'][PERSIST]['conclusion'] = 'failure'
+        previous['recovery_artifact_available'] = False
+        result = admission(NOW, health(), [previous], 574)
+        self.assertEqual(result['status'], 'BLOCKED')
+        self.assertEqual(result['reason'], 'UNPUBLISHED_CYCLE_WITHOUT_RECOVERY')
+        self.assertEqual(result['unpublished_run_id'], '567')
+        self.assertTrue(result['checkpoint_prepared'])
+        self.assertFalse(result['recovery_artifact_available'])
+        self.assertEqual(result['unpublished_audit_status'], 'UNKNOWN_NOT_RECOVERED')
+        self.assertEqual(result['operator_action_required'], 'FORENSIC_RECONCILIATION_NO_AUTOMATIC_RESUME')
+        self.assertFalse(result['allowed'])
+        self.assertFalse(result['buy'])
+
     def test_verified_recovery_is_required_before_further_scanning(self):
         previous = completed(); previous['steps'][PERSIST]['conclusion'] = 'failure'
         previous['recovery_artifact_available'] = True
