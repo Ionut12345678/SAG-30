@@ -15,6 +15,17 @@ class RecoveryTests(unittest.TestCase):
                 {"t": "2026-10-15T16:49:00Z", "h": 12}]
         self.assertEqual(recover(state, lambda *_: rows)["ABC"]["max_bar_high_after"], 12)
 
+    def test_one_symbol_failure_does_not_discard_other_results(self):
+        state = {"ABC": {"first_seen": "2026-10-15T16:48:07+00:00", "first_price": 10},
+                 "XYZ": {"first_seen": "2026-10-15T16:48:07+00:00", "first_price": 10}}
+        def fetch(symbol, *_):
+            if symbol == "ABC":
+                raise TimeoutError("provider timeout")
+            return [{"t": "2026-10-15T16:49:00Z", "h": 12}]
+        outcomes = recover(state, fetch)
+        self.assertEqual(outcomes["ABC"]["status"], "DATA_GAP")
+        self.assertEqual(outcomes["XYZ"]["status"], "OBSERVED")
+
     def test_missing_bars_is_data_gap(self):
         state = {"ABC": {"first_seen": "2026-10-15T16:48:07+00:00", "first_price": 10}}
         self.assertEqual(recover(state, lambda *_: [])["ABC"]["status"], "DATA_GAP")
