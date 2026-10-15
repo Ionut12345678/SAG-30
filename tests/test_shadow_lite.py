@@ -1,3 +1,4 @@
+import copy
 import unittest
 from datetime import datetime, timedelta, timezone
 from radar.shadow_lite import cycle, market_window, valid_price
@@ -62,6 +63,20 @@ class ShadowLiteTests(unittest.TestCase):
         self.assertEqual(report["valid_fresh_snapshots"], 0)
         self.assertEqual(report["missing_or_stale_snapshots"], 2)
         self.assertEqual(report["coverage_fraction"], 0)
+
+    def test_cycle_does_not_mutate_prior_checkpoint(self):
+        prior, _ = cycle(NOW, ["AAA"], {"AAA": snapshot(10.7)}, {})
+        original = copy.deepcopy(prior)
+        later, _ = cycle(NOW + timedelta(minutes=5), ["AAA"], {"AAA": snapshot(15.1, 5)}, prior)
+        self.assertEqual(prior, original)
+        self.assertEqual(later["tracked"]["AAA"]["milestones"], [15, 20, 30, 50])
+
+    def test_nonfinite_prices_are_not_evidence(self):
+        for price in (float('nan'), float('inf')):
+            self.assertIsNone(valid_price('AAA', snapshot(price), NOW))
+        snap = snapshot(10.6)
+        snap['prevDailyBar']['c'] = float('nan')
+        self.assertIsNone(valid_price('AAA', snap, NOW))
 
     def test_new_york_window(self):
         self.assertTrue(market_window(NOW))

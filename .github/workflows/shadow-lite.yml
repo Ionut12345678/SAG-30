@@ -32,12 +32,13 @@ jobs:
           pathlib.Path('shadow-lite/state.json').write_bytes(base64.b64decode(payload['content']))
           pathlib.Path('shadow-lite/state-sha.txt').write_text(payload['sha'])
           PY
+          cp shadow-lite/state.json shadow-lite/state-before.json
       - name: Collect real prospective snapshots (SHADOW, never BUY)
         id: collect
         env:
           ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
           ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
-        run: python -m radar.shadow_lite --state shadow-lite/state.json --out shadow-lite/report.json
+        run: python -m radar.shadow_lite --state shadow-lite/state.json --out shadow-lite/report.json --snapshots-out shadow-lite/snapshots.json
       - name: Persist first_seen and post-alert evidence only on successful collection
         id: persist_state
         if: ${{ steps.collect.outcome == 'success' }}
@@ -57,6 +58,28 @@ jobs:
           gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/shadow_lite/state.json" \
             -f branch=shadow-lite-state -f sha="$sha" -f content="$content" \
             -f message="Record prospective SHADOW Lite observations for $GITHUB_RUN_ID"
+          gh api "repos/$GITHUB_REPOSITORY/contents/shadow_lite/state.json?ref=shadow-lite-state" > shadow-lite/persisted-remote.json
+          python - <<'PY'
+          import base64, hashlib, json, pathlib
+          local = pathlib.Path('shadow-lite/state.json').read_bytes()
+          remote = json.loads(pathlib.Path('shadow-lite/persisted-remote.json').read_text())
+          verified = base64.b64decode(remote['content']) == local
+          before = json.loads(pathlib.Path('shadow-lite/state-before.json').read_text())
+          after = json.loads(local)
+          first_seen_preserved = all(
+              s in after.get('tracked', {}) and item['first_seen'] == after['tracked'][s]['first_seen']
+              and item['first_price'] == after['tracked'][s]['first_price']
+              for s, item in before.get('tracked', {}).items())
+          pathlib.Path('shadow-lite/persistence.json').write_text(json.dumps({
+              'verified': verified, 'blob_sha': remote['sha'],
+              'sha256': hashlib.sha256(local).hexdigest(),
+              'first_seen_preserved': first_seen_preserved,
+              'tracked_before': len(before.get('tracked', {})),
+              'tracked_after': len(after.get('tracked', {})),
+          }, indent=2) + '\n')
+          if not verified or not first_seen_preserved:
+              raise SystemExit('SHADOW state persistence/invariant check failed')
+          PY
       - name: Write workflow health evidence even after failed prerequisites
         if: ${{ always() }}
         env:
@@ -92,5 +115,9 @@ jobs:
           path: |
             shadow-lite/report.json
             shadow-lite/health.json
+            shadow-lite/state-before.json
+            shadow-lite/state.json
+            shadow-lite/snapshots.json
+            shadow-lite/persistence.json
           if-no-files-found: warn
           retention-days: 30

@@ -1,5 +1,7 @@
 """Standalone, audit-friendly SHADOW detector. Standard library only. No trading."""
 import argparse
+import copy
+import math
 import csv
 import json
 import os
@@ -67,7 +69,7 @@ def valid_price(symbol, snapshot, now, max_age_seconds=900):
         return None
     if not isinstance(price, (int, float)) or not isinstance(close, (int, float)):
         return None
-    if price <= 0 or close <= 0:
+    if not math.isfinite(price) or not math.isfinite(close) or price <= 0 or close <= 0:
         return None
     # Daily bar timestamp can be missing on some feeds; never use its high as an outcome.
     return {"symbol": symbol, "price": price, "change_pct": round((price / close - 1) * 100, 4),
@@ -77,7 +79,7 @@ def valid_price(symbol, snapshot, now, max_age_seconds=900):
 
 def cycle(now, universe, snapshots, prior):
     """Immutable first_seen; outcomes require observations strictly AFTER detection."""
-    state = dict(prior or {})
+    state = copy.deepcopy(prior or {})
     if state.get("version") not in (None, STATE_VERSION):
         raise ValueError("Unsupported state version")
     tracked = dict(state.get("tracked") or {})
@@ -161,6 +163,7 @@ def main():
     parser.add_argument("--universe", default="config/universe.csv")
     parser.add_argument("--state", required=True)
     parser.add_argument("--out", required=True)
+    parser.add_argument("--snapshots-out", help="Optional raw input evidence; never contains credentials")
     args = parser.parse_args()
     now = datetime.now(timezone.utc)
     output = Path(args.out)
@@ -180,6 +183,12 @@ def main():
                 if not universe:
                     raise ValueError("Empty universe")
                 snapshots = fetch_snapshots(universe, key, secret)
+                # Detection occurs after all batches have arrived, never before the request.
+                now = datetime.now(timezone.utc)
+                if args.snapshots_out:
+                    evidence = Path(args.snapshots_out)
+                    evidence.parent.mkdir(parents=True, exist_ok=True)
+                    evidence.write_text(json.dumps(snapshots, sort_keys=True) + "\n")
                 state, detail = cycle(now, universe, snapshots, prior)
                 report.update(detail)
                 report["status"] = ("OBSERVED" if detail["coverage_fraction"] >= 0.8
