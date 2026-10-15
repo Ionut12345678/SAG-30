@@ -18,8 +18,11 @@ def recover(tracked, fetch):
         first = parse_ts(item["first_seen"])
         end = first + timedelta(minutes=240)
         rows = fetch(symbol, first, end)
+        # A one-minute bar can straddle the alert. Exclude its entire minute;
+        # otherwise its high could have happened before first_seen.
         eligible = [(parse_ts(b["t"]), float(b["h"])) for b in rows
-                    if parse_ts(b["t"]) > first and parse_ts(b["t"]) <= end and float(b["h"]) > 0]
+                    if parse_ts(b["t"]) >= first.replace(second=0, microsecond=0) + timedelta(minutes=1)
+                    and parse_ts(b["t"]) <= end and float(b["h"]) > 0]
         if eligible:
             highest = max(eligible, key=lambda x: x[1])
             price = highest[1]
