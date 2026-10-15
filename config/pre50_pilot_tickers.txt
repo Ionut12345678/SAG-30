@@ -1,0 +1,11 @@
+# Small pilot for pipeline verification; NOT representative of the full SAG-30 universe.
+SOFI
+RGTI
+QBTS
+BBAI
+ACHR
+LUNR
+PLUG
+RIOT
+MARA
+IONQ
