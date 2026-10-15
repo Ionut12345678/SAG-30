@@ -37,6 +37,17 @@ class GapResumeTests(unittest.TestCase):
             self.assertEqual(result['gate0'],'BLOCKED')
             self.assertFalse(result['resume_executed'])
 
+    def test_malformed_external_evidence_fails_closed(self):
+        health,manifest,artifacts=fixtures()
+        for h,m,a in ((None,manifest,artifacts), (health,None,artifacts),
+                      ({'checkpoint': []},manifest,artifacts),
+                      (health,manifest,[None,artifacts[0]])):
+            result=preflight(h,m,a,operator_authorized=True,
+                             restore_evidence=RESTORE_EVIDENCE)
+            self.assertEqual(result['preflight'],'BLOCKED')
+            self.assertFalse(result['resume_executed'])
+            self.assertFalse(result['buy'])
+
     def test_approval_missing_blocks(self):
         result=preflight_checked(*fixtures())
         self.assertEqual(result['preflight'],'BLOCKED')
