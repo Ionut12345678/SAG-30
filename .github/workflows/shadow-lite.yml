@@ -18,6 +18,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Read isolated state
+        id: read_state
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
@@ -38,6 +39,7 @@ jobs:
           ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
         run: python -m radar.shadow_lite --state shadow-lite/state.json --out shadow-lite/report.json
       - name: Persist first_seen and post-alert evidence only on successful collection
+        id: persist_state
         if: ${{ steps.collect.outcome == 'success' }}
         env:
           GH_TOKEN: ${{ github.token }}
@@ -47,7 +49,7 @@ jobs:
           python - <<'PY'
           import json,pathlib
           r=json.loads(pathlib.Path('shadow-lite/report.json').read_text())
-          pathlib.Path('shadow-lite/should-publish').write_text('1' if r['status']=='OBSERVED' else '0')
+          pathlib.Path('shadow-lite/should-publish').write_text('1' if r['status'] in ('OBSERVED', 'PARTIAL_OBSERVED') else '0')
           PY
           if [ "$(cat shadow-lite/should-publish)" != 1 ]; then exit 0; fi
           content="$(base64 -w0 shadow-lite/state.json)"
@@ -55,11 +57,40 @@ jobs:
           gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/shadow_lite/state.json" \
             -f branch=shadow-lite-state -f sha="$sha" -f content="$content" \
             -f message="Record prospective SHADOW Lite observations for $GITHUB_RUN_ID"
+      - name: Write workflow health evidence even after failed prerequisites
+        if: ${{ always() }}
+        env:
+          READ_OUTCOME: ${{ steps.read_state.outcome }}
+          COLLECT_OUTCOME: ${{ steps.collect.outcome }}
+          PERSIST_OUTCOME: ${{ steps.persist_state.outcome }}
+        run: |
+          mkdir -p shadow-lite
+          python - <<'PY'
+          import json, os, pathlib
+          report_path = pathlib.Path("shadow-lite/report.json")
+          report = json.loads(report_path.read_text()) if report_path.exists() else {}
+          health = {
+              "run_id": os.getenv("GITHUB_RUN_ID"),
+              "read_state": os.getenv("READ_OUTCOME"),
+              "collect": os.getenv("COLLECT_OUTCOME"),
+              "persist_state": os.getenv("PERSIST_OUTCOME"),
+              "scanner_status": report.get("status", "NO_REPORT"),
+              "reason": report.get("reason"),
+              "universe_size": report.get("universe_size"),
+              "valid_fresh_snapshots": report.get("valid_fresh_snapshots"),
+              "coverage_fraction": report.get("coverage_fraction"),
+              "first_watch_count": sum(e.get("type") == "FIRST_WATCH" for e in report.get("new_events", [])),
+              "credentials_exposed": False
+          }
+          pathlib.Path("shadow-lite/health.json").write_text(json.dumps(health, indent=2) + "\n")
+          PY
       - name: Upload report regardless of data availability
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: sag30-shadow-lite-report
-          path: shadow-lite/report.json
+          path: |
+            shadow-lite/report.json
+            shadow-lite/health.json
           if-no-files-found: warn
           retention-days: 30
