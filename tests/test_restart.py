@@ -93,6 +93,22 @@ class AdmissionTests(unittest.TestCase):
             self.assertFalse(result['allowed'])
             self.assertEqual(result['reason'], 'UNPUBLISHED_CYCLE_WITHOUT_RECOVERY')
 
+    def test_unrecoverable_cycle_reports_exact_id_without_bypassing_audit(self):
+        previous = completed()
+        previous['id'] = 567
+        previous['steps'][PERSIST]['conclusion'] = 'failure'
+        previous['recovery_artifact_available'] = False
+        result = admission(NOW, health(), [previous], 574)
+        self.assertEqual(result['status'], 'BLOCKED')
+        self.assertEqual(result['reason'], 'UNPUBLISHED_CYCLE_WITHOUT_RECOVERY')
+        self.assertEqual(result['unpublished_run_id'], '567')
+        self.assertTrue(result['checkpoint_prepared'])
+        self.assertFalse(result['recovery_artifact_available'])
+        self.assertEqual(result['unpublished_audit_status'], 'UNKNOWN_NOT_RECOVERED')
+        self.assertEqual(result['operator_action_required'], 'FORENSIC_RECONCILIATION_NO_AUTOMATIC_RESUME')
+        self.assertFalse(result['allowed'])
+        self.assertFalse(result['buy'])
+
     def test_verified_recovery_is_required_before_further_scanning(self):
         previous = completed(); previous['steps'][PERSIST]['conclusion'] = 'failure'
         previous['recovery_artifact_available'] = True
@@ -276,6 +292,22 @@ class RemoteAndCliTests(unittest.TestCase):
         recovery = workflow.split('      - name: Recover unpublished prospective cycle before scanning\n', 1)[1].split('\n      - name:', 1)[0]
         self.assertIn('verify_required_recovery', recovery)
         self.assertIn('SAG30_CADENCE_WINDOW_ENDED_AFTER_WAIT', workflow)
+
+    def test_prepublication_backup_is_required_before_checkpoint_push(self):
+        workflow = Path('.github/workflows/radar.yml').read_text()
+        backup = workflow.index('      - name: Secure pre-publication recovery artifact')
+        persist = workflow.index('      - name: Persist audit state and heartbeat')
+        cleanup = workflow.index('      - name: Remove successful pre-publication backup')
+        self.assertLess(backup, persist)
+        self.assertLess(persist, cleanup)
+        self.assertIn("steps.recovery_backup.outcome == 'success' && !cancelled()", workflow)
+        self.assertIn('name: sag30-checkpoint-recovery', workflow)
+        self.assertEqual(workflow.count('name: sag30-checkpoint-recovery'), 1)
+        self.assertIn('actions: write', workflow)
+        self.assertIn("steps.persist.outcome == 'success' && steps.recovery_backup.outcome == 'success'", workflow)
+        # Cleanup is deliberately impossible after a failed/cancelled publish.
+        self.assertNotIn('Preserve unpublished audit checkpoint for automatic recovery', workflow)
+        self.assertIn('SAG30_CHECKPOINT_PUBLICATION_NOT_CONFIRMED', workflow)
 
     def test_real_dispatch_shell_does_not_dispatch_after_wait_crosses_close(self):
         workflow = Path('.github/workflows/radar.yml').read_text()
