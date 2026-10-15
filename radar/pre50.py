@@ -7,7 +7,8 @@ import argparse
 import csv
 import json
 import math
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
+from zoneinfo import ZoneInfo
 from pathlib import Path
 
 WEIGHTS = {"rvol": 25, "acceleration": 20, "compression": 15,
@@ -180,6 +181,7 @@ def main():
     p.add_argument("--data-dir", required=True, help="Directory of SYMBOL.csv OHLCV files")
     p.add_argument("--tickers", required=True, help="Text file, one ticker per line")
     p.add_argument("--journal", default="pre50-journal.json")
+    p.add_argument("--expected-session", help="Required US trading session YYYY-MM-DD for prospective scan")
     p.add_argument("--output", default="pre50-report.json")
     args = p.parse_args()
     tickers = list(dict.fromkeys(x.strip().upper() for x in
@@ -191,6 +193,8 @@ def main():
         report = backtest(universe)
     elif args.command == "scan":
         report = scan(universe)
+        if args.expected_session and report["as_of"] != args.expected_session:
+            raise SystemExit(f"DATA_GAP: latest session {report['as_of']} != expected {args.expected_session}")
         if report["stale_symbols"] or not report["as_of"]:
             raise SystemExit(f"DATA_GAP: stale symbols {report['stale_symbols'][:10]}")
         path = Path(args.journal)
