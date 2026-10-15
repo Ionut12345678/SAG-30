@@ -46,3 +46,24 @@ class GapResumeTests(unittest.TestCase):
         for inventory in (None,[],[{'name':'irrelevant'}]):
             result=preflight(health,manifest,inventory,operator_authorized=True)
             self.assertEqual(result['preflight'],'BLOCKED')
+
+    def test_accepts_unmodified_github_artifacts_api_payload(self):
+        health,manifest,artifacts=fixtures()
+        artifacts[0]['workflow_run']={'id':int(INCIDENT_RUN)}
+        result=preflight(health,manifest,{'artifacts':artifacts},operator_authorized=True)
+        self.assertEqual(result['preflight'],'PASS_PREPARATION_ONLY')
+        self.assertFalse(result['resume_executed'])
+
+    def test_wrong_run_or_expired_diagnostic_blocks(self):
+        for modification in ({'workflow_run':{'id':123}}, {'expired':True}):
+            health,manifest,artifacts=fixtures()
+            artifacts[0].update(modification)
+            result=preflight(health,manifest,{'artifacts':artifacts},operator_authorized=True)
+            self.assertEqual(result['preflight'],'BLOCKED')
+
+    def test_expired_recovery_does_not_become_permission_to_resume(self):
+        health,manifest,artifacts=fixtures()
+        artifacts.append({'name':'sag30-checkpoint-recovery','expired':True})
+        result=preflight(health,manifest,{'artifacts':artifacts},operator_authorized=True)
+        self.assertEqual(result['preflight'],'BLOCKED')
+        self.assertIn('RECOVERY_ARTIFACT_EXISTS_USE_EXACT_RECOVERY',result['errors'])
