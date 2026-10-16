@@ -30,7 +30,11 @@ class TestPre50FetchValidation(unittest.TestCase):
                 self.assertFalse((Path(directory) / "SOFI.csv").exists())
 
     def test_valid_bars_with_zero_volume_are_accepted(self):
-        import pandas as pd
+        try:
+            import pandas as pd
+            import yfinance
+        except ImportError:
+            self.skipTest('pandas/yfinance optional outside feed workflow')
         rows = [{"Open": 9, "High": 10, "Low": 8, "Close": 9.5, "Volume": 0}] * 42
         frame = pd.DataFrame(rows, index=pd.date_range("2026-08-01", periods=42))
         with tempfile.TemporaryDirectory() as directory:
