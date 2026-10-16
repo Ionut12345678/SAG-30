@@ -8,7 +8,11 @@ from radar.pre50_fetch import fetch
 
 class TestPre50FetchValidation(unittest.TestCase):
     def test_rejects_zero_prices_and_does_not_leave_csv(self):
-        import pandas as pd
+        try:
+            import pandas as pd
+            import yfinance
+        except ImportError:
+            self.skipTest('pandas/yfinance optional outside feed workflow')
         for invalid in (
             {"Open": 0, "High": 10, "Low": 0, "Close": 9, "Volume": 100},
             {"Open": 9, "High": 10, "Low": 0, "Close": 9.5, "Volume": 100},
