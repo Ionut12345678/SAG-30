@@ -9,7 +9,8 @@ def classify(coverage, outcomes, scan=None):
         and isinstance(fetched, int) and fetched == requested
         and not coverage.get("missing")
     )
-    scan_ok = outcomes.get("scan") == "success" and isinstance(scan, dict)
+    scan_ok = (outcomes.get("scan") == "success" and isinstance(scan, dict)
+               and isinstance(scan.get("candidates"), list) and bool(scan.get("as_of")))
     ready = scan_ok and all(
         outcomes.get(key) == "success"
         for key in ("read_state", "fetch", "resolve")
@@ -20,6 +21,8 @@ def classify(coverage, outcomes, scan=None):
     return dict(
         scanner_status="OBSERVED" if complete else "PARTIAL_OBSERVED",
         scan_completed=True,
-        candidate_count=len(scan.get("candidates", [])),
+        candidate_count=len(scan["candidates"]),
+        as_of=scan["as_of"],
+        state_published=outcomes.get("persist") == "success",
         coverage_complete=complete,
     )
