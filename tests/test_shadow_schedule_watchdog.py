@@ -19,6 +19,13 @@ class WatchdogTests(unittest.TestCase):
                      "created_at": "2026-10-16T14:52:00Z"}]
             self.assertFalse(needs_recovery(runs, now))
 
+    def test_old_running_or_queued_scan_is_not_duplicated(self):
+        now = dt.datetime(2026, 10, 16, 15, tzinfo=UTC)
+        for status in ("queued", "in_progress"):
+            runs = [{"event": "schedule", "status": status,
+                     "created_at": "2026-10-16T14:10:00Z"}]
+            self.assertFalse(needs_recovery(runs, now))
+
     def test_stale_or_other_workflow_event_requires_recovery(self):
         now = dt.datetime(2026, 10, 16, 15, tzinfo=UTC)
         self.assertTrue(needs_recovery([], now))
