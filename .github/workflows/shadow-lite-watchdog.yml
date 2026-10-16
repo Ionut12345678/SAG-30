@@ -21,4 +21,14 @@ jobs:
       - name: Recover only if no recent SHADOW Lite run during US market hours
         env:
           GH_TOKEN: ${{ github.token }}
-        run: python -m radar.shadow_schedule_watchdog
+        run: |
+          mkdir -p watchdog-out
+          python -m radar.shadow_schedule_watchdog | tee watchdog-out/result.json
+      - name: Upload watchdog decision evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: sag30-shadow-lite-watchdog-decision
+          path: watchdog-out/result.json
+          if-no-files-found: warn
+          retention-days: 30
