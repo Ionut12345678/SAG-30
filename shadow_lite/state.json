@@ -98,9 +98,42 @@
       "source_ts": "2026-10-15T19:24:54.419967+00:00",
       "symbol": "ZIP",
       "type": "FIRST_WATCH"
+    },
+    {
+      "change_pct": 9.9526,
+      "decision": "SHADOW_WATCH_NOT_BUY",
+      "feed": "iex",
+      "first_seen": "2026-10-16T14:29:17.252292+00:00",
+      "price": 1.16,
+      "source": "alpaca_snapshot_latestTrade",
+      "source_ts": "2026-10-16T14:26:43.794839+00:00",
+      "symbol": "FFR",
+      "type": "FIRST_WATCH"
+    },
+    {
+      "change_pct": 9.9398,
+      "decision": "SHADOW_WATCH_NOT_BUY",
+      "feed": "iex",
+      "first_seen": "2026-10-16T14:29:17.252292+00:00",
+      "price": 1.825,
+      "source": "alpaca_snapshot_latestTrade",
+      "source_ts": "2026-10-16T14:21:49.707650+00:00",
+      "symbol": "DTI",
+      "type": "FIRST_WATCH"
+    },
+    {
+      "change_pct": 9.2658,
+      "decision": "SHADOW_WATCH_NOT_BUY",
+      "feed": "iex",
+      "first_seen": "2026-10-16T14:29:17.252292+00:00",
+      "price": 0.5849,
+      "source": "alpaca_snapshot_latestTrade",
+      "source_ts": "2026-10-16T14:20:47.507339+00:00",
+      "symbol": "VNTG",
+      "type": "FIRST_WATCH"
     }
   ],
-  "last_cycle": "2026-10-15T19:27:35.963518+00:00",
+  "last_cycle": "2026-10-16T14:29:17.252292+00:00",
   "tracked": {
     "ARHS": {
       "first_change_pct": 9.4035,
@@ -110,7 +143,7 @@
       "max_observed_price_after": 10.225,
       "milestones": [],
       "source_ts": "2026-10-15T16:46:41.014789+00:00",
-      "status": "ACTIVE"
+      "status": "CENSORED_OR_WINDOW_COMPLETE"
     },
     "ATLX": {
       "first_change_pct": 9.3434,
@@ -120,6 +153,16 @@
       "max_observed_price_after": 2.22,
       "milestones": [],
       "source_ts": "2026-10-15T16:44:46.629932+00:00",
+      "status": "CENSORED_OR_WINDOW_COMPLETE"
+    },
+    "DTI": {
+      "first_change_pct": 9.9398,
+      "first_price": 1.825,
+      "first_seen": "2026-10-16T14:29:17.252292+00:00",
+      "max_observed_pct_after": null,
+      "max_observed_price_after": null,
+      "milestones": [],
+      "source_ts": "2026-10-16T14:21:49.707650+00:00",
       "status": "ACTIVE"
     },
     "EZRA": {
@@ -130,6 +173,16 @@
       "max_observed_price_after": null,
       "milestones": [],
       "source_ts": "2026-10-15T19:15:00.675212+00:00",
+      "status": "CENSORED_OR_WINDOW_COMPLETE"
+    },
+    "FFR": {
+      "first_change_pct": 9.9526,
+      "first_price": 1.16,
+      "first_seen": "2026-10-16T14:29:17.252292+00:00",
+      "max_observed_pct_after": null,
+      "max_observed_price_after": null,
+      "milestones": [],
+      "source_ts": "2026-10-16T14:26:43.794839+00:00",
       "status": "ACTIVE"
     },
     "KNRX": {
@@ -140,7 +193,7 @@
       "max_observed_price_after": null,
       "milestones": [],
       "source_ts": "2026-10-15T16:38:58.506658+00:00",
-      "status": "ACTIVE"
+      "status": "CENSORED_OR_WINDOW_COMPLETE"
     },
     "LBRX": {
       "first_change_pct": 9.409,
@@ -150,7 +203,7 @@
       "max_observed_price_after": 36.74,
       "milestones": [],
       "source_ts": "2026-10-15T16:37:24.581646+00:00",
-      "status": "ACTIVE"
+      "status": "CENSORED_OR_WINDOW_COMPLETE"
     },
     "MNTN": {
       "first_change_pct": 9.9468,
@@ -160,7 +213,7 @@
       "max_observed_price_after": null,
       "milestones": [],
       "source_ts": "2026-10-15T19:21:54.978774+00:00",
-      "status": "ACTIVE"
+      "status": "CENSORED_OR_WINDOW_COMPLETE"
     },
     "NFGC": {
       "first_change_pct": 9.5406,
@@ -170,7 +223,7 @@
       "max_observed_price_after": 1.57,
       "milestones": [],
       "source_ts": "2026-10-15T16:35:44.899000+00:00",
-      "status": "ACTIVE"
+      "status": "CENSORED_OR_WINDOW_COMPLETE"
     },
     "TBCH": {
       "first_change_pct": 9.9202,
@@ -180,6 +233,16 @@
       "max_observed_price_after": 16.44,
       "milestones": [],
       "source_ts": "2026-10-15T16:46:03.866695+00:00",
+      "status": "CENSORED_OR_WINDOW_COMPLETE"
+    },
+    "VNTG": {
+      "first_change_pct": 9.2658,
+      "first_price": 0.5849,
+      "first_seen": "2026-10-16T14:29:17.252292+00:00",
+      "max_observed_pct_after": null,
+      "max_observed_price_after": null,
+      "milestones": [],
+      "source_ts": "2026-10-16T14:20:47.507339+00:00",
       "status": "ACTIVE"
     },
     "ZIP": {
@@ -190,7 +253,7 @@
       "max_observed_price_after": null,
       "milestones": [],
       "source_ts": "2026-10-15T19:24:54.419967+00:00",
-      "status": "ACTIVE"
+      "status": "CENSORED_OR_WINDOW_COMPLETE"
     }
   },
   "version": 1
