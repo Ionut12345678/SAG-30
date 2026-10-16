@@ -1,0 +1,29 @@
+name: Gate 0 read-only cadence evidence
+on:
+  schedule:
+    - cron: '45 23 * * 1-5'
+  workflow_dispatch:
+permissions:
+  actions: read
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Collect actual SHADOW Lite workflow runs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python -m radar.gate0_actions_runs --out gate0-out/cadence.json
+      - name: Upload evidence, even when collection fails
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: sag30-gate0-cadence
+          path: gate0-out/cadence.json
+          if-no-files-found: warn
+          retention-days: 30
