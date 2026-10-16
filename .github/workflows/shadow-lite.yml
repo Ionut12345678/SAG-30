@@ -75,12 +75,27 @@ jobs:
               raise SystemExit("SHADOW state readback differs from collected evidence")
           PY
           printf "true\\n" > shadow-lite/state-published
+      - name: Read-only post-detection minute-bar evidence
+        id: followup
+        if: ${{ steps.persist_state.outcome == 'success' && steps.collect.outcome == 'success' }}
+        continue-on-error: true
+        env:
+          ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+        run: |
+          set -euo pipefail
+          if [ ! -f shadow-lite/state-published ]; then
+            echo 'No verified new state; follow-up not credited'
+            exit 0
+          fi
+          python -m radar.shadow_recover --state shadow-lite/state.json --out shadow-lite/followup.json
       - name: Write workflow health evidence even after failed prerequisites
         if: ${{ always() }}
         env:
           READ_OUTCOME: ${{ steps.read_state.outcome }}
           COLLECT_OUTCOME: ${{ steps.collect.outcome }}
           PERSIST_OUTCOME: ${{ steps.persist_state.outcome }}
+          FOLLOWUP_OUTCOME: ${{ steps.followup.outcome }}
         run: |
           mkdir -p shadow-lite
           python - <<'PY'
@@ -95,6 +110,7 @@ jobs:
               "read_state": os.getenv("READ_OUTCOME"),
               "collect": os.getenv("COLLECT_OUTCOME"),
               "persist_state": os.getenv("PERSIST_OUTCOME"),
+              "followup": os.getenv("FOLLOWUP_OUTCOME"),
               "scanner_status": report.get("status", "NO_REPORT"),
               "reason": report.get("reason"),
               "universe_size": report.get("universe_size"),
@@ -114,5 +130,6 @@ jobs:
             shadow-lite/report.json
             shadow-lite/health.json
             shadow-lite/persistence.json
+            shadow-lite/followup.json
           if-no-files-found: warn
           retention-days: 30
