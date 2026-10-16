@@ -180,6 +180,8 @@ def main():
     p.add_argument("--data-dir", required=True, help="Directory of SYMBOL.csv OHLCV files")
     p.add_argument("--tickers", required=True, help="Text file, one ticker per line")
     p.add_argument("--journal", default="pre50-journal.json")
+    p.add_argument("--live-session", action="store_true", help="Require the latest completed exchange session")
+    p.add_argument("--expected-session", help="Required US trading session YYYY-MM-DD for prospective scan")
     p.add_argument("--output", default="pre50-report.json")
     args = p.parse_args()
     tickers = list(dict.fromkeys(x.strip().upper() for x in
@@ -187,10 +189,22 @@ def main():
     universe, missing = load_universe(args.data_dir, tickers)
     if missing or not universe:
         raise SystemExit(f"DATA_GAP: {len(missing)} missing OHLCV files of {len(tickers)}: {missing[:10]}")
+    expected = args.expected_session
+    if args.live_session:
+        from radar.pre50_sessions import latest_completed_session
+        expected = latest_completed_session()
+        universe = {symbol: [b for b in bars if b["date"] <= expected]
+                    for symbol, bars in universe.items()}
+    if expected and args.command != "backtest":
+        stale = [s for s, bars in universe.items() if not bars or bars[-1]["date"] != expected]
+        if stale:
+            raise SystemExit(f"DATA_GAP: expected completed session {expected}: {stale[:10]}")
     if args.command == "backtest":
         report = backtest(universe)
     elif args.command == "scan":
         report = scan(universe)
+        if expected and report["as_of"] != expected:
+            raise SystemExit(f"DATA_GAP: latest session {report['as_of']} != expected {expected}")
         if report["stale_symbols"] or not report["as_of"]:
             raise SystemExit(f"DATA_GAP: stale symbols {report['stale_symbols'][:10]}")
         path = Path(args.journal)

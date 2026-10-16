@@ -7,17 +7,22 @@ import csv
 import json
 import math
 from pathlib import Path
+from radar.pre50_sessions import latest_completed_session
+from radar.pre50 import load_csv
 
 
-def fetch(symbols, out_dir, period="3y"):
+def fetch(symbols, out_dir, period="3y", now=None):
     import yfinance as yf
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
-    errors = {}
+    completed = latest_completed_session(now)
+    errors, histories = {}, {}
     for symbol in symbols:
         try:
             frame = yf.Ticker(symbol).history(period=period, interval="1d",
                                               auto_adjust=False, actions=False)
+            if frame is not None:
+                frame = frame.loc[[ts.date().isoformat() <= completed for ts in frame.index]]
             if frame is None or len(frame) < 42:
                 raise ValueError("Less than 42 daily bars")
             for ts, row in frame.iterrows():
@@ -27,17 +32,22 @@ def fetch(symbols, out_dir, period="3y"):
                     or lo > min(op, cl) or hi < max(op, cl) or lo > hi):
                     raise ValueError(f"Invalid OHLCV for {symbol} on {ts.date()}")
             path = out / f"{symbol}.csv"
+            path.unlink(missing_ok=True)
+            if frame.index[-1].date().isoformat() != completed:
+                raise ValueError(f"Latest bar does not match completed session {completed}")
             with path.open("w", newline="") as stream:
                 writer = csv.writer(stream)
                 writer.writerow(("date", "open", "high", "low", "close", "volume"))
                 for ts, row in frame.iterrows():
                     writer.writerow([ts.date().isoformat()] + [
                         float(row[k]) for k in ("Open", "High", "Low", "Close", "Volume")])
+            validated = load_csv(path)
+            histories[symbol] = {"rows": len(validated), "latest_session": validated[-1]["date"]}
         except Exception as exc:
             (out / f"{symbol}.csv").unlink(missing_ok=True)
             errors[symbol] = f"{type(exc).__name__}: {exc}"
     return {"requested": len(symbols), "fetched": len(symbols) - len(errors),
-            "missing": errors, "provider": "yfinance_unofficial", "period": period}
+            "missing": errors, "expected_session": completed, "histories": histories, "provider": "yfinance_unofficial", "period": period}
 
 
 def main():
