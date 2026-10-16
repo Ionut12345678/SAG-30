@@ -13,20 +13,35 @@ from radar.pre50_fetch import fetch
 class FakeFrame:
     def __init__(self, rows):
         self.rows = rows
+        end = dt.datetime(2026, 8, 4)
+        dates = []
+        day = end
+        while len(dates) < len(rows):
+            if day.weekday() < 5:
+                dates.append(day)
+            day -= dt.timedelta(days=1)
+        self.index = list(reversed(dates))
+        self.loc = self
+
+    def __getitem__(self, mask):
+        selected = FakeFrame([])
+        selected.rows = [row for row, keep in zip(self.rows, mask) if keep]
+        selected.index = [day for day, keep in zip(self.index, mask) if keep]
+        return selected
 
     def __len__(self):
         return len(self.rows)
 
     def iterrows(self):
-        for index, row in enumerate(self.rows):
-            yield dt.datetime(2026, 8, 1) + dt.timedelta(days=index), row
+        for day, row in zip(self.index, self.rows):
+            yield day, row
 
 
 def run_fetch(rows, directory):
     fake_ticker = types.SimpleNamespace(history=lambda **kwargs: FakeFrame(rows))
     fake_yf = types.SimpleNamespace(Ticker=lambda symbol: fake_ticker)
     with patch.dict(sys.modules, {"yfinance": fake_yf}):
-        return fetch(["SOFI"], directory)
+        return fetch(["SOFI"], directory, now=dt.datetime(2026, 8, 5, 12, tzinfo=dt.timezone.utc))
 
 
 class TestPre50FetchValidation(unittest.TestCase):
