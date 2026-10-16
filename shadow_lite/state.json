@@ -131,10 +131,56 @@
       "source_ts": "2026-10-16T14:20:47.507339+00:00",
       "symbol": "VNTG",
       "type": "FIRST_WATCH"
+    },
+    {
+      "change_pct": 8.5329,
+      "decision": "SHADOW_WATCH_NOT_BUY",
+      "feed": "iex",
+      "first_seen": "2026-10-16T18:18:36.724288+00:00",
+      "price": 7.25,
+      "source": "alpaca_snapshot_latestTrade",
+      "source_age_seconds": 109.61,
+      "source_ts": "2026-10-16T18:16:47.114054+00:00",
+      "symbol": "ALOY",
+      "type": "FIRST_WATCH"
+    },
+    {
+      "change_pct": 7.7367,
+      "decision": "SHADOW_WATCH_NOT_BUY",
+      "feed": "iex",
+      "first_seen": "2026-10-16T18:18:36.724288+00:00",
+      "price": 4.665,
+      "source": "alpaca_snapshot_latestTrade",
+      "source_age_seconds": 67.147,
+      "source_ts": "2026-10-16T18:17:29.576954+00:00",
+      "symbol": "CRBP",
+      "type": "FIRST_WATCH"
+    },
+    {
+      "change_pct": 7.6229,
+      "decision": "SHADOW_WATCH_NOT_BUY",
+      "feed": "iex",
+      "first_seen": "2026-10-16T18:18:36.724288+00:00",
+      "price": 10.73,
+      "source": "alpaca_snapshot_latestTrade",
+      "source_age_seconds": 35.274,
+      "source_ts": "2026-10-16T18:18:01.450215+00:00",
+      "symbol": "HPK",
+      "type": "FIRST_WATCH"
     }
   ],
-  "last_cycle": "2026-10-16T14:29:17.252292+00:00",
+  "last_cycle": "2026-10-16T18:18:36.724288+00:00",
   "tracked": {
+    "ALOY": {
+      "first_change_pct": 8.5329,
+      "first_price": 7.25,
+      "first_seen": "2026-10-16T18:18:36.724288+00:00",
+      "max_observed_pct_after": null,
+      "max_observed_price_after": null,
+      "milestones": [],
+      "source_ts": "2026-10-16T18:16:47.114054+00:00",
+      "status": "ACTIVE"
+    },
     "ARHS": {
       "first_change_pct": 9.4035,
       "first_price": 10.18,
@@ -155,12 +201,22 @@
       "source_ts": "2026-10-15T16:44:46.629932+00:00",
       "status": "CENSORED_OR_WINDOW_COMPLETE"
     },
+    "CRBP": {
+      "first_change_pct": 7.7367,
+      "first_price": 4.665,
+      "first_seen": "2026-10-16T18:18:36.724288+00:00",
+      "max_observed_pct_after": null,
+      "max_observed_price_after": null,
+      "milestones": [],
+      "source_ts": "2026-10-16T18:17:29.576954+00:00",
+      "status": "ACTIVE"
+    },
     "DTI": {
       "first_change_pct": 9.9398,
       "first_price": 1.825,
       "first_seen": "2026-10-16T14:29:17.252292+00:00",
-      "max_observed_pct_after": null,
-      "max_observed_price_after": null,
+      "max_observed_pct_after": 2.7397,
+      "max_observed_price_after": 1.875,
       "milestones": [],
       "source_ts": "2026-10-16T14:21:49.707650+00:00",
       "status": "ACTIVE"
@@ -183,6 +239,16 @@
       "max_observed_price_after": null,
       "milestones": [],
       "source_ts": "2026-10-16T14:26:43.794839+00:00",
+      "status": "ACTIVE"
+    },
+    "HPK": {
+      "first_change_pct": 7.6229,
+      "first_price": 10.73,
+      "first_seen": "2026-10-16T18:18:36.724288+00:00",
+      "max_observed_pct_after": null,
+      "max_observed_price_after": null,
+      "milestones": [],
+      "source_ts": "2026-10-16T18:18:01.450215+00:00",
       "status": "ACTIVE"
     },
     "KNRX": {
