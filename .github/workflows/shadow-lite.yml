@@ -57,6 +57,7 @@ jobs:
           gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/shadow_lite/state.json" \
             -f branch=shadow-lite-state -f sha="$sha" -f content="$content" \
             -f message="Record prospective SHADOW Lite observations for $GITHUB_RUN_ID"
+          printf "true\\n" > shadow-lite/state-published
       - name: Write workflow health evidence even after failed prerequisites
         if: ${{ always() }}
         env:
@@ -71,6 +72,8 @@ jobs:
           report = json.loads(report_path.read_text()) if report_path.exists() else {}
           health = {
               "run_id": os.getenv("GITHUB_RUN_ID"),
+              "trigger_event": os.getenv("GITHUB_EVENT_NAME"),
+              "state_published": pathlib.Path("shadow-lite/state-published").exists(),
               "read_state": os.getenv("READ_OUTCOME"),
               "collect": os.getenv("COLLECT_OUTCOME"),
               "persist_state": os.getenv("PERSIST_OUTCOME"),
