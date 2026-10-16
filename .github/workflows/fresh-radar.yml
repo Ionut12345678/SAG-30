@@ -1,0 +1,96 @@
+name: SAG-30 Fresh Radar SHADOW
+on:
+  schedule:
+    - cron: '*/5 * * * 1-5'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: sag30-fresh-radar-state
+  cancel-in-progress: false
+jobs:
+  observe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Read isolated state
+        id: read_state
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p fresh-out
+          gh api "repos/$GITHUB_REPOSITORY/contents/fresh/state.json?ref=fresh-radar-state" > fresh-out/remote.json
+          python - <<'PY'
+          import base64,json,pathlib
+          p=json.loads(pathlib.Path('fresh-out/remote.json').read_text())
+          pathlib.Path('fresh-out/state.json').write_bytes(base64.b64decode(p['content']))
+          pathlib.Path('fresh-out/state-sha').write_text(p['sha'])
+          PY
+      - name: Collect and evaluate fresh IEX evidence
+        id: collect
+        env:
+          ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+        run: python -m radar.fresh_radar --state fresh-out/state.json --out fresh-out/report.json
+      - name: Persist only when observations exist; verify readback
+        id: persist
+        if: ${{ steps.collect.outcome == 'success' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,pathlib
+          report=json.loads(pathlib.Path('fresh-out/report.json').read_text())
+          pathlib.Path('fresh-out/publish').write_text('1' if report['status'] in ('OBSERVED','PARTIAL_OBSERVED') else '0')
+          PY
+          if [ "$(cat fresh-out/publish)" != 1 ]; then exit 0; fi
+          gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/fresh/state.json" \
+            -f branch=fresh-radar-state -f sha="$(cat fresh-out/state-sha)" \
+            -f content="$(base64 -w0 fresh-out/state.json)" \
+            -f message="Record Fresh Radar cycle $GITHUB_RUN_ID"
+          gh api "repos/$GITHUB_REPOSITORY/contents/fresh/state.json?ref=fresh-radar-state" > fresh-out/readback.json
+          python - <<'PY'
+          import base64,json,pathlib
+          raw=pathlib.Path('fresh-out/state.json').read_bytes()
+          remote=json.loads(pathlib.Path('fresh-out/readback.json').read_text())
+          verified=base64.b64decode(remote['content'])==raw
+          pathlib.Path('fresh-out/persistence.json').write_text(json.dumps({'verified':verified},indent=2))
+          if not verified: raise SystemExit('Remote state mismatch')
+          PY
+      - name: Always write health report
+        if: ${{ always() }}
+        env:
+          READ_OUTCOME: ${{ steps.read_state.outcome }}
+          COLLECT_OUTCOME: ${{ steps.collect.outcome }}
+          PERSIST_OUTCOME: ${{ steps.persist.outcome }}
+        run: |
+          mkdir -p fresh-out
+          python - <<'PY'
+          import json,os,pathlib
+          p=pathlib.Path('fresh-out/report.json')
+          r=json.loads(p.read_text()) if p.exists() else {}
+          health={'run_id':os.getenv('GITHUB_RUN_ID'),'read_state':os.getenv('READ_OUTCOME'),
+                  'collect':os.getenv('COLLECT_OUTCOME'),'persist_state':os.getenv('PERSIST_OUTCOME'),
+                  'status':r.get('status','NO_REPORT'),'coverage':r.get('coverage'),
+                  'new_watches':r.get('new_watches'), 'mode':'SHADOW_ONLY','buy':False}
+          pathlib.Path('fresh-out/health.json').write_text(json.dumps(health,indent=2)+'\n')
+          PY
+      - name: Always upload evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: sag30-fresh-radar-evidence
+          path: |
+            fresh-out/report.json
+            fresh-out/health.json
+            fresh-out/persistence.json
+          if-no-files-found: warn
+          retention-days: 30
