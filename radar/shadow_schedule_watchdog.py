@@ -24,6 +24,8 @@ def needs_recovery(runs, now, stale_minutes=15):
         except (KeyError, ValueError, TypeError):
             continue
         age = (now - created).total_seconds()
+        if run.get("status") in ("queued", "in_progress", "waiting", "pending", "requested"):
+            return False
         if -120 <= age <= stale_minutes * 60:
             return False
     return True
