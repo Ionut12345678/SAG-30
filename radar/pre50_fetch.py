@@ -9,6 +9,13 @@ import math
 from pathlib import Path
 
 
+def valid_ohlcv(values):
+    if not all(math.isfinite(v) and v >= 0 for v in values):
+        return False
+    opening, high, low, close, volume = values
+    return high > 0 and low <= min(opening, close) and high >= max(opening, close)
+
+
 def fetch(symbols, out_dir, period="3y"):
     import yfinance as yf
     out = Path(out_dir)
@@ -22,10 +29,7 @@ def fetch(symbols, out_dir, period="3y"):
                 raise ValueError("Less than 42 daily bars")
             for ts, row in frame.iterrows():
                 values = [float(row[k]) for k in ("Open", "High", "Low", "Close", "Volume")]
-                if not all(math.isfinite(v) and v >= 0 for v in values):
-                    raise ValueError(f"INVALID_OHLCV: {symbol} {ts.date()}")
-                opening, high, low, close, volume = values
-                if high <= 0 or low > min(opening, close) or high < max(opening, close):
+                if not valid_ohlcv(values):
                     raise ValueError(f"INVALID_OHLCV: {symbol} {ts.date()}")
             path = out / f"{symbol}.csv"
             with path.open("w", newline="") as stream:
