@@ -11,7 +11,7 @@ def classify(coverage, outcomes, scan=None):
     )
     scan_ok = (outcomes.get("scan") == "success" and isinstance(scan, dict)
                and isinstance(scan.get("candidates"), list) and bool(scan.get("as_of")))
-    ready = scan_ok and all(
+    ready = scan_ok and isinstance(requested, int) and requested > 0 and isinstance(fetched, int) and 0 <= fetched <= requested and all(
         outcomes.get(key) == "success"
         for key in ("read_state", "fetch", "resolve")
     )
