@@ -70,7 +70,7 @@ jobs:
               "sha256": hashlib.sha256(local).hexdigest(),
               "last_cycle": json.loads(local).get("last_cycle"),
               "tracked_count": len(json.loads(local).get("tracked", {}))
-          }, indent=2) + "\\n")
+          }, indent=2) + "\n")
           if not verified:
               raise SystemExit("SHADOW state readback differs from collected evidence")
           PY
