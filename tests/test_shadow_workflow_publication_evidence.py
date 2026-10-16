@@ -6,6 +6,7 @@ import unittest
 WORKFLOW = pathlib.Path(__file__).resolve().parents[1] / ".github/workflows/shadow-lite.yml"
 
 
+@unittest.skipUnless(WORKFLOW.exists(), "Legacy SHADOW Lite workflow retired")
 class ShadowPublicationEvidenceTests(unittest.TestCase):
     def test_marker_is_written_only_after_remote_put(self):
         workflow = WORKFLOW.read_text()
