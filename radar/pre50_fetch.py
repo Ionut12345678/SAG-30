@@ -5,6 +5,7 @@ Research feed only: coverage is reported; partial/missing histories fail closed.
 import argparse
 import csv
 import json
+import math
 from pathlib import Path
 
 
@@ -19,6 +20,12 @@ def fetch(symbols, out_dir, period="3y"):
                                               auto_adjust=False, actions=False)
             if frame is None or len(frame) < 42:
                 raise ValueError("Less than 42 daily bars")
+            for ts, row in frame.iterrows():
+                op, hi, lo, cl, vol = (float(row[k]) for k in ("Open", "High", "Low", "Close", "Volume"))
+                if (not all(math.isfinite(v) for v in (op, hi, lo, cl, vol))
+                    or min(op, hi, lo, cl) <= 0 or vol < 0
+                    or lo > min(op, cl) or hi < max(op, cl) or lo > hi):
+                    raise ValueError(f"Invalid OHLCV for {symbol} on {ts.date()}")
             path = out / f"{symbol}.csv"
             with path.open("w", newline="") as stream:
                 writer = csv.writer(stream)
@@ -27,6 +34,7 @@ def fetch(symbols, out_dir, period="3y"):
                     writer.writerow([ts.date().isoformat()] + [
                         float(row[k]) for k in ("Open", "High", "Low", "Close", "Volume")])
         except Exception as exc:
+            (out / f"{symbol}.csv").unlink(missing_ok=True)
             errors[symbol] = f"{type(exc).__name__}: {exc}"
     return {"requested": len(symbols), "fetched": len(symbols) - len(errors),
             "missing": errors, "provider": "yfinance_unofficial", "period": period}
