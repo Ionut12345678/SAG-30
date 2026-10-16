@@ -6,7 +6,7 @@ import math
 import os
 from pathlib import Path
 from zoneinfo import ZoneInfo
-from radar.shadow_recover import alpaca_fetch, parse_ts
+from radar.shadow_recover import parse_ts
 
 NY = ZoneInfo("America/New_York")
 TARGETS = (1, 2, 5)
@@ -30,16 +30,24 @@ def evaluate(tracked, fetch, now):
                 if day > first_day and math.isfinite(high) and high > 0:
                     sessions[day] = max(high, sessions.get(day, 0))
             days = sorted(sessions)
+            # Fail closed on missing weekday bars. Holidays can cause false gaps,
+            # but never a false validated T+n session.
+            expected = []
+            cursor = first_day + dt.timedelta(days=1)
+            while cursor <= now.astimezone(NY).date():
+                if cursor.weekday() < 5:
+                    expected.append(cursor)
+                cursor += dt.timedelta(days=1)
             for n in TARGETS:
                 key = f"T+{n}"
-                if len(days) >= n:
-                    day = days[n - 1]
+                if len(expected) >= n and all(day in sessions for day in expected[:n]):
+                    day = expected[n - 1]
                     high = sessions[day]
                     record[key] = {"status": "OBSERVED", "session": day.isoformat(),
                                    "session_high": high,
                                    "max_pct": round((high / price - 1) * 100, 4)}
                 else:
-                    record[key] = {"status": "NOT_MEASURED", "reason": "INSUFFICIENT_SESSIONS_OR_FEED_GAP"}
+                    record[key] = {"status": "NOT_MEASURED", "reason": "INSUFFICIENT_SESSIONS_OR_FEED_GAP_OR_HOLIDAY"}
         except Exception as exc:
             for n in TARGETS:
                 record[f"T+{n}"] = {"status": "DATA_GAP", "reason": type(exc).__name__}
