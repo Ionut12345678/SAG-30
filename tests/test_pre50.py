@@ -1,5 +1,6 @@
 import unittest
 from radar.pre50 import evaluate, backtest, scan, resolve
+from radar.pre50_fetch import valid_ohlcv
 
 
 def bars(n=50, volume=100000):
@@ -45,6 +46,12 @@ class Pre50Tests(unittest.TestCase):
         resolved = resolve(journal, {"AAA": rows})
         self.assertTrue(resolved[0]["resolved"]["hit_50"])
         self.assertFalse(resolved[0]["resolved"]["high_is_executable"])
+
+    def test_yahoo_invalid_daily_ohlcv_rejected(self):
+        self.assertTrue(valid_ohlcv([9, 10, 8, 9.5, 100]))
+        self.assertFalse(valid_ohlcv([9, 10, 8, float('nan'), 100]))
+        self.assertFalse(valid_ohlcv([9, 10, 8, float('inf'), 100]))
+        self.assertFalse(valid_ohlcv([9, 10, 8, 11, 100]))
 
     def test_scan_shadow_no_buy(self):
         report = scan({"AAA": bars()})

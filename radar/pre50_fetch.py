@@ -5,7 +5,15 @@ Research feed only: coverage is reported; partial/missing histories fail closed.
 import argparse
 import csv
 import json
+import math
 from pathlib import Path
+
+
+def valid_ohlcv(values):
+    if not all(math.isfinite(v) and v >= 0 for v in values):
+        return False
+    opening, high, low, close, volume = values
+    return high > 0 and low <= min(opening, close) and high >= max(opening, close)
 
 
 def fetch(symbols, out_dir, period="3y"):
@@ -19,6 +27,10 @@ def fetch(symbols, out_dir, period="3y"):
                                               auto_adjust=False, actions=False)
             if frame is None or len(frame) < 42:
                 raise ValueError("Less than 42 daily bars")
+            for ts, row in frame.iterrows():
+                values = [float(row[k]) for k in ("Open", "High", "Low", "Close", "Volume")]
+                if not valid_ohlcv(values):
+                    raise ValueError(f"INVALID_OHLCV: {symbol} {ts.date()}")
             path = out / f"{symbol}.csv"
             with path.open("w", newline="") as stream:
                 writer = csv.writer(stream)
