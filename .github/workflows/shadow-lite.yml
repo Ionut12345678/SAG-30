@@ -57,6 +57,23 @@ jobs:
           gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/shadow_lite/state.json" \
             -f branch=shadow-lite-state -f sha="$sha" -f content="$content" \
             -f message="Record prospective SHADOW Lite observations for $GITHUB_RUN_ID"
+          # Read back the exact remote bytes before declaring prospective evidence persisted.
+          gh api "repos/$GITHUB_REPOSITORY/contents/shadow_lite/state.json?ref=shadow-lite-state" > shadow-lite/persisted-remote.json
+          python - <<'PY'
+          import base64, hashlib, json, pathlib
+          local = pathlib.Path("shadow-lite/state.json").read_bytes()
+          remote = json.loads(pathlib.Path("shadow-lite/persisted-remote.json").read_text())
+          actual = base64.b64decode(remote["content"])
+          verified = actual == local
+          pathlib.Path("shadow-lite/persistence.json").write_text(json.dumps({
+              "verified": verified, "blob_sha": remote["sha"],
+              "sha256": hashlib.sha256(local).hexdigest(),
+              "last_cycle": json.loads(local).get("last_cycle"),
+              "tracked_count": len(json.loads(local).get("tracked", {}))
+          }, indent=2) + "\\n")
+          if not verified:
+              raise SystemExit("SHADOW state readback differs from collected evidence")
+          PY
           printf "true\\n" > shadow-lite/state-published
       - name: Write workflow health evidence even after failed prerequisites
         if: ${{ always() }}
@@ -74,6 +91,7 @@ jobs:
               "run_id": os.getenv("GITHUB_RUN_ID"),
               "trigger_event": os.getenv("GITHUB_EVENT_NAME"),
               "state_published": pathlib.Path("shadow-lite/state-published").exists(),
+              "state_readback_verified": (json.loads(pathlib.Path("shadow-lite/persistence.json").read_text()).get("verified") is True) if pathlib.Path("shadow-lite/persistence.json").exists() else False,
               "read_state": os.getenv("READ_OUTCOME"),
               "collect": os.getenv("COLLECT_OUTCOME"),
               "persist_state": os.getenv("PERSIST_OUTCOME"),
@@ -95,5 +113,6 @@ jobs:
           path: |
             shadow-lite/report.json
             shadow-lite/health.json
+            shadow-lite/persistence.json
           if-no-files-found: warn
           retention-days: 30
