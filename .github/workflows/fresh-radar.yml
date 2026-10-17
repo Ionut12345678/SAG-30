@@ -51,18 +51,21 @@ jobs:
           report=json.loads(pathlib.Path('fresh-out/report.json').read_text())
           pathlib.Path('fresh-out/publish').write_text('1' if report['status'] in ('OBSERVED','PARTIAL_OBSERVED') else '0')
           PY
-          if [ "$(cat fresh-out/publish)" != 1 ]; then exit 0; fi
+          if [ "$(cat fresh-out/publish)" != 1 ]; then
+            echo 'No market observations: state not published; this is not a successful collection'
+            exit 0
+          fi
           gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/fresh/state.json" \
             -f branch=fresh-radar-state -f sha="$(cat fresh-out/state-sha)" \
             -f content="$(base64 -w0 fresh-out/state.json)" \
             -f message="Record Fresh Radar cycle $GITHUB_RUN_ID"
           gh api "repos/$GITHUB_REPOSITORY/contents/fresh/state.json?ref=fresh-radar-state" > fresh-out/readback.json
           python - <<'PY'
-          import base64,json,pathlib
+          import base64,json,os,pathlib
           raw=pathlib.Path('fresh-out/state.json').read_bytes()
           remote=json.loads(pathlib.Path('fresh-out/readback.json').read_text())
           verified=base64.b64decode(remote['content'])==raw
-          pathlib.Path('fresh-out/persistence.json').write_text(json.dumps({'verified':verified},indent=2))
+          pathlib.Path('fresh-out/persistence.json').write_text(json.dumps({'verified':verified,'run_id':os.environ.get('GITHUB_RUN_ID'),'last_cycle':json.loads(raw).get('last_cycle')},indent=2)+'\n')
           if not verified: raise SystemExit('Remote state mismatch')
           PY
       - name: Always write health report
@@ -80,7 +83,10 @@ jobs:
           health={'run_id':os.getenv('GITHUB_RUN_ID'),'read_state':os.getenv('READ_OUTCOME'),
                   'collect':os.getenv('COLLECT_OUTCOME'),'persist_state':os.getenv('PERSIST_OUTCOME'),
                   'status':r.get('status','NO_REPORT'),'coverage':r.get('coverage'),
-                  'new_watches':r.get('new_watches'), 'mode':'SHADOW_ONLY','buy':False}
+                  'state_published_and_verified': (json.loads(pathlib.Path('fresh-out/persistence.json').read_text()).get('verified') is True) if pathlib.Path('fresh-out/persistence.json').exists() else False,
+                  'reason':r.get('reason'), 'fresh_snapshots':r.get('fresh_snapshots'),
+                  'new_watches':r.get('new_watches'), 'mode':'SHADOW_ONLY','buy':False,
+                  'market_data_collected':r.get('status') in ('OBSERVED','PARTIAL_OBSERVED')}
           pathlib.Path('fresh-out/health.json').write_text(json.dumps(health,indent=2)+'\n')
           PY
       - name: Always upload evidence
