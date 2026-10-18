@@ -41,7 +41,9 @@ def probe_one(name, url, opener=None):
             payload = list(csv.DictReader(io.StringIO(data.decode('utf-8')))) if name == 'stooq_quote' else json.loads(data)
         if name == "nasdaq_screener":
             block = (payload.get("data") or {}) if isinstance(payload, dict) else {}
-            rows = block.get("rows") or ((block.get("table") or {}).get("rows"))
+            rows = block.get("rows")
+            if rows is None:
+                rows = (block.get("table") or {}).get("rows")
             if not isinstance(rows, list):
                 evidence["status"] = "SCHEMA_UNSUPPORTED"
                 return evidence
