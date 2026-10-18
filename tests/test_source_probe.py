@@ -24,6 +24,9 @@ class TestReadOnlyProbe(unittest.TestCase):
     def test_schema_failure(self):
         out=probe_one("nasdaq_screener","https://example.org",opener=lambda *a,**k: FakeResponse({}))
         self.assertEqual(out["status"],"SCHEMA_UNSUPPORTED")
+    def test_nested_nasdaq_response(self):
+        out=probe_one("nasdaq_screener","https://example.org",opener=lambda *a,**k: FakeResponse({"data":{"table":{"rows":[{"symbol":"AAPL"}]}}}))
+        self.assertEqual(out["status"],"REACHABLE_UNTIMESTAMPED")
     def test_invalid_payload(self):
         out=probe_one("stockprices_dev","https://example.org",opener=lambda *a,**k: FakeResponse({"a":1}))
         self.assertEqual(out["status"],"SCHEMA_UNSUPPORTED")
