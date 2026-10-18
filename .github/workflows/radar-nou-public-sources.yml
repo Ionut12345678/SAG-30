@@ -1,0 +1,24 @@
+name: Radar Nou public source diagnostic
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  public-source-read-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Probe two no-login endpoints
+        run: python probe_public_sources.py --out source-evidence.json
+      - name: Upload evidence even if no data
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: radar-nou-public-source-evidence
+          path: source-evidence.json
+          if-no-files-found: warn
