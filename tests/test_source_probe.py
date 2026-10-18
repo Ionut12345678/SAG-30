@@ -27,6 +27,17 @@ class TestReadOnlyProbe(unittest.TestCase):
     def test_nested_nasdaq_response(self):
         out=probe_one("nasdaq_screener","https://example.org",opener=lambda *a,**k: FakeResponse({"data":{"table":{"rows":[{"symbol":"AAPL"}]}}}))
         self.assertEqual(out["status"],"REACHABLE_UNTIMESTAMPED")
+    def test_yahoo_stale_timestamp_not_signal(self):
+        response={"chart":{"result":[{"meta":{"symbol":"AAPL","regularMarketPrice":100.1,"chartPreviousClose":99.0,"regularMarketTime":1600000000}}]}}
+        out=probe_one("yahoo_chart","https://example.org",opener=lambda *a,**k: FakeResponse(response))
+        self.assertEqual(out["status"],"TIMESTAMPED_STALE_OR_FUTURE")
+        self.assertFalse(out["prospective_signal_eligible"])
+        self.assertFalse(out["source_timestamp_verified"])
+        self.assertTrue(out["has_previous_close"])
+    def test_yahoo_missing_reference_rejected(self):
+        response={"chart":{"result":[{"meta":{"regularMarketPrice":100.1,"regularMarketTime":1600000000}}]}}
+        out=probe_one("yahoo_chart","https://example.org",opener=lambda *a,**k: FakeResponse(response))
+        self.assertEqual(out["status"],"SCHEMA_UNSUPPORTED")
     def test_invalid_payload(self):
         out=probe_one("stockprices_dev","https://example.org",opener=lambda *a,**k: FakeResponse({"a":1}))
         self.assertEqual(out["status"],"SCHEMA_UNSUPPORTED")
