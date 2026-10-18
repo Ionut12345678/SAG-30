@@ -1,4 +1,1 @@
-__pycache__/
-*.pyc
-state/
-.env
+*.sqlite\n*.sqlite-wal\n*.sqlite-shm\n__pycache__/\n*.pyc\n.env\n
