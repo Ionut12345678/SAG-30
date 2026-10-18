@@ -1,9 +1,15 @@
-name: Radar Nou public source diagnostic
+name: Radar Nou public source diagnostic (NO SIGNALS)
 on:
+  schedule:
+    # Diagnostic only, every 30m weekdays around US market hours; GitHub cron is best effort.
+    - cron: '0,30 13-21 * * 1-5'
   pull_request:
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: radar-nou-source-diagnostic
+  cancel-in-progress: false
 jobs:
   public-source-read-only:
     runs-on: ubuntu-latest
