@@ -4,6 +4,8 @@ Public website endpoints are not licensed real-time feeds. Missing per-trade
 source timestamps are treated as UNKNOWN, not replaced with retrieval time.
 """
 import argparse
+import csv
+import io
 import json
 import os
 import urllib.error
@@ -14,6 +16,7 @@ from pathlib import Path
 SOURCES = {
     "nasdaq_screener": "https://api.nasdaq.com/api/screener/stocks?tableonly=true&limit=10",
     "stockprices_dev": "https://stockprices.dev/api/stocks/AAPL",
+    "stooq_quote": "https://stooq.com/q/l/?s=aapl.us&f=sd2t2ohlcvnp&h&e=csv",
 }
 MAX_BYTES = 1_000_000
 
@@ -35,9 +38,10 @@ def probe_one(name, url, opener=None):
             if len(data) > MAX_BYTES:
                 evidence["status"] = "OVERSIZE"
                 return evidence
-            payload = json.loads(data)
+            payload = list(csv.DictReader(io.StringIO(data.decode('utf-8')))) if name == 'stooq_quote' else json.loads(data)
         if name == "nasdaq_screener":
-            rows = (payload.get("data") or {}).get("rows") if isinstance(payload, dict) else None
+            block = (payload.get("data") or {}) if isinstance(payload, dict) else {}
+            rows = block.get("rows") or ((block.get("table") or {}).get("rows"))
             if not isinstance(rows, list):
                 evidence["status"] = "SCHEMA_UNSUPPORTED"
                 return evidence
@@ -49,6 +53,12 @@ def probe_one(name, url, opener=None):
                 return evidence
             evidence["records"] = 1
             evidence["example_symbols"] = [str(payload.get("Ticker", "AAPL"))]
+        elif name == "stooq_quote":
+            if not isinstance(payload, list) or not payload or not any("Close" in r or "close" in r for r in payload):
+                evidence["status"] = "SCHEMA_UNSUPPORTED"
+                return evidence
+            evidence["records"] = len(payload)
+            evidence["example_symbols"] = [str(payload[0].get("Symbol","AAPL.US"))]
         else:
             evidence["status"] = "SOURCE_UNSUPPORTED"
             return evidence
