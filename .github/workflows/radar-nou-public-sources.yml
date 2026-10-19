@@ -1,7 +1,7 @@
-name: Radar Nou public source diagnostic (NO SIGNALS)
+name: Radar Nou automatic stock discovery (SHADOW)
 on:
   schedule:
-    # Diagnostic only, every 30m weekdays around US market hours; GitHub cron is best effort.
+    # Automatic discovery, every 30m weekdays around US market hours; cron best effort.
     - cron: '0,30 13-21 * * 1-5'
   pull_request:
   workflow_dispatch:
@@ -19,12 +19,14 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Probe two no-login endpoints
+      - name: Diagnose feed quality
         run: python probe_public_sources.py --out source-evidence.json
+      - name: Search listed stocks for early +5..+10 percent candidates
+        run: python radar_discovery.py --output radar-discovery.json
       - name: Upload evidence even if no data
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: radar-nou-public-source-evidence
-          path: source-evidence.json
+          name: radar-nou-discovery-evidence
+          path: |\n            source-evidence.json\n            radar-discovery.json
           if-no-files-found: warn
