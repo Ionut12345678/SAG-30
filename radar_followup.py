@@ -100,6 +100,7 @@ def main():
     ap=argparse.ArgumentParser()
     ap.add_argument("--state",default="candidate-state.json")
     ap.add_argument("--out",default="candidate-followup.json")
+    ap.add_argument("--snapshot",default=None)
     args=ap.parse_args()
     state_path=Path(args.state)
     try:
@@ -107,8 +108,12 @@ def main():
     except (ValueError,OSError):
         state=valid_state(None)
     try:
-        payload=fetch_payload()
+        if args.snapshot:
+            payload=json.loads(Path(args.snapshot).read_text(encoding="utf-8"))
+        else:
+            payload=fetch_payload()
         state,report=merge_scan(state,payload,datetime.now(timezone.utc))
+        report["same_snapshot_as_discovery"]=bool(args.snapshot)
     except Exception as e:
         report={"status":"SOURCE_ERROR","error_type":type(e).__name__,
           "quality":"UNVERIFIED_WEBSITE_SNAPSHOT","valid_first_watch_signals":0,
