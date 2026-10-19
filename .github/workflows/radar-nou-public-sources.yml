@@ -10,6 +10,7 @@ on:
       - '.github/workflows/radar-nou-public-sources.yml'
       - 'radar_discovery.py'
       - 'radar_followup.py'
+      - 'radar-pulses/**'
   workflow_run:
     workflows: ["Radar Nou schedule heartbeat"]
     types: [completed]
