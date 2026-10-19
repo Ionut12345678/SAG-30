@@ -19,7 +19,7 @@ class CrossSourceTests(unittest.TestCase):
  def test_bounded_sample(self):
   d={"candidates":[{"symbol":"A"+str(i)} for i in range(12)]}
   r=run(d,N,fetch=lambda s:chart(N))
-  self.assertEqual(r["requested"],5)
+  self.assertEqual(r["requested"],12)
   self.assertEqual(r["verified_live_signals"],0)
  def test_feed_failure_no_buy(self):
   def error(s):raise TimeoutError()

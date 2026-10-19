@@ -28,10 +28,12 @@ def audit(state, discovery, followup, at=None):
     ok=bool(discovery.get("scan_status")=="DISCOVERY_ONLY" and
       followup.get("status")=="UNVERIFIED_SCREENING_OBSERVED" and
       followup.get("same_snapshot_as_discovery") is True)
+    duplicate=followup.get("status")=="REPEATED_UNCHANGED_SOURCE"
     return {
        "session":session,"mode":"UNVERIFIED_SHADOW_RESEARCH","valid_buy_signals":0,
        "same_snapshot_as_discovery":bool(followup.get("same_snapshot_as_discovery")),
-       "data_quality_status":"CONSISTENT_UNVERIFIED_SNAPSHOT" if ok else "DATA_GAP_OR_INCONSISTENT",
+       "data_quality_status":"STALE_REPEAT_NO_NEW_QUOTES" if duplicate else ("CONSISTENT_UNVERIFIED_SNAPSHOT" if ok else "DATA_GAP_OR_INCONSISTENT"),
+       "duplicate_source_snapshot":duplicate,
        "tracked_candidates":len(ledger),"candidates_with_later_snapshot":n_followed,
        "candidates_without_later_snapshot":len(ledger)-n_followed,
        "reported_milestones_cumulative":milestones,

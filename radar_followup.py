@@ -4,6 +4,7 @@ This is not a live quote/BUY system. Both 'entry' and follow-up are website
 snapshots captured at retrieval time, not independently timed exchange prints.
 """
 import argparse
+import hashlib
 import json
 import math
 from datetime import datetime, timezone
@@ -42,6 +43,26 @@ def merge_scan(state, payload, at):
         rows,total=get_rows(payload)
         if not rows:
             result["status"]="EMPTY_SOURCE"
+            return state,result
+        # A second retrieval of exactly the same provider prices is NOT new
+        # market evidence. Do not increase follow-ups or milestones.
+        screen_observations=sorted(
+            (str(r.get("symbol") or "").strip().upper(),
+             str(r.get("pctchange") or "").strip(),
+             str(r.get("lastsale") or "").strip())
+            for r in rows if isinstance(r,dict)
+        )
+        fingerprint=hashlib.sha256(
+            json.dumps(screen_observations,separators=(",",":"),ensure_ascii=False).encode("utf-8")
+        ).hexdigest()
+        prior_hash=state.get("last_successful_screen_hash")
+        if fingerprint==prior_hash:
+            result.update(status="REPEATED_UNCHANGED_SOURCE",
+               duplicate_source_snapshot=True,
+               tracked_symbols=len(state["sessions"].get(session,{}) or {}),
+               new_candidates=0,new_reported_milestones=0,
+               source_fingerprint=fingerprint,
+               note="Identical public price data: cannot infer a new quote, no follow-ups recorded.")
             return state,result
         report_rows={}
         for row in rows:
@@ -85,7 +106,9 @@ def merge_scan(state, payload, at):
             existing["milestones_reported"]=sorted(levels)
         # Cap retained sessions and keep most recent by Eastern date.
         for old in sorted(state["sessions"])[:-MAX_SESSIONS]:state["sessions"].pop(old,None)
-        result.update(status="UNVERIFIED_SCREENING_OBSERVED",
+        state["last_successful_screen_hash"]=fingerprint
+        result.update(source_fingerprint=fingerprint,duplicate_source_snapshot=False,
+          status="UNVERIFIED_SCREENING_OBSERVED",
           received_rows=len(rows),parsed_rows=len(report_rows),reported_universe_size=total,
           partial_universe=bool(isinstance(total,int) and total>len(rows)),
           new_candidates=len(new_symbols),tracked_symbols=len(session_map),

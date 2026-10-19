@@ -13,7 +13,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-MAX_CHECKS=5
+MAX_CHECKS=40
 MAX_BYTES=300000
 def inspect_chart(symbol, payload, now):
     out={"symbol":symbol,"source":"Yahoo public chart (unofficial)",
