@@ -11,6 +11,7 @@ on:
       - 'radar_discovery.py'
       - 'radar_followup.py'
       - 'radar_quality_audit.py'
+      - 'radar_cross_source.py'
       - 'radar-pulses/**'
   workflow_run:
     workflows: ["Radar Nou schedule heartbeat"]
@@ -64,6 +65,8 @@ jobs:
         run: python probe_public_sources.py --out source-evidence.json
       - name: Search listed stocks for early +5..+10 percent candidates
         run: python radar_discovery.py --output radar-discovery.json --snapshot nasdaq-snapshot.json
+      - name: Check timestamp and price against independent public chart source
+        run: python radar_cross_source.py --discovery radar-discovery.json --out cross-source-timing.json
       - name: Track candidate outcomes vs later screen snapshots
         run: python radar_followup.py --state candidate-state.json --out candidate-followup.json --snapshot nasdaq-snapshot.json
       - name: Audit quality and follow-up coverage
@@ -85,5 +88,6 @@ jobs:
             nasdaq-snapshot.json
             candidate-followup.json
             radar-quality.json
+            cross-source-timing.json
             candidate-state.json
           if-no-files-found: warn
