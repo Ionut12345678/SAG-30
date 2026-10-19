@@ -66,6 +66,8 @@ jobs:
         run: python radar_discovery.py --output radar-discovery.json --snapshot nasdaq-snapshot.json
       - name: Track candidate outcomes vs later screen snapshots
         run: python radar_followup.py --state candidate-state.json --out candidate-followup.json --snapshot nasdaq-snapshot.json
+      - name: Audit quality and follow-up coverage
+        run: python radar_quality_audit.py --out radar-quality.json
       - name: Persist screening state for next scheduled run
         if: github.event_name != 'pull_request' && hashFiles('candidate-state.json') != ''
         uses: actions/cache/save@v4
@@ -82,5 +84,6 @@ jobs:
             radar-discovery.json
             nasdaq-snapshot.json
             candidate-followup.json
+            radar-quality.json
             candidate-state.json
           if-no-files-found: warn
