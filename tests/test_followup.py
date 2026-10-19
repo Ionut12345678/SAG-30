@@ -14,14 +14,14 @@ class FollowupTests(unittest.TestCase):
         x=state["sessions"]["2026-10-19"]["AAA"]
         self.assertEqual(first,x["first_seen_utc"])
         self.assertEqual(r["new_candidates"],0)
-        self.assertEqual(x["milestones_reported"],[15])
+        self.assertEqual(x["milestones_reported"],[])\n        self.assertEqual(x["milestone_quality"],"UNVERIFIED_SNAPSHOT_NO_ALERT")
         self.assertEqual(x["highest_later_reported_pct"],18.1)
         self.assertEqual(x["followup_count"],1)
         self.assertEqual(r["valid_first_watch_signals"],0)
     def test_multiple_later_thresholds_without_hindsight(self):
         s,_=merge_scan({},payload(("AAA",6)),A)
         s,r=merge_scan(s,payload(("AAA",52)),A+timedelta(minutes=30))
-        self.assertEqual(r["new_reported_milestones"],4)
+        self.assertEqual(r["new_reported_milestones"],0)\n        self.assertEqual(s["sessions"]["2026-10-19"]["AAA"]["highest_later_reported_pct"],52)
         s,r=merge_scan(s,payload(("AAA",45)),A+timedelta(minutes=60))
         self.assertEqual(r["new_reported_milestones"],0)
     def test_no_same_timestamp_followup(self):
