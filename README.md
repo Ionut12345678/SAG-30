@@ -41,3 +41,7 @@ Because GitHub Actions `schedule` has not produced confirmed events in our Oct 1
 ## Consistent screen snapshots
 
 Candidate discovery and subsequent milestone tracking process one identical public Nasdaq response per scan. A quality artifact reports counts, follow-up coverage and data gaps. Source timestamps and market-wide coverage remain unverified; reported milestones are observational only. GitHub native cron and independent hourly pulse fallback are best-effort, not 5-minute guarantees.
+
+## Prospective 5-minute cadence auditing
+
+Each successful, nonempty public screen now records its actual UTC scan timestamp in recovered state. Later valid observations report the elapsed time since the previous successful collection, whether the measured gap met five minutes, and the number of five-minute intervals skipped. An unsuccessful feed does not count as a successful scan. This is measurement **only**: GitHub scheduled executions and the independent ChatGPT pulse do not become guaranteed 5-minute schedulers. The market data remain unverified website snapshots, never actionable BUY signals.
