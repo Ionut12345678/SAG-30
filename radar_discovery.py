@@ -46,7 +46,7 @@ def is_common_stock(name):
     name = str(name or "").lower()
     blocked = ("warrant", "rights", "units", "depositary", "preferred", "preference",
                "etf", "exchange traded fund", "closed end fund")
-    return bool(name.strip()) and not any(term in name for term in blocked)
+    return not any(term in name for term in blocked)
 
 def find_candidates(rows):
     found=[]
