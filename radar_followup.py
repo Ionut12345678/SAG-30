@@ -78,11 +78,10 @@ def merge_scan(state, payload, at):
             existing["last_seen_utc"]=now
             existing["last_reported_pct"]=change
             existing["last_last_sale"]=obs["price"]
-            levels=set(existing.get("milestones_reported",[]))
-            for level in LEVELS:
-                if change>=level and level not in levels:
-                    levels.add(level);new_milestones+=1
-            existing["milestones_reported"]=sorted(levels)
+            # Screener retrieval time is not a quote timestamp. Never promote
+            # repeated website snapshots to confirmed milestones.
+            existing["milestones_reported"]=[]
+            existing["milestone_quality"]="UNVERIFIED_SNAPSHOT_NO_ALERT"
         # Cap retained sessions and keep most recent by Eastern date.
         for old in sorted(state["sessions"])[:-MAX_SESSIONS]:state["sessions"].pop(old,None)
         previous_scan=state.get("last_successful_scan_utc")
@@ -107,7 +106,7 @@ def merge_scan(state, payload, at):
           received_rows=len(rows),parsed_rows=len(report_rows),reported_universe_size=total,
           partial_universe=bool(isinstance(total,int) and total>len(rows)),
           new_candidates=len(new_symbols),tracked_symbols=len(session_map),
-          new_reported_milestones=new_milestones,
+          new_reported_milestones=0,
           sample=[{"symbol":s,"first_reported_pct":session_map[s]["first_reported_pct"],
              "first_seen_utc":session_map[s]["first_seen_utc"]} for s in new_symbols[:40]])
     except (TypeError,ValueError,KeyError,AttributeError):
