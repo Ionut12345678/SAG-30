@@ -13,22 +13,40 @@ concurrency:
 jobs:
   public-source-read-only:
     runs-on: ubuntu-latest
-    timeout-minutes: 4
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Recover previous screening state (main only)
+        if: github.event_name != 'pull_request'
+        uses: actions/cache/restore@v4
+        with:
+          path: candidate-state.json
+          key: radar-nou-candidate-history-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            radar-nou-candidate-history-
       - name: Diagnose feed quality
         run: python probe_public_sources.py --out source-evidence.json
       - name: Search listed stocks for early +5..+10 percent candidates
         run: python radar_discovery.py --output radar-discovery.json
+      - name: Track candidate outcomes vs later screen snapshots
+        run: python radar_followup.py --state candidate-state.json --out candidate-followup.json
+      - name: Persist screening state for next scheduled run
+        if: github.event_name != 'pull_request' && hashFiles('candidate-state.json') != ''
+        uses: actions/cache/save@v4
+        with:
+          path: candidate-state.json
+          key: radar-nou-candidate-history-${{ github.run_id }}-${{ github.run_attempt }}
       - name: Upload evidence even if no data
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: radar-nou-discovery-evidence
+          name: radar-nou-tracked-discovery-evidence
           path: |
             source-evidence.json
             radar-discovery.json
+            candidate-followup.json
+            candidate-state.json
           if-no-files-found: warn
