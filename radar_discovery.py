@@ -117,6 +117,7 @@ def run(payload=None,at=None):
 def main():
     ap=argparse.ArgumentParser()
     ap.add_argument("--output",default="radar-discovery.json")
+    ap.add_argument("--snapshot",default=None)
     a=ap.parse_args()
     result=run()
     Path(a.output).write_text(json.dumps(result,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
