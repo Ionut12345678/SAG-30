@@ -28,5 +28,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: radar-nou-discovery-evidence
-          path: |\n            source-evidence.json\n            radar-discovery.json
+          path: |
+            source-evidence.json
+            radar-discovery.json
           if-no-files-found: warn
