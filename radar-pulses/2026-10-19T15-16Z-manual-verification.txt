@@ -1,0 +1,1 @@
+Independent pulse fallback test at 2026-10-19 15:16 UTC. Read-only Radar Nou trigger verification; no orders.
