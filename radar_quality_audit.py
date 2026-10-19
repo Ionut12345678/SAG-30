@@ -35,6 +35,9 @@ def audit(state, discovery, followup, at=None):
        "tracked_candidates":len(ledger),"candidates_with_later_snapshot":n_followed,
        "candidates_without_later_snapshot":len(ledger)-n_followed,
        "reported_milestones_cumulative":milestones,
+       "seconds_since_previous_success":followup.get("seconds_since_previous_success"),
+       "five_minute_cadence_met":followup.get("five_minute_cadence_met",False),
+       "missed_five_minute_intervals":followup.get("missed_five_minute_intervals"),
        "quote_source_time_verified":False,"full_market_coverage_verified":False,
        "source_quality_issues":gaps,
        "note":"Reported changes are snapshots without verified exchange quote times. Milestones are NOT verified live opportunities."
