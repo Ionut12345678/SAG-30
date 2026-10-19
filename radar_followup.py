@@ -85,6 +85,24 @@ def merge_scan(state, payload, at):
             existing["milestones_reported"]=sorted(levels)
         # Cap retained sessions and keep most recent by Eastern date.
         for old in sorted(state["sessions"])[:-MAX_SESSIONS]:state["sessions"].pop(old,None)
+        previous_scan=state.get("last_successful_scan_utc")
+        if previous_scan:
+            try:
+                previous_dt=datetime.fromisoformat(previous_scan.replace("Z","+00:00"))
+                lag=(at.astimezone(timezone.utc)-previous_dt.astimezone(timezone.utc)).total_seconds()
+                result["seconds_since_previous_success"]=round(lag,1) if lag>0 else None
+                result["five_minute_cadence_met"]=bool(0<lag<=300)
+                result["missed_five_minute_intervals"]=max(0,int((lag-1)//300)) if lag>0 else None
+            except (ValueError,TypeError,AttributeError):
+                result["seconds_since_previous_success"]=None
+                result["five_minute_cadence_met"]=False
+                result["missed_five_minute_intervals"]=None
+        else:
+            result["seconds_since_previous_success"]=None
+            result["five_minute_cadence_met"]=False
+            result["missed_five_minute_intervals"]=None
+        if not previous_scan or result["seconds_since_previous_success"] is None or result["seconds_since_previous_success"]>0:
+            state["last_successful_scan_utc"]=now
         result.update(status="UNVERIFIED_SCREENING_OBSERVED",
           received_rows=len(rows),parsed_rows=len(report_rows),reported_universe_size=total,
           partial_universe=bool(isinstance(total,int) and total>len(rows)),
