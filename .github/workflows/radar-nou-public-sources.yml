@@ -21,8 +21,8 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: radar-nou-source-diagnostic
-  cancel-in-progress: false
+  group: radar-nou-source-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'production' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   public-source-read-only:
     if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
