@@ -1,9 +1,15 @@
 name: Radar Nou automatic stock discovery (SHADOW)
 on:
   schedule:
-    # Automatic discovery, every 30m weekdays around US market hours; cron best effort.
-    - cron: '0,30 13-21 * * 1-5'
+    # Off-peak slots: avoid :00 congestion. Best-effort UTC, not exact timing.
+    - cron: '17,47 13-21 * * 1-5'
   pull_request:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/radar-nou-public-sources.yml'
+      - 'radar_discovery.py'
+      - 'radar_followup.py'
   workflow_dispatch:
 permissions:
   contents: read
@@ -27,6 +33,8 @@ jobs:
           key: radar-nou-candidate-history-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
             radar-nou-candidate-history-
+      - name: Record trigger and actual UTC runtime
+        run: echo "trigger=${{ github.event_name }} started_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
       - name: Diagnose feed quality
         run: python probe_public_sources.py --out source-evidence.json
       - name: Search listed stocks for early +5..+10 percent candidates
