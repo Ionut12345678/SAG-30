@@ -10,6 +10,10 @@ on:
       - '.github/workflows/radar-nou-public-sources.yml'
       - 'radar_discovery.py'
       - 'radar_followup.py'
+  workflow_run:
+    workflows: ["Radar Nou schedule heartbeat"]
+    types: [completed]
+    branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
@@ -18,6 +22,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   public-source-read-only:
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
@@ -34,7 +39,10 @@ jobs:
           restore-keys: |
             radar-nou-candidate-history-
       - name: Record trigger and actual UTC runtime
-        run: echo "trigger=${{ github.event_name }} started_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+        run: |
+          echo "trigger=${{ github.event_name }} started_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          echo "upstream_heartbeat_id=${{ github.event.workflow_run.id || 'none' }}"
+
       - name: Audit persisted state readback
         run: |
           python - <<'PY'
