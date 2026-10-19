@@ -9,6 +9,7 @@ import math
 import re
 import urllib.error
 import urllib.request
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -67,18 +68,28 @@ def find_candidates(rows):
     found.sort(key=lambda x:(-x["reported_change_pct"],x["symbol"]))
     return found[:MAX_CANDIDATES],eligible,malformed,len(found)
 
-def fetch_payload(opener=None):
+def fetch_payload(opener=None, sleeper=None, attempts=3):
     opener = opener or urllib.request.urlopen
     req=urllib.request.Request(SOURCE,headers={
         "Accept":"application/json",
         "User-Agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/122 Safari/537.36",
         "Referer":"https://www.nasdaq.com/",
     })
-    with opener(req,timeout=20) as response:
-        data=response.read(MAX_BYTES+1)
-    if len(data)>MAX_BYTES:
-        raise ValueError("Listing response too large")
-    return json.loads(data)
+    sleeper = sleeper or time.sleep
+    if not 1 <= attempts <= 3:
+        raise ValueError("Invalid retry attempts")
+    for attempt in range(attempts):
+        try:
+            with opener(req,timeout=20) as response:
+                data=response.read(MAX_BYTES+1)
+            if len(data)>MAX_BYTES:
+                raise ValueError("Listing response too large")
+            return json.loads(data)
+        except (urllib.error.HTTPError, urllib.error.URLError,TimeoutError,OSError):
+            if attempt == attempts-1:
+                raise
+            sleeper(2*(attempt+1))
+
 
 def run(payload=None,at=None):
     at = at or datetime.now(timezone.utc)
