@@ -1,0 +1,22 @@
+name: Radar Nou schedule heartbeat
+on:
+  schedule:
+    # Independent, staggered UTC heartbeat; GitHub cron is best-effort.
+    - cron: '7,37 13-21 * * 1-5'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/radar-nou-heartbeat.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  heartbeat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Log event and actual execution time
+        run: |
+          echo "heartbeat_event=${{ github.event_name }}"
+          echo "heartbeat_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          echo "heartbeat_run_id=${{ github.run_id }}"
