@@ -35,6 +35,21 @@ jobs:
             radar-nou-candidate-history-
       - name: Record trigger and actual UTC runtime
         run: echo "trigger=${{ github.event_name }} started_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+      - name: Audit persisted state readback
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path("candidate-state.json")
+          if not p.exists():
+              print("STATE_READBACK=NO_PREVIOUS_STATE")
+          else:
+              state = json.loads(p.read_text())
+              sessions = state.get("sessions", {})
+              counts = {k: len(v) for k, v in sessions.items() if isinstance(v, dict)}
+              print("STATE_READBACK=RESTORED")
+              print("RESTORED_SESSION_SYMBOL_COUNTS=" + json.dumps(counts, sort_keys=True))
+          PY
       - name: Diagnose feed quality
         run: python probe_public_sources.py --out source-evidence.json
       - name: Search listed stocks for early +5..+10 percent candidates
