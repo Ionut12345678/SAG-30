@@ -33,3 +33,7 @@ Sample JSON feed contract (sample is **synthetic**, not a live price):
 4. Complete five genuinely observed sessions with market-wide denominators and post-detection follow-ups.
 
 **Never create live signals from the sample feed.**
+
+## Independent pulse fallback (hourly)
+
+Because GitHub Actions `schedule` has not produced confirmed events in our Oct 19 audit, the read-only scanner also listens to versioned files added in `radar-pulses/` on the default branch. A separate scheduled ChatGPT task can write one unique, tiny file per hourly pulse (only during US trading-day monitoring hours). GitHub interprets this as a `push` event and triggers the scanning workflow, even when GitHub's own cron fails. This is a fallback and cannot guarantee a 5-minute or 30-minute frequency. Each pulse creates a trivial commit; no BUY or broker access. Monitor both the task result and GitHub run. The task depends on the GitHub app remaining connected and permissioned.
