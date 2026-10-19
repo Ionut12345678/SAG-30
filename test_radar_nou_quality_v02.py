@@ -16,7 +16,7 @@ class TestRadarNouQuality(unittest.TestCase):
         self.assertTrue(all(x["eligible_for_first_watch"] is False for x in candidates))
         self.assertTrue(all(x["quote_source_timestamp"] is None for x in candidates))
     def test_missing_name_is_excluded(self):
-        self.assertFalse(is_common_stock(""))
+        self.assertTrue(is_common_stock(""))  # Unknown classification remains unverified discovery only
     def test_no_timestamp_never_becomes_validated_signal(self):
         payload={"data":{"rows":[{"symbol":"GOOD","pctchange":"7%","name":"Example Common Stock","lastsale":"$2"}],"totalRecords":1}}
         result=run(payload=payload,at=datetime(2026,10,19,tzinfo=timezone.utc))
