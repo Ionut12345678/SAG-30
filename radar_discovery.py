@@ -130,7 +130,19 @@ def main():
     ap.add_argument("--output",default="radar-discovery.json")
     ap.add_argument("--snapshot",default=None)
     a=ap.parse_args()
-    result=run()
+    if a.snapshot:
+        snapshot_path=Path(a.snapshot)
+        snapshot_path.unlink(missing_ok=True)
+        try:
+            payload=fetch_payload()
+            snapshot_path.write_text(json.dumps(payload,ensure_ascii=False)+"\n",encoding="utf-8")
+            result=run(payload=payload)
+        except (ValueError,KeyError,TypeError,urllib.error.HTTPError,urllib.error.URLError,TimeoutError,OSError) as exc:
+            snapshot_path.unlink(missing_ok=True)
+            result=run(payload={"__fetch_error__":type(exc).__name__})
+            result["source_fetch_error"]=type(exc).__name__
+    else:
+        result=run()
     Path(a.output).write_text(json.dumps(result,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     print(json.dumps({"status":result["scan_status"],
         "rows":result["rows_received"],
