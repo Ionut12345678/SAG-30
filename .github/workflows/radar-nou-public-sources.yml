@@ -10,6 +10,7 @@ on:
       - '.github/workflows/radar-nou-public-sources.yml'
       - 'radar_discovery.py'
       - 'radar_followup.py'
+      - 'radar_quality_audit.py'
       - 'radar-pulses/**'
   workflow_run:
     workflows: ["Radar Nou schedule heartbeat"]
@@ -62,9 +63,9 @@ jobs:
       - name: Diagnose feed quality
         run: python probe_public_sources.py --out source-evidence.json
       - name: Search listed stocks for early +5..+10 percent candidates
-        run: python radar_discovery.py --output radar-discovery.json
+        run: python radar_discovery.py --output radar-discovery.json --snapshot nasdaq-snapshot.json
       - name: Track candidate outcomes vs later screen snapshots
-        run: python radar_followup.py --state candidate-state.json --out candidate-followup.json
+        run: python radar_followup.py --state candidate-state.json --out candidate-followup.json --snapshot nasdaq-snapshot.json
       - name: Persist screening state for next scheduled run
         if: github.event_name != 'pull_request' && hashFiles('candidate-state.json') != ''
         uses: actions/cache/save@v4
@@ -79,6 +80,7 @@ jobs:
           path: |
             source-evidence.json
             radar-discovery.json
+            nasdaq-snapshot.json
             candidate-followup.json
             candidate-state.json
           if-no-files-found: warn
