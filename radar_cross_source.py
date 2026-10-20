@@ -13,7 +13,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-MAX_CHECKS=5
+MAX_CHECKS=25
 MAX_BYTES=300000
 def inspect_chart(symbol, payload, now):
     out={"symbol":symbol,"source":"Yahoo public chart (unofficial)",
@@ -31,11 +31,11 @@ def inspect_chart(symbol, payload, now):
         source_dt=datetime.fromtimestamp(epoch,timezone.utc)
         age=(now-source_dt).total_seconds()
         eastern=source_dt.astimezone(ZoneInfo("America/New_York"))
-        out.update(source_ts_utc=source_dt.isoformat(),retrieval_utc=now.isoformat(),
+        out.update(observed_price=price,reference_close=close,source_ts_utc=source_dt.isoformat(),retrieval_utc=now.isoformat(),
             age_seconds=round(age,1),reported_pct_vs_yahoo_reference=round((price/close-1)*100,3),
             source_regular_session_date=eastern.date().isoformat())
-        if age<0:out["status"]="FUTURE_TIMESTAMP"
-        elif age>120:out["status"]="STALE_TIMESTAMP"
+        if age< -30:out["status"]="FUTURE_TIMESTAMP"
+        elif age>300:out["status"]="STALE_TIMESTAMP"
         else:out["status"]="RECENT_VENDOR_TIMESTAMP_UNVERIFIED"
         out["source_timestamp_verified_by_exchange"]=False
     except (ValueError,TypeError,KeyError,IndexError,OverflowError,AttributeError):
