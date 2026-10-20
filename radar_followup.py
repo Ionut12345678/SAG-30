@@ -169,7 +169,7 @@ def main():
           "quality":"UNVERIFIED_WEBSITE_SNAPSHOT","valid_first_watch_signals":0,
           "buy_enabled":False,"new_candidates":0}
     # Only write a state snapshot when fetch + schema processed successfully.
-    if report["status"]=="UNVERIFIED_SCREENING_OBSERVED":
+    if report["status"] in ("UNVERIFIED_SCREENING_OBSERVED","DUPLICATE_SOURCE_SNAPSHOT"):
         state_path.write_text(json.dumps(state,indent=2,sort_keys=True)+"\n",encoding="utf-8")
     Path(args.out).write_text(json.dumps(report,indent=2,sort_keys=True)+"\n",encoding="utf-8")
     print(json.dumps({k:report.get(k) for k in ["status","error_type","new_candidates","tracked_symbols",
