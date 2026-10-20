@@ -26,6 +26,13 @@ class FollowupTests(unittest.TestCase):
         self.assertEqual(s["sessions"]["2026-10-19"]["AAA"]["highest_later_reported_pct"],52)
         s,r=merge_scan(s,payload(("AAA",45)),A+timedelta(minutes=60))
         self.assertEqual(r["new_reported_milestones"],0)
+    def test_return_is_from_first_observed_price_not_daily_pct(self):
+        s,_=merge_scan({},payload(("AAA",7)),A)
+        later={"data":{"rows":[{"symbol":"AAA","pctchange":"52%","lastsale":"$12.50"}],"totalRecords":1}}
+        s,r=merge_scan(s,later,A+timedelta(minutes=30))
+        self.assertEqual(r["return_from_first_observation"][0]["return_pct"],25.0)
+        self.assertFalse(r["return_from_first_observation"][0]["tradable_entry_verified"])
+        self.assertEqual(r["new_reported_milestones"],0)
     def test_no_same_timestamp_followup(self):
         s,_=merge_scan({},payload(("AAA",7)),A)
         s,r=merge_scan(s,payload(("AAA",52)),A)
