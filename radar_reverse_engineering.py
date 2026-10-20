@@ -59,7 +59,16 @@ def main():
     if not isinstance(cases,list):
         raise ValueError("Expected a list of cases")
     results=[evaluate(str(c.get("symbol","")),c.get("bars",[])) for c in cases]
-    Path(args.output).write_text(json.dumps({"results":results,"evaluated":sum(r["status"]=="HISTORICAL_EVALUATED" for r in results)},indent=2)+"\n",encoding="utf-8")
+    evaluated=[r for r in results if r["status"]=="HISTORICAL_EVALUATED"]
+    summary={"cases":len(results),"evaluated":len(evaluated),
+             "rejected":len(results)-len(evaluated),
+             "hits_from_first_5_to_10_observation":{},
+             "false_winners_no_15pct":sum(not r["thresholds"].get("15") for r in evaluated)}
+    for level in (15,20,30,50):
+        count=sum(str(level) in r["thresholds"] for r in evaluated)
+        summary["hits_from_first_5_to_10_observation"][str(level)]={
+            "count":count,"rate_pct":round(100*count/len(evaluated),2) if evaluated else None}
+    Path(args.output).write_text(json.dumps({"results":results,"summary":summary},indent=2)+"\\n",encoding="utf-8")
     print(json.dumps({"cases":len(results),"evaluated":sum(r["status"]=="HISTORICAL_EVALUATED" for r in results)}))
 if __name__=="__main__":
     main()
