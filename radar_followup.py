@@ -61,6 +61,17 @@ def merge_scan(state, payload, at):
         for sym,obs in sorted(report_rows.items()):
             change=obs["pct"]
             existing=session_map.get(sym)
+            # Reuse the earliest observation from retained prior sessions.
+            # Do not silently reset a symbol's baseline at the day boundary.
+            if existing is None:
+                for older_session in sorted(state["sessions"]):
+                    if older_session >= session:
+                        break
+                    old_map=state["sessions"][older_session]
+                    if isinstance(old_map,dict) and isinstance(old_map.get(sym),dict):
+                        existing=old_map[sym]
+                        session_map[sym]=existing
+                        break
             if existing is None:
                 if not (5<=change<=10): continue
                 if len(session_map)>=MAX_SYMBOLS: continue
