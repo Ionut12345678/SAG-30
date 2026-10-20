@@ -6,6 +6,7 @@ snapshots captured at retrieval time, not independently timed exchange prints.
 import argparse
 import json
 import math
+import hashlib
 from datetime import datetime, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -53,6 +54,12 @@ def merge_scan(state, payload, at):
             # A symbol may occur twice: keep first occurrence; do not cherry-pick.
             if symbol not in report_rows:
                 report_rows[symbol]={"pct":change,"price":parse_price(row.get("lastsale"))}
+        fingerprint=hashlib.sha256(json.dumps(report_rows,sort_keys=True).encode()).hexdigest()
+        if state.get("last_universe_fingerprint")==fingerprint:
+            result["status"]="DUPLICATE_SOURCE_SNAPSHOT"
+            result["explanation"]="Unchanged screener prices are not a new observation"
+            return state,result
+        state["last_universe_fingerprint"]=fingerprint
         session_map=state["sessions"].setdefault(session,{})
         if not isinstance(session_map,dict):session_map={};state["sessions"][session]=session_map
         new_symbols=[]
