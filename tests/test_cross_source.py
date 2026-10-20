@@ -10,6 +10,8 @@ class CrossSourceTests(unittest.TestCase):
   self.assertEqual(r["status"],"RECENT_VENDOR_TIMESTAMP_UNVERIFIED")
   self.assertFalse(r["eligible_for_first_watch"])
   self.assertFalse(r["source_timestamp_verified_by_exchange"])
+  self.assertEqual(r["observed_price"],10.6)
+  self.assertEqual(r["reference_close"],10.0)
  def test_stale_source(self):
   r=inspect_chart("ABC",chart(N-timedelta(minutes=15)),N)
   self.assertEqual(r["status"],"STALE_TIMESTAMP")
