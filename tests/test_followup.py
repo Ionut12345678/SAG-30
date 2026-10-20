@@ -47,6 +47,22 @@ class FollowupTests(unittest.TestCase):
         s,r=merge_scan(s,payload(("AAA",52)),A)
         self.assertEqual(s["sessions"]["2026-10-19"]["AAA"]["followup_count"],0)
         self.assertEqual(r["new_reported_milestones"],0)
+    def test_identical_source_snapshot_is_not_followup(self):
+        first=payload(("AAA",7))
+        s,_=merge_scan({},first,A)
+        before=s["sessions"]["2026-10-19"]["AAA"].copy()
+        s,r=merge_scan(s,first,A+timedelta(minutes=30))
+        self.assertEqual(r["status"],"DUPLICATE_SOURCE_SNAPSHOT")
+        self.assertEqual(s["sessions"]["2026-10-19"]["AAA"],before)
+        self.assertEqual(r["return_from_first_observation"],[])
+    def test_changed_price_creates_unverified_comparison(self):
+        s,_=merge_scan({},payload(("AAA",7)),A)
+        changed={"data":{"rows":[{"symbol":"AAA","pctchange":"28%","lastsale":"$12.50"}],"totalRecords":1}}
+        s,r=merge_scan(s,changed,A+timedelta(minutes=30))
+        self.assertEqual(r["comparison_count"],1)
+        self.assertEqual(r["unverified_return_threshold_counts"]["20"],1)
+        self.assertEqual(r["unverified_return_threshold_counts"]["30"],0)
+        self.assertEqual(r["valid_first_watch_signals"],0)
     def test_missing_feed_preserves_state(self):
         s,_=merge_scan({},payload(("AAA",7)),A)
         old=s.copy()
