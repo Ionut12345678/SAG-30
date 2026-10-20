@@ -37,7 +37,7 @@ def merge_scan(state, payload, at):
       "source":"Nasdaq public screener","quality":"UNVERIFIED_WEBSITE_SNAPSHOT",
       "quote_timestamp_verified":False,"real_time_verified":False,"buy_enabled":False,
       "valid_first_watch_signals":0,"new_candidates":0,"tracked_symbols":0,
-      "new_reported_milestones":0,"return_from_first_observation":[],"sample":[],"previous_state_loaded":bool(state["sessions"])}
+      "new_reported_milestones":0,"return_from_first_observation":[],"comparison_count":0,"unverified_return_threshold_counts":{"15":0,"20":0,"30":0,"50":0},"sample":[],"previous_state_loaded":bool(state["sessions"])}
     try:
         rows,total=get_rows(payload)
         if not rows:
@@ -130,6 +130,9 @@ def merge_scan(state, payload, at):
           new_candidates=len(new_symbols),tracked_symbols=len(session_map),
           new_reported_milestones=0,
           return_from_first_observation=comparisons,
+          comparison_count=len(comparisons),
+          unverified_return_threshold_counts={str(level):sum(
+              c["return_pct"]>=level for c in comparisons) for level in LEVELS},
           sample=[{"symbol":s,"first_reported_pct":session_map[s]["first_reported_pct"],
              "first_seen_utc":session_map[s]["first_seen_utc"]} for s in new_symbols[:40]])
     except (TypeError,ValueError,KeyError,AttributeError):
@@ -163,6 +166,6 @@ def main():
         state_path.write_text(json.dumps(state,indent=2,sort_keys=True)+"\n",encoding="utf-8")
     Path(args.out).write_text(json.dumps(report,indent=2,sort_keys=True)+"\n",encoding="utf-8")
     print(json.dumps({k:report.get(k) for k in ["status","error_type","new_candidates","tracked_symbols",
-        "new_reported_milestones","valid_first_watch_signals"]}))
+        "new_reported_milestones","valid_first_watch_signals","comparison_count","unverified_return_threshold_counts"]}))
 
 if __name__=="__main__":main()
