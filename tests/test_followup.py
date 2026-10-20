@@ -63,6 +63,29 @@ class FollowupTests(unittest.TestCase):
         self.assertEqual(r["unverified_return_threshold_counts"]["20"],1)
         self.assertEqual(r["unverified_return_threshold_counts"]["30"],0)
         self.assertEqual(r["valid_first_watch_signals"],0)
+    def test_cli_persists_state_between_separate_processes(self):
+        import json
+        import subprocess
+        import sys
+        import tempfile
+        from pathlib import Path
+        script=Path(__file__).resolve().parents[1]/"radar_followup.py"
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder)
+            state=root/"state.json"
+            snapshot=root/"snapshot.json"
+            output=root/"report.json"
+            snapshot.write_text(json.dumps(payload(("AAA",7))),encoding="utf-8")
+            cmd=[sys.executable,str(script),"--state",str(state),"--out",str(output),"--snapshot",str(snapshot)]
+            subprocess.run(cmd,check=True,capture_output=True,text=True)
+            first=json.loads(state.read_text(encoding="utf-8"))
+            self.assertEqual(len(first["sessions"]),1)
+            subprocess.run(cmd,check=True,capture_output=True,text=True)
+            second=json.loads(state.read_text(encoding="utf-8"))
+            report=json.loads(output.read_text(encoding="utf-8"))
+            self.assertEqual(report["status"],"DUPLICATE_SOURCE_SNAPSHOT")
+            self.assertEqual(second["sessions"],first["sessions"])
+            self.assertEqual(second["last_universe_fingerprint"],first["last_universe_fingerprint"])
     def test_missing_feed_preserves_state(self):
         s,_=merge_scan({},payload(("AAA",7)),A)
         old=s.copy()
