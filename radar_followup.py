@@ -37,7 +37,7 @@ def merge_scan(state, payload, at):
       "source":"Nasdaq public screener","quality":"UNVERIFIED_WEBSITE_SNAPSHOT",
       "quote_timestamp_verified":False,"real_time_verified":False,"buy_enabled":False,
       "valid_first_watch_signals":0,"new_candidates":0,"tracked_symbols":0,
-      "new_reported_milestones":0,"sample":[],"previous_state_loaded":bool(state["sessions"])}
+      "new_reported_milestones":0,"return_from_first_observation":[],"sample":[],"previous_state_loaded":bool(state["sessions"])}
     try:
         rows,total=get_rows(payload)
         if not rows:
@@ -57,6 +57,7 @@ def merge_scan(state, payload, at):
         if not isinstance(session_map,dict):session_map={};state["sessions"][session]=session_map
         new_symbols=[]
         new_milestones=0
+        comparisons=[]
         for sym,obs in sorted(report_rows.items()):
             change=obs["pct"]
             existing=session_map.get(sym)
@@ -78,6 +79,16 @@ def merge_scan(state, payload, at):
             existing["last_seen_utc"]=now
             existing["last_reported_pct"]=change
             existing["last_last_sale"]=obs["price"]
+            baseline_price=parse_price(existing.get("first_last_sale"))
+            later_price=obs["price"]
+            if baseline_price is not None and later_price is not None:
+                ret=round((later_price/baseline_price-1)*100,3)
+                existing["last_return_from_first_observation_pct"]=ret
+                comparisons.append({"symbol":sym,"first_seen_utc":first,
+                    "first_price":baseline_price,"later_seen_utc":now,
+                    "later_price":later_price,"return_pct":ret,
+                    "quality":"UNVERIFIED_WEBSITE_SNAPSHOT",
+                    "tradable_entry_verified":False})
             # Screener retrieval time is not a quote timestamp. Never promote
             # repeated website snapshots to confirmed milestones.
             existing["milestones_reported"]=[]
@@ -107,6 +118,7 @@ def merge_scan(state, payload, at):
           partial_universe=bool(isinstance(total,int) and total>len(rows)),
           new_candidates=len(new_symbols),tracked_symbols=len(session_map),
           new_reported_milestones=0,
+          return_from_first_observation=comparisons,
           sample=[{"symbol":s,"first_reported_pct":session_map[s]["first_reported_pct"],
              "first_seen_utc":session_map[s]["first_seen_utc"]} for s in new_symbols[:40]])
     except (TypeError,ValueError,KeyError,AttributeError):
