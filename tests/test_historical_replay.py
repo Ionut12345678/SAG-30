@@ -27,6 +27,13 @@ class HistoricalReplayTests(unittest.TestCase):
         self.assertNotIn("50",r["hits_from_proxy_entry"])
     def test_no_signal_no_cherry_pick(self):
         self.assertEqual(replay("NO",bars([10,11.5,13,15]),10)["status"],"NO_EARLY_WINDOW")
+    def test_gap_above_window_is_recorded_as_missed_not_fake_entry(self):
+        b=bars([12.0,13.0,15.0,17.0,19.0])
+        r=replay("GAP",b,10)
+        self.assertEqual(r["status"],"NO_EARLY_WINDOW")
+        self.assertTrue(r["gap_above_10pct_at_first_bar"])
+        self.assertTrue(r["missed_20pct_runner"])
+        self.assertEqual(summarize([r])["missed_20pct_runners_without_5to10_entry"],1)
     def test_malformed_time_rejected(self):
         b=bars([10,10.7,10.8,12])
         b[2]["ts"]=b[1]["ts"]
