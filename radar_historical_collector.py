@@ -16,12 +16,18 @@ from zoneinfo import ZoneInfo
 from radar_historical_replay import replay,summarize
 
 # Frozen before evaluating this cohort; not a statistical performance sample.
-COHORT=("SAIQ","MYGN","VOGX","IRLA","LRMR","FISN","ARQQ","CHPT",
-        "RUN","SGMT","CCCC","ATOS","ALOY","NFE","KXIN","OPTH")
+COHORT=(
+    "SAIQ","MYGN","VOGX","IRLA","LRMR","FISN","ARQQ","CHPT",
+    "RUN","SGMT","CCCC","ATOS","ALOY","NFE","KXIN","OPTH",
+    "OIO","FFR","ARMP","GMHS","BHST","LVLU","MODD","GRNT",
+    "MTDR","ATNM","NOMA","HPK","ALXO","NOG","SM","KGEI",
+    "SOUN","PLTR","NVDA","AMD","IONQ","RGTI","QBTS","MARA",
+    "RIOT","SOFI","HIMS","UPST","RKLB","LUNR","ASTS","ACHR"
+)
 EAST=ZoneInfo("America/New_York")
 def fetch(symbol,opener=None):
     opener=opener or urllib.request.urlopen
-    url="https://query1.finance.yahoo.com/v8/finance/chart/"+urllib.parse.quote(symbol,safe="")+"?interval=5m&range=5d&includePrePost=false"
+    url="https://query1.finance.yahoo.com/v8/finance/chart/"+urllib.parse.quote(symbol,safe="")+"?interval=5m&range=1mo&includePrePost=true"
     req=urllib.request.Request(url,headers={"User-Agent":"Mozilla/5.0","Accept":"application/json"})
     with opener(req,timeout=9) as response:data=response.read(500001)
     if len(data)>500000:raise ValueError("oversized")
