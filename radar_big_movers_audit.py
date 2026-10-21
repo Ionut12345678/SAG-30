@@ -15,7 +15,7 @@ from collections import Counter
 from pathlib import Path
 
 SOURCE=("https://raw.githubusercontent.com/willhjw/big_movers/"
-        "54d4ca613b78c7fc14e5d1067dc8d0671407896e/big_movers_result.csv")
+        "8ccb831aca1cda6a5d01471f7968e11552d88007/big_movers_result.csv")
 MAX_BYTES=250000
 
 def load_csv(data):
