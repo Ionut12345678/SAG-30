@@ -9,11 +9,16 @@ THRESHOLDS=(15,20,30,50)
 def reconcile(state,feed):
     state=json.loads(json.dumps(state)) if isinstance(state,dict) else {}
     tracked=state.setdefault("symbols",{})
-    output={"status":"VENDOR_QUOTE_OBSERVATIONS","source":"Yahoo unofficial chart",
+    provider=feed.get("provider","Yahoo public chart (unofficial)") if isinstance(feed,dict) else "Unknown"
+    output={"status":"VENDOR_QUOTE_OBSERVATIONS","source":provider,
             "exchange_verified":False,"buy_enabled":False,"new_baselines":0,
             "new_comparisons":0,"repeats_skipped":0,"stale_skipped":0,
             "invalid_skipped":0,"outcomes":[],"threshold_counts":{str(n):0 for n in THRESHOLDS}}
     rows=feed.get("results",[]) if isinstance(feed,dict) else []
+    if isinstance(feed,dict) and feed.get("status")=="MISSING_API_KEY":
+        output["status"]="MISSING_API_KEY"
+        output["tracked_symbols"]=len(tracked)
+        return state,output
     for row in rows:
         if not isinstance(row,dict):continue
         sym=row.get("symbol")
