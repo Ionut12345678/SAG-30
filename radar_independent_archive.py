@@ -99,7 +99,8 @@ def main():
     # split. Remove its fields to prevent accidental misinterpretation.
     for field in ("train_before","holdout_from","train","holdout"):
         summary.pop(field,None)
-    summary.update({"data_origin":f"https://github.com/willhjw/big_movers/tree/{UPSTREAM}/collected_stocks",
+    summary.update({"source":"Big Movers public collected_stocks OHLCV CSV",
+      "data_origin":f"https://github.com/willhjw/big_movers/tree/{UPSTREAM}/collected_stocks",
       "randomization":"fixed SHA256 of stock filename, independent of winner labels",
       "total_archive_files":total_files,"sampled_files":len(selected),
       "errors":errors,"upstream_is_not_point_in_time_universe":True,
