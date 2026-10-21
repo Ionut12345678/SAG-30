@@ -36,7 +36,9 @@ jobs:
       - name: Recover previous screening state (isolated by PR or production)
         uses: actions/cache/restore@v4
         with:
-          path: candidate-state.json
+          path: |
+            candidate-state.json
+            vendor-quote-state.json
           key: ${{ github.event_name == 'pull_request' && format('radar-nou-history-pr-{0}', github.event.pull_request.number) || 'radar-nou-candidate-history' }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
             ${{ github.event_name == 'pull_request' && format('radar-nou-history-pr-{0}', github.event.pull_request.number) || 'radar-nou-candidate-history' }}-
@@ -66,15 +68,19 @@ jobs:
         run: python radar_discovery.py --output radar-discovery.json --snapshot nasdaq-snapshot.json
       - name: Check timestamp and price against independent public chart source
         run: python radar_cross_source.py --discovery radar-discovery.json --out cross-source-timing.json
+      - name: Track vendor-timestamped price outcomes (read-only)
+        run: python radar_vendor_quotes.py --state vendor-quote-state.json --feed cross-source-timing.json --out vendor-quote-followup.json
       - name: Track candidate outcomes vs later screen snapshots
         run: python radar_followup.py --state candidate-state.json --out candidate-followup.json --snapshot nasdaq-snapshot.json
       - name: Audit quality and follow-up coverage
         run: python radar_quality_audit.py --out radar-quality.json
       - name: Persist screening state for next scheduled run
-        if: hashFiles('candidate-state.json') != ''
+        if: hashFiles('candidate-state.json', 'vendor-quote-state.json') != ''
         uses: actions/cache/save@v4
         with:
-          path: candidate-state.json
+          path: |
+            candidate-state.json
+            vendor-quote-state.json
           key: ${{ github.event_name == 'pull_request' && format('radar-nou-history-pr-{0}', github.event.pull_request.number) || 'radar-nou-candidate-history' }}-${{ github.run_id }}-${{ github.run_attempt }}
       - name: Upload evidence even if no data
         if: always()
@@ -89,4 +95,6 @@ jobs:
             radar-quality.json
             cross-source-timing.json
             candidate-state.json
+            vendor-quote-state.json
+            vendor-quote-followup.json
           if-no-files-found: warn
