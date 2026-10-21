@@ -57,6 +57,7 @@ def merge_scan(state, payload, at):
         fingerprint=hashlib.sha256(json.dumps(report_rows,sort_keys=True).encode()).hexdigest()
         if state.get("last_universe_fingerprint")==fingerprint:
             result["status"]="DUPLICATE_SOURCE_SNAPSHOT"
+            result["tracked_symbols"]=sum(len(v) for v in state["sessions"].values() if isinstance(v,dict))
             result["explanation"]="Unchanged screener prices are not a new observation"
             return state,result
         state["last_universe_fingerprint"]=fingerprint
