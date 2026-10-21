@@ -18,7 +18,7 @@ from radar_annual_research import analyze_symbol,summarize
 UPSTREAM="8ccb831aca1cda6a5d01471f7968e11552d88007"
 TREE=f"https://api.github.com/repos/willhjw/big_movers/git/trees/{UPSTREAM}?recursive=1"
 RAW=f"https://raw.githubusercontent.com/willhjw/big_movers/{UPSTREAM}/"
-MAX_SYMBOLS=24
+MAX_SYMBOLS=36
 def sample_paths(files,limit=MAX_SYMBOLS):
     available=sorted({x for x in files if isinstance(x,str) and
                       x.startswith("collected_stocks/") and x.endswith(".csv") and
@@ -38,7 +38,7 @@ def decode_daily_csv(text):
             if not all(math.isfinite(x) for x in (o,h,l,c,v)) or not (0<l<=min(o,c)<=max(o,c)<=h and v>=0):
                 continue
             if out and day<=out[-1]["session"]:continue
-            if not "2025-10-01"<=day<="2026-10-21":continue
+            if not "2025-01-01"<=day<="2026-10-21":continue
             out.append({"session":day,"open":o,"high":h,"low":l,"close":c,"volume":v})
         except (ValueError,TypeError,KeyError):continue
     return out
@@ -84,6 +84,21 @@ def main():
     except Exception as exc:
         errors.append({"step":"upstream_tree","error_type":type(exc).__name__})
     summary=summarize(items)
+    # The upstream public archive largely ends around March 2026. Use a fixed
+    # Jan 2026 split rather than claiming a July 2026 out-of-sample test.
+    entries=[e for item in items for e in item.get("events",[])]
+    def bucket(group):
+        hits=sum(bool(e["hits_20_pct_upper_bound"]) for e in group)
+        return {"events":len(group),"hits_20":hits,
+                "hit_rate_pct":round(100*hits/len(group),2) if group else None}
+    summary["archive_train_before"]="2026-01-01"
+    summary["archive_holdout_from"]="2026-01-01"
+    summary["archive_train"]=bucket([e for e in entries if e["signal_date"]<"2026-01-01"])
+    summary["archive_holdout"]=bucket([e for e in entries if e["signal_date"]>="2026-01-01"])
+    # Generic annual summary uses July 2026 and is not valid as the archive
+    # split. Remove its fields to prevent accidental misinterpretation.
+    for field in ("train_before","holdout_from","train","holdout"):
+        summary.pop(field,None)
     summary.update({"data_origin":f"https://github.com/willhjw/big_movers/tree/{UPSTREAM}/collected_stocks",
       "randomization":"fixed SHA256 of stock filename, independent of winner labels",
       "total_archive_files":total_files,"sampled_files":len(selected),
