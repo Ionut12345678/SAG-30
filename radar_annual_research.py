@@ -85,6 +85,7 @@ def analyze_symbol(symbol,bars,has_splits=False):
           "volume_ratio_20_prior_days":round(rvol,3) if rvol is not None else None,
           "group":"EARLY_DAILY_5_TO_10" if 5<=change<=10 else "GAP_OVER_10" if gap>=10 else "ALREADY_OVER_20",
           "proxy_entry_date":next_bar["session"],
+          "outcome_last_session":future[-1]["session"],
           "proxy_entry_next_open":round(entry,5),
           "five_session_max_high_pct":round(100*(future_peak/entry-1),3),
           "five_session_min_low_pct":round(100*(future_low/entry-1),3),
