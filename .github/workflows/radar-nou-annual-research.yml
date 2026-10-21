@@ -5,6 +5,8 @@ on:
     paths:
       - 'radar_annual_research.py'
       - 'tests/test_annual_research.py'
+      - 'radar_big_movers_audit.py'
+      - 'tests/test_big_movers_audit.py'
       - '.github/workflows/radar-nou-annual-research.yml'
 permissions:
   contents: read
@@ -24,10 +26,14 @@ jobs:
         run: python -m unittest discover -s tests -p 'test_annual_research.py' -v
       - name: Research one calendar-year daily bars with time-based holdout
         run: python radar_annual_research.py --out annual-daily-research.json
+      - name: Audit public Big Movers labels without training on future winners
+        run: python radar_big_movers_audit.py --annual annual-daily-research.json --out big-movers-audit.json
       - name: Preserve the full result and limitations
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: radar-nou-annual-daily-research
-          path: annual-daily-research.json
+          path: |
+            annual-daily-research.json
+            big-movers-audit.json
           if-no-files-found: warn
