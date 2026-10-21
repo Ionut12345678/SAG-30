@@ -10,22 +10,22 @@ class FollowupTests(unittest.TestCase):
     def test_first_seen_immutable_and_real_later_followup(self):
         state,r=merge_scan({},payload(("AAA",7.0)),A)
         first=state["sessions"]["2026-10-19"]["AAA"]["first_seen_utc"]
-        state,r=merge_scan(state,payload(("AAA",18.1)),A+timedelta(minutes=30))
+        state,r=merge_scan(state,{"data":{"rows":[{"symbol":"AAA","pctchange":"18.1%","lastsale":"$11.00"}]}},A+timedelta(minutes=30))
         x=state["sessions"]["2026-10-19"]["AAA"]
         self.assertEqual(first,x["first_seen_utc"])
         self.assertEqual(r["new_candidates"],0)
         self.assertEqual(x["milestones_reported"],[])
         self.assertEqual(x["milestone_quality"],"UNVERIFIED_SNAPSHOT_NO_ALERT")
         self.assertEqual(x["highest_later_reported_pct"],18.1)
-        self.assertEqual(x["followup_count"],0)
-        self.assertEqual(r["unchanged_symbol_prices_skipped"],1)
+        self.assertEqual(x["followup_count"],1)
+        self.assertEqual(r["unchanged_symbol_prices_skipped"],0)
         self.assertEqual(r["valid_first_watch_signals"],0)
     def test_multiple_later_thresholds_without_hindsight(self):
         s,_=merge_scan({},payload(("AAA",6)),A)
-        s,r=merge_scan(s,payload(("AAA",52)),A+timedelta(minutes=30))
+        s,r=merge_scan(s,{"data":{"rows":[{"symbol":"AAA","pctchange":"52%","lastsale":"$12.00"}]}},A+timedelta(minutes=30))
         self.assertEqual(r["new_reported_milestones"],0)
         self.assertEqual(s["sessions"]["2026-10-19"]["AAA"]["highest_later_reported_pct"],52)
-        s,r=merge_scan(s,payload(("AAA",45)),A+timedelta(minutes=60))
+        s,r=merge_scan(s,{"data":{"rows":[{"symbol":"AAA","pctchange":"45%","lastsale":"$11.50"}]}},A+timedelta(minutes=60))
         self.assertEqual(r["new_reported_milestones"],0)
     def test_return_is_from_first_observed_price_not_daily_pct(self):
         s,_=merge_scan({},payload(("AAA",7)),A)
