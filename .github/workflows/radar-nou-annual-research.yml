@@ -7,6 +7,8 @@ on:
       - 'tests/test_annual_research.py'
       - 'radar_big_movers_audit.py'
       - 'tests/test_big_movers_audit.py'
+      - 'radar_independent_archive.py'
+      - 'tests/test_independent_archive.py'
       - '.github/workflows/radar-nou-annual-research.yml'
 permissions:
   contents: read
@@ -28,6 +30,8 @@ jobs:
         run: python radar_annual_research.py --out annual-daily-research.json
       - name: Audit public Big Movers labels without training on future winners
         run: python radar_big_movers_audit.py --annual annual-daily-research.json --out big-movers-audit.json
+      - name: Sample independent historical daily stock archives including delisted tickers
+        run: python radar_independent_archive.py --out independent-daily-sample.json
       - name: Preserve the full result and limitations
         if: always()
         uses: actions/upload-artifact@v4
@@ -36,4 +40,5 @@ jobs:
           path: |
             annual-daily-research.json
             big-movers-audit.json
+            independent-daily-sample.json
           if-no-files-found: warn
