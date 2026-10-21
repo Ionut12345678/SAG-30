@@ -1,0 +1,33 @@
+name: Radar Nou annual research (SHADOW, no trading)
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'radar_annual_research.py'
+      - 'tests/test_annual_research.py'
+      - '.github/workflows/radar-nou-annual-research.yml'
+permissions:
+  contents: read
+concurrency:
+  group: radar-nou-annual-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  annual-daily-research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate annual replay safeguards
+        run: python -m unittest tests.test_annual_research -v
+      - name: Research one calendar-year daily bars with time-based holdout
+        run: python radar_annual_research.py --out annual-daily-research.json
+      - name: Preserve the full result and limitations
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: radar-nou-annual-daily-research
+          path: annual-daily-research.json
+          if-no-files-found: warn
