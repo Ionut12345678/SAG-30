@@ -87,7 +87,9 @@ def main():
         cohort_selected_retrospectively=True,
         calibration_allowed=False,
         realtime_fill_proven=False)
-    Path(args.out).write_text(json.dumps({"summary":summary,"results":outcomes},indent=2)+"\n")
+    premarket_summary=summarize_pre(premarket_outcomes)
+    Path(args.out).write_text(json.dumps({"summary":summary,"results":outcomes,
+        "premarket_summary":premarket_summary,"premarket_results":premarket_outcomes},indent=2)+"\n")
     print(json.dumps({k:summary[k] for k in ("cases","evaluated","winner_20_count","false_winner_under_20_count","collection_errors")},
          "premarket":premarket_summary))
 if __name__=="__main__":main()
