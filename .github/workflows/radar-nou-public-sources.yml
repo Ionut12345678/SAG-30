@@ -33,14 +33,16 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Recover previous screening state (main only)
-        if: github.event_name != 'pull_request'
+      - name: Recover previous screening state (isolated by PR or production)
         uses: actions/cache/restore@v4
         with:
-          path: candidate-state.json
-          key: radar-nou-candidate-history-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            candidate-state.json
+            vendor-quote-state.json
+            twelve-data-quote-state.json
+          key: ${{ github.event_name == 'pull_request' && format('radar-nou-history-pr-{0}', github.event.pull_request.number) || 'radar-nou-candidate-history' }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
-            radar-nou-candidate-history-
+            ${{ github.event_name == 'pull_request' && format('radar-nou-history-pr-{0}', github.event.pull_request.number) || 'radar-nou-candidate-history' }}-
       - name: Record trigger and actual UTC runtime
         run: |
           echo "trigger=${{ github.event_name }} started_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
@@ -67,16 +69,31 @@ jobs:
         run: python radar_discovery.py --output radar-discovery.json --snapshot nasdaq-snapshot.json
       - name: Check timestamp and price against independent public chart source
         run: python radar_cross_source.py --discovery radar-discovery.json --out cross-source-timing.json
+      - name: Track vendor-timestamped price outcomes (read-only)
+        run: python radar_vendor_quotes.py --state vendor-quote-state.json --feed cross-source-timing.json --out vendor-quote-followup.json
+      - name: Fetch 1-minute Twelve Data quotes when API key is connected
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+        run: python radar_twelvedata.py --discovery radar-discovery.json --state twelve-data-quote-state.json --out twelve-data-quotes.json
+      - name: Track Twelve Data timestamped outcomes
+        run: python radar_vendor_quotes.py --state twelve-data-quote-state.json --feed twelve-data-quotes.json --out twelve-data-followup.json
       - name: Track candidate outcomes vs later screen snapshots
         run: python radar_followup.py --state candidate-state.json --out candidate-followup.json --snapshot nasdaq-snapshot.json
+      - name: Retrospective replay of historical runners and negative controls
+        run: python radar_historical_collector.py --out historical-real-replay.json
+      - name: Compare fixed momentum and volume rule against baseline historical replay
+        run: python radar_pattern_benchmark.py --input historical-real-replay.json --out historical-pattern-benchmark.json
       - name: Audit quality and follow-up coverage
         run: python radar_quality_audit.py --out radar-quality.json
       - name: Persist screening state for next scheduled run
-        if: github.event_name != 'pull_request' && hashFiles('candidate-state.json') != ''
+        if: hashFiles('candidate-state.json', 'vendor-quote-state.json') != ''
         uses: actions/cache/save@v4
         with:
-          path: candidate-state.json
-          key: radar-nou-candidate-history-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            candidate-state.json
+            vendor-quote-state.json
+            twelve-data-quote-state.json
+          key: ${{ github.event_name == 'pull_request' && format('radar-nou-history-pr-{0}', github.event.pull_request.number) || 'radar-nou-candidate-history' }}-${{ github.run_id }}-${{ github.run_attempt }}
       - name: Upload evidence even if no data
         if: always()
         uses: actions/upload-artifact@v4
@@ -90,4 +107,11 @@ jobs:
             radar-quality.json
             cross-source-timing.json
             candidate-state.json
+            vendor-quote-state.json
+            twelve-data-quote-state.json
+            vendor-quote-followup.json
+            twelve-data-quotes.json
+            twelve-data-followup.json
+            historical-real-replay.json
+            historical-pattern-benchmark.json
           if-no-files-found: warn

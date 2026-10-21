@@ -6,6 +6,7 @@ snapshots captured at retrieval time, not independently timed exchange prints.
 import argparse
 import json
 import math
+import hashlib
 from datetime import datetime, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -37,7 +38,7 @@ def merge_scan(state, payload, at):
       "source":"Nasdaq public screener","quality":"UNVERIFIED_WEBSITE_SNAPSHOT",
       "quote_timestamp_verified":False,"real_time_verified":False,"buy_enabled":False,
       "valid_first_watch_signals":0,"new_candidates":0,"tracked_symbols":0,
-      "new_reported_milestones":0,"sample":[],"previous_state_loaded":bool(state["sessions"])}
+      "new_reported_milestones":0,"return_from_first_observation":[],"comparison_count":0,"unchanged_symbol_prices_skipped":0,"unverified_return_threshold_counts":{"15":0,"20":0,"30":0,"50":0},"sample":[],"previous_state_loaded":bool(state["sessions"])}
     try:
         rows,total=get_rows(payload)
         if not rows:
@@ -53,18 +54,38 @@ def merge_scan(state, payload, at):
             # A symbol may occur twice: keep first occurrence; do not cherry-pick.
             if symbol not in report_rows:
                 report_rows[symbol]={"pct":change,"price":parse_price(row.get("lastsale"))}
+        fingerprint=hashlib.sha256(json.dumps(report_rows,sort_keys=True).encode()).hexdigest()
+        if state.get("last_universe_fingerprint")==fingerprint:
+            result["status"]="DUPLICATE_SOURCE_SNAPSHOT"
+            result["tracked_symbols"]=len(set().union(*(set(v) for v in state["sessions"].values() if isinstance(v,dict))))
+            result["explanation"]="Unchanged screener prices are not a new observation"
+            return state,result
+        state["last_universe_fingerprint"]=fingerprint
         session_map=state["sessions"].setdefault(session,{})
         if not isinstance(session_map,dict):session_map={};state["sessions"][session]=session_map
         new_symbols=[]
         new_milestones=0
+        comparisons=[]
+        unchanged_symbol_prices_skipped=0
         for sym,obs in sorted(report_rows.items()):
             change=obs["pct"]
             existing=session_map.get(sym)
+            # Reuse the earliest observation from retained prior sessions.
+            # Do not silently reset a symbol's baseline at the day boundary.
+            if existing is None:
+                for older_session in sorted(state["sessions"]):
+                    if older_session >= session:
+                        break
+                    old_map=state["sessions"][older_session]
+                    if isinstance(old_map,dict) and isinstance(old_map.get(sym),dict):
+                        existing=old_map[sym]
+                        session_map[sym]=existing
+                        break
             if existing is None:
                 if not (5<=change<=10): continue
                 if len(session_map)>=MAX_SYMBOLS: continue
                 existing={"first_seen_utc":now,"first_reported_pct":change,
-                  "first_last_sale":obs["price"],"highest_later_reported_pct":None,
+                  "first_last_sale":obs["price"],"last_observed_price":obs["price"],"highest_later_reported_pct":None,
                   "first_source_quote_time":None,"first_classification":"UNVERIFIED_DISCOVERY_ONLY",
                   "milestones_reported":[],"followup_count":0}
                 session_map[sym]=existing
@@ -72,17 +93,32 @@ def merge_scan(state, payload, at):
                 continue
             first=existing.get("first_seen_utc")
             if not isinstance(first,str) or first>=now:continue
+            previous_price=parse_price(existing.get("last_observed_price",existing.get("last_last_sale",existing.get("first_last_sale"))))
+            current_price=obs["price"]
+            if previous_price is not None and current_price is not None and previous_price==current_price:
+                unchanged_symbol_prices_skipped+=1
+                continue
+            existing["last_observed_price"]=current_price
             existing["followup_count"]=int(existing.get("followup_count") or 0)+1
             previous=existing.get("highest_later_reported_pct")
             existing["highest_later_reported_pct"]=max(change,previous) if isinstance(previous,(float,int)) else change
             existing["last_seen_utc"]=now
             existing["last_reported_pct"]=change
             existing["last_last_sale"]=obs["price"]
-            levels=set(existing.get("milestones_reported",[]))
-            for level in LEVELS:
-                if change>=level and level not in levels:
-                    levels.add(level);new_milestones+=1
-            existing["milestones_reported"]=sorted(levels)
+            baseline_price=parse_price(existing.get("first_last_sale"))
+            later_price=obs["price"]
+            if baseline_price is not None and later_price is not None:
+                ret=round((later_price/baseline_price-1)*100,3)
+                existing["last_return_from_first_observation_pct"]=ret
+                comparisons.append({"symbol":sym,"first_seen_utc":first,
+                    "first_price":baseline_price,"later_seen_utc":now,
+                    "later_price":later_price,"return_pct":ret,
+                    "quality":"UNVERIFIED_WEBSITE_SNAPSHOT",
+                    "tradable_entry_verified":False})
+            # Screener retrieval time is not a quote timestamp. Never promote
+            # repeated website snapshots to confirmed milestones.
+            existing["milestones_reported"]=[]
+            existing["milestone_quality"]="UNVERIFIED_SNAPSHOT_NO_ALERT"
         # Cap retained sessions and keep most recent by Eastern date.
         for old in sorted(state["sessions"])[:-MAX_SESSIONS]:state["sessions"].pop(old,None)
         previous_scan=state.get("last_successful_scan_utc")
@@ -107,7 +143,11 @@ def merge_scan(state, payload, at):
           received_rows=len(rows),parsed_rows=len(report_rows),reported_universe_size=total,
           partial_universe=bool(isinstance(total,int) and total>len(rows)),
           new_candidates=len(new_symbols),tracked_symbols=len(session_map),
-          new_reported_milestones=new_milestones,
+          new_reported_milestones=0,
+          return_from_first_observation=comparisons,
+          comparison_count=len(comparisons),unchanged_symbol_prices_skipped=unchanged_symbol_prices_skipped,
+          unverified_return_threshold_counts={str(level):sum(
+              c["return_pct"]>=level for c in comparisons) for level in LEVELS},
           sample=[{"symbol":s,"first_reported_pct":session_map[s]["first_reported_pct"],
              "first_seen_utc":session_map[s]["first_seen_utc"]} for s in new_symbols[:40]])
     except (TypeError,ValueError,KeyError,AttributeError):
@@ -137,10 +177,10 @@ def main():
           "quality":"UNVERIFIED_WEBSITE_SNAPSHOT","valid_first_watch_signals":0,
           "buy_enabled":False,"new_candidates":0}
     # Only write a state snapshot when fetch + schema processed successfully.
-    if report["status"]=="UNVERIFIED_SCREENING_OBSERVED":
+    if report["status"] in ("UNVERIFIED_SCREENING_OBSERVED","DUPLICATE_SOURCE_SNAPSHOT"):
         state_path.write_text(json.dumps(state,indent=2,sort_keys=True)+"\n",encoding="utf-8")
     Path(args.out).write_text(json.dumps(report,indent=2,sort_keys=True)+"\n",encoding="utf-8")
     print(json.dumps({k:report.get(k) for k in ["status","error_type","new_candidates","tracked_symbols",
-        "new_reported_milestones","valid_first_watch_signals"]}))
+        "new_reported_milestones","valid_first_watch_signals","comparison_count","unchanged_symbol_prices_skipped","unverified_return_threshold_counts"]}))
 
 if __name__=="__main__":main()

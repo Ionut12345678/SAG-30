@@ -10,25 +10,98 @@ class FollowupTests(unittest.TestCase):
     def test_first_seen_immutable_and_real_later_followup(self):
         state,r=merge_scan({},payload(("AAA",7.0)),A)
         first=state["sessions"]["2026-10-19"]["AAA"]["first_seen_utc"]
-        state,r=merge_scan(state,payload(("AAA",18.1)),A+timedelta(minutes=30))
+        state,r=merge_scan(state,{"data":{"rows":[{"symbol":"AAA","pctchange":"18.1%","lastsale":"$11.00"}]}},A+timedelta(minutes=30))
         x=state["sessions"]["2026-10-19"]["AAA"]
         self.assertEqual(first,x["first_seen_utc"])
         self.assertEqual(r["new_candidates"],0)
-        self.assertEqual(x["milestones_reported"],[15])
+        self.assertEqual(x["milestones_reported"],[])
+        self.assertEqual(x["milestone_quality"],"UNVERIFIED_SNAPSHOT_NO_ALERT")
         self.assertEqual(x["highest_later_reported_pct"],18.1)
         self.assertEqual(x["followup_count"],1)
+        self.assertEqual(r["unchanged_symbol_prices_skipped"],0)
         self.assertEqual(r["valid_first_watch_signals"],0)
     def test_multiple_later_thresholds_without_hindsight(self):
         s,_=merge_scan({},payload(("AAA",6)),A)
-        s,r=merge_scan(s,payload(("AAA",52)),A+timedelta(minutes=30))
-        self.assertEqual(r["new_reported_milestones"],4)
-        s,r=merge_scan(s,payload(("AAA",45)),A+timedelta(minutes=60))
+        s,r=merge_scan(s,{"data":{"rows":[{"symbol":"AAA","pctchange":"52%","lastsale":"$12.00"}]}},A+timedelta(minutes=30))
         self.assertEqual(r["new_reported_milestones"],0)
+        self.assertEqual(s["sessions"]["2026-10-19"]["AAA"]["highest_later_reported_pct"],52)
+        s,r=merge_scan(s,{"data":{"rows":[{"symbol":"AAA","pctchange":"45%","lastsale":"$11.50"}]}},A+timedelta(minutes=60))
+        self.assertEqual(r["new_reported_milestones"],0)
+    def test_return_is_from_first_observed_price_not_daily_pct(self):
+        s,_=merge_scan({},payload(("AAA",7)),A)
+        later={"data":{"rows":[{"symbol":"AAA","pctchange":"52%","lastsale":"$12.50"}],"totalRecords":1}}
+        s,r=merge_scan(s,later,A+timedelta(minutes=30))
+        self.assertEqual(r["return_from_first_observation"][0]["return_pct"],25.0)
+        self.assertFalse(r["return_from_first_observation"][0]["tradable_entry_verified"])
+        self.assertEqual(r["new_reported_milestones"],0)
+    def test_cross_session_retains_original_baseline(self):
+        s,_=merge_scan({},payload(("AAA",7)),A)
+        from datetime import timedelta
+        next_day=A+timedelta(days=1)
+        later={"data":{"rows":[{"symbol":"AAA","pctchange":"6%","lastsale":"$12.50"}],"totalRecords":1}}
+        s,report=merge_scan(s,later,next_day)
+        self.assertEqual(report["new_candidates"],0)
+        self.assertEqual(report["return_from_first_observation"][0]["return_pct"],25.0)
+        self.assertEqual(len(s["sessions"]),2)
     def test_no_same_timestamp_followup(self):
         s,_=merge_scan({},payload(("AAA",7)),A)
         s,r=merge_scan(s,payload(("AAA",52)),A)
         self.assertEqual(s["sessions"]["2026-10-19"]["AAA"]["followup_count"],0)
         self.assertEqual(r["new_reported_milestones"],0)
+    def test_identical_source_snapshot_is_not_followup(self):
+        first=payload(("AAA",7))
+        s,_=merge_scan({},first,A)
+        before=s["sessions"]["2026-10-19"]["AAA"].copy()
+        s,r=merge_scan(s,first,A+timedelta(minutes=30))
+        self.assertEqual(r["status"],"DUPLICATE_SOURCE_SNAPSHOT")
+        self.assertEqual(s["sessions"]["2026-10-19"]["AAA"],before)
+        self.assertEqual(r["return_from_first_observation"],[])
+    def test_per_symbol_duplicate_price_not_counted_when_universe_changes(self):
+        start={"data":{"rows":[
+            {"symbol":"AAA","pctchange":"7%","lastsale":"$10.00"},
+            {"symbol":"BBB","pctchange":"6%","lastsale":"$20.00"}],"totalRecords":2}}
+        next_scan={"data":{"rows":[
+            {"symbol":"AAA","pctchange":"8%","lastsale":"$10.00"},
+            {"symbol":"BBB","pctchange":"12%","lastsale":"$25.00"}],"totalRecords":2}}
+        s,_=merge_scan({},start,A)
+        s,r=merge_scan(s,next_scan,A+timedelta(minutes=30))
+        self.assertEqual(r["comparison_count"],1)
+        self.assertEqual(r["unchanged_symbol_prices_skipped"],1)
+        self.assertEqual(r["return_from_first_observation"][0]["symbol"],"BBB")
+        self.assertEqual(r["return_from_first_observation"][0]["return_pct"],25.0)
+        self.assertEqual(s["sessions"]["2026-10-19"]["AAA"]["followup_count"],0)
+        self.assertEqual(s["sessions"]["2026-10-19"]["BBB"]["followup_count"],1)
+    def test_changed_price_creates_unverified_comparison(self):
+        s,_=merge_scan({},payload(("AAA",7)),A)
+        changed={"data":{"rows":[{"symbol":"AAA","pctchange":"28%","lastsale":"$12.50"}],"totalRecords":1}}
+        s,r=merge_scan(s,changed,A+timedelta(minutes=30))
+        self.assertEqual(r["comparison_count"],1)
+        self.assertEqual(r["unverified_return_threshold_counts"]["20"],1)
+        self.assertEqual(r["unverified_return_threshold_counts"]["30"],0)
+        self.assertEqual(r["valid_first_watch_signals"],0)
+    def test_cli_persists_state_between_separate_processes(self):
+        import json
+        import subprocess
+        import sys
+        import tempfile
+        from pathlib import Path
+        script=Path(__file__).resolve().parents[1]/"radar_followup.py"
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder)
+            state=root/"state.json"
+            snapshot=root/"snapshot.json"
+            output=root/"report.json"
+            snapshot.write_text(json.dumps(payload(("AAA",7))),encoding="utf-8")
+            cmd=[sys.executable,str(script),"--state",str(state),"--out",str(output),"--snapshot",str(snapshot)]
+            subprocess.run(cmd,check=True,capture_output=True,text=True)
+            first=json.loads(state.read_text(encoding="utf-8"))
+            self.assertEqual(len(first["sessions"]),1)
+            subprocess.run(cmd,check=True,capture_output=True,text=True)
+            second=json.loads(state.read_text(encoding="utf-8"))
+            report=json.loads(output.read_text(encoding="utf-8"))
+            self.assertEqual(report["status"],"DUPLICATE_SOURCE_SNAPSHOT")
+            self.assertEqual(second["sessions"],first["sessions"])
+            self.assertEqual(second["last_universe_fingerprint"],first["last_universe_fingerprint"])
     def test_missing_feed_preserves_state(self):
         s,_=merge_scan({},payload(("AAA",7)),A)
         old=s.copy()
