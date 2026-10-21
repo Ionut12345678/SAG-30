@@ -37,7 +37,16 @@ def replay(symbol,bars,previous_close,*,horizon_minutes=390):
         return {"symbol":symbol,"status":"INVALID_DATA"}
     if len(parsed)<4:return {"symbol":symbol,"status":"INSUFFICIENT_BARS"}
     entries=[i for i,b in enumerate(parsed[:-1]) if 5<=100*(b[4]/ref-1)<=10]
-    if not entries:return {"symbol":symbol,"status":"NO_EARLY_WINDOW"}
+    if not entries:
+        opening_pct=100*(parsed[0][4]/ref-1)
+        peak_pct=100*(max(b[2] for b in parsed)/ref-1)
+        return {"symbol":symbol,"status":"NO_EARLY_WINDOW",
+                "first_regular_bar_change_pct":round(opening_pct,3),
+                "session_peak_pct_vs_previous_close":round(peak_pct,3),
+                "missed_20pct_runner":peak_pct>=20,
+                "gap_above_10pct_at_first_bar":opening_pct>10,
+                "interpretation":"MISSED_MOVE_NOT_ACTIONABLE_ENTRY",
+                "orders_enabled":False}
     i=entries[0]
     signal=parsed[i]
     next_bar=parsed[i+1]
@@ -82,7 +91,10 @@ def summarize(records):
     def median_volume_ratio(group):
         ratios=[x["signal_volume_ratio_vs_prior_6"] for x in group if x.get("signal_volume_ratio_vs_prior_6") is not None]
         return round(statistics.median(ratios),3) if ratios else None
+    missed=[x for x in records if x.get("status")=="NO_EARLY_WINDOW"]
     return {"cases":len(records),"evaluated":len(valid),"excluded":len(records)-len(valid),
+            "missed_20pct_runners_without_5to10_entry":sum(x.get("missed_20pct_runner",False) for x in missed),
+            "first_bar_gaps_above_10pct":sum(x.get("gap_above_10pct_at_first_bar",False) for x in missed),
             "median_signal_volume_ratio_winner_20":median_volume_ratio(winners),
             "median_signal_volume_ratio_false_winner":median_volume_ratio(false_winners),
             "winner_20_count":sum(x["outcome"]=="WINNER_20" for x in valid),
