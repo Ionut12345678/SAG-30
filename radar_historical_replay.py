@@ -6,6 +6,7 @@ This is research, not trading advice or evidence of executable fills.
 import argparse
 import json
 import math
+import statistics
 import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
@@ -76,7 +77,14 @@ def replay(symbol,bars,previous_close,*,horizon_minutes=390):
 
 def summarize(records):
     valid=[x for x in records if x.get("status")=="EVALUATED_HISTORICAL_REPLAY"]
+    winners=[x for x in valid if x["outcome"]=="WINNER_20"]
+    false_winners=[x for x in valid if x["outcome"]=="FALSE_WINNER_UNDER_20"]
+    def median_volume_ratio(group):
+        ratios=[x["signal_volume_ratio_vs_prior_6"] for x in group if x.get("signal_volume_ratio_vs_prior_6") is not None]
+        return round(statistics.median(ratios),3) if ratios else None
     return {"cases":len(records),"evaluated":len(valid),"excluded":len(records)-len(valid),
+            "median_signal_volume_ratio_winner_20":median_volume_ratio(winners),
+            "median_signal_volume_ratio_false_winner":median_volume_ratio(false_winners),
             "winner_20_count":sum(x["outcome"]=="WINNER_20" for x in valid),
             "false_winner_under_20_count":sum(x["outcome"]=="FALSE_WINNER_UNDER_20" for x in valid),
             "threshold_counts":{str(n):sum(str(n) in x["hits_from_proxy_entry"] for x in valid) for n in TARGETS},
