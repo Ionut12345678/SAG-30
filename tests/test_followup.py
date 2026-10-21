@@ -17,7 +17,8 @@ class FollowupTests(unittest.TestCase):
         self.assertEqual(x["milestones_reported"],[])
         self.assertEqual(x["milestone_quality"],"UNVERIFIED_SNAPSHOT_NO_ALERT")
         self.assertEqual(x["highest_later_reported_pct"],18.1)
-        self.assertEqual(x["followup_count"],1)
+        self.assertEqual(x["followup_count"],0)
+        self.assertEqual(r["unchanged_symbol_prices_skipped"],1)
         self.assertEqual(r["valid_first_watch_signals"],0)
     def test_multiple_later_thresholds_without_hindsight(self):
         s,_=merge_scan({},payload(("AAA",6)),A)
@@ -55,6 +56,21 @@ class FollowupTests(unittest.TestCase):
         self.assertEqual(r["status"],"DUPLICATE_SOURCE_SNAPSHOT")
         self.assertEqual(s["sessions"]["2026-10-19"]["AAA"],before)
         self.assertEqual(r["return_from_first_observation"],[])
+    def test_per_symbol_duplicate_price_not_counted_when_universe_changes(self):
+        start={"data":{"rows":[
+            {"symbol":"AAA","pctchange":"7%","lastsale":"$10.00"},
+            {"symbol":"BBB","pctchange":"6%","lastsale":"$20.00"}],"totalRecords":2}}
+        next_scan={"data":{"rows":[
+            {"symbol":"AAA","pctchange":"8%","lastsale":"$10.00"},
+            {"symbol":"BBB","pctchange":"12%","lastsale":"$25.00"}],"totalRecords":2}}
+        s,_=merge_scan({},start,A)
+        s,r=merge_scan(s,next_scan,A+timedelta(minutes=30))
+        self.assertEqual(r["comparison_count"],1)
+        self.assertEqual(r["unchanged_symbol_prices_skipped"],1)
+        self.assertEqual(r["return_from_first_observation"][0]["symbol"],"BBB")
+        self.assertEqual(r["return_from_first_observation"][0]["return_pct"],25.0)
+        self.assertEqual(s["sessions"]["2026-10-19"]["AAA"]["followup_count"],0)
+        self.assertEqual(s["sessions"]["2026-10-19"]["BBB"]["followup_count"],1)
     def test_changed_price_creates_unverified_comparison(self):
         s,_=merge_scan({},payload(("AAA",7)),A)
         changed={"data":{"rows":[{"symbol":"AAA","pctchange":"28%","lastsale":"$12.50"}],"totalRecords":1}}
