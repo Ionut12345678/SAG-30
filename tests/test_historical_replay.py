@@ -16,6 +16,20 @@ class HistoricalReplayTests(unittest.TestCase):
         self.assertEqual(r["proxy_entry_price_next_open"],10.8)
         self.assertIn("20",r["hits_from_proxy_entry"])
         self.assertEqual(r["outcome"],"WINNER_20")
+    def test_wick_only_winner_not_confirmed_by_completed_close(self):
+        b=bars([10,10.7,10.8,11.0,11.2,11.1])
+        b[3]["high"]=14.0
+        r=replay("WICK",b,10)
+        self.assertIn("20",r["hits_from_proxy_entry"])
+        self.assertNotIn("20",r["thresholds_at_completed_closes"])
+        self.assertFalse(r["winner_20_completed_close"])
+        self.assertEqual(summarize([r])["winner_20_completed_close_count"],0)
+    def test_next_entry_bar_must_be_adjacent_five_minutes(self):
+        b=bars([10,10.7,10.8,12.0])
+        b[2]["ts"]=(T+timedelta(minutes=15)).isoformat()
+        b[3]["ts"]=(T+timedelta(minutes=20)).isoformat()
+        r=replay("GAP",b,10)
+        self.assertEqual(r["status"],"INVALID_BAR_CADENCE")
     def test_false_winner_is_counted(self):
         r=replay("FALSE",bars([10,10.6,10.7,10.3,10.2]),10)
         self.assertEqual(r["outcome"],"FALSE_WINNER_UNDER_20")
