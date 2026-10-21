@@ -38,7 +38,7 @@ def merge_scan(state, payload, at):
       "source":"Nasdaq public screener","quality":"UNVERIFIED_WEBSITE_SNAPSHOT",
       "quote_timestamp_verified":False,"real_time_verified":False,"buy_enabled":False,
       "valid_first_watch_signals":0,"new_candidates":0,"tracked_symbols":0,
-      "new_reported_milestones":0,"return_from_first_observation":[],"comparison_count":0,"unverified_return_threshold_counts":{"15":0,"20":0,"30":0,"50":0},"sample":[],"previous_state_loaded":bool(state["sessions"])}
+      "new_reported_milestones":0,"return_from_first_observation":[],"comparison_count":0,"unchanged_symbol_prices_skipped":0,"unverified_return_threshold_counts":{"15":0,"20":0,"30":0,"50":0},"sample":[],"previous_state_loaded":bool(state["sessions"])}
     try:
         rows,total=get_rows(payload)
         if not rows:
@@ -66,6 +66,7 @@ def merge_scan(state, payload, at):
         new_symbols=[]
         new_milestones=0
         comparisons=[]
+        unchanged_symbol_prices_skipped=0
         for sym,obs in sorted(report_rows.items()):
             change=obs["pct"]
             existing=session_map.get(sym)
@@ -84,7 +85,7 @@ def merge_scan(state, payload, at):
                 if not (5<=change<=10): continue
                 if len(session_map)>=MAX_SYMBOLS: continue
                 existing={"first_seen_utc":now,"first_reported_pct":change,
-                  "first_last_sale":obs["price"],"highest_later_reported_pct":None,
+                  "first_last_sale":obs["price"],"last_observed_price":obs["price"],"highest_later_reported_pct":None,
                   "first_source_quote_time":None,"first_classification":"UNVERIFIED_DISCOVERY_ONLY",
                   "milestones_reported":[],"followup_count":0}
                 session_map[sym]=existing
@@ -92,6 +93,12 @@ def merge_scan(state, payload, at):
                 continue
             first=existing.get("first_seen_utc")
             if not isinstance(first,str) or first>=now:continue
+            previous_price=parse_price(existing.get("last_observed_price",existing.get("last_last_sale",existing.get("first_last_sale"))))
+            current_price=obs["price"]
+            if previous_price is not None and current_price is not None and previous_price==current_price:
+                unchanged_symbol_prices_skipped+=1
+                continue
+            existing["last_observed_price"]=current_price
             existing["followup_count"]=int(existing.get("followup_count") or 0)+1
             previous=existing.get("highest_later_reported_pct")
             existing["highest_later_reported_pct"]=max(change,previous) if isinstance(previous,(float,int)) else change
@@ -138,7 +145,7 @@ def merge_scan(state, payload, at):
           new_candidates=len(new_symbols),tracked_symbols=len(session_map),
           new_reported_milestones=0,
           return_from_first_observation=comparisons,
-          comparison_count=len(comparisons),
+          comparison_count=len(comparisons),unchanged_symbol_prices_skipped=unchanged_symbol_prices_skipped,
           unverified_return_threshold_counts={str(level):sum(
               c["return_pct"]>=level for c in comparisons) for level in LEVELS},
           sample=[{"symbol":s,"first_reported_pct":session_map[s]["first_reported_pct"],
@@ -174,6 +181,6 @@ def main():
         state_path.write_text(json.dumps(state,indent=2,sort_keys=True)+"\n",encoding="utf-8")
     Path(args.out).write_text(json.dumps(report,indent=2,sort_keys=True)+"\n",encoding="utf-8")
     print(json.dumps({k:report.get(k) for k in ["status","error_type","new_candidates","tracked_symbols",
-        "new_reported_milestones","valid_first_watch_signals","comparison_count","unverified_return_threshold_counts"]}))
+        "new_reported_milestones","valid_first_watch_signals","comparison_count","unchanged_symbol_prices_skipped","unverified_return_threshold_counts"]}))
 
 if __name__=="__main__":main()
