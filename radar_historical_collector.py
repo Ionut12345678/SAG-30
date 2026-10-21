@@ -14,6 +14,7 @@ from datetime import datetime,timezone,time as clock
 from pathlib import Path
 from zoneinfo import ZoneInfo
 from radar_historical_replay import replay,summarize
+from radar_premarket_replay import extract as extract_pre, summarize as summarize_pre
 
 # Frozen before evaluating this cohort; not a statistical performance sample.
 COHORT=(
@@ -70,10 +71,13 @@ def main():
     p.add_argument("--out",default="historical-real-replay.json")
     args=p.parse_args()
     outcomes=[]
+    premarket_outcomes=[]
     errors=[]
     for symbol in COHORT:
         try:
-            outcomes.extend(extract(symbol,fetch(symbol)))
+            payload=fetch(symbol)
+            outcomes.extend(extract(symbol,payload))
+            premarket_outcomes.extend(extract_pre(symbol,payload))
         except Exception as exc:
             errors.append({"symbol":symbol,"error_type":type(exc).__name__})
         time.sleep(.15)
@@ -84,5 +88,6 @@ def main():
         calibration_allowed=False,
         realtime_fill_proven=False)
     Path(args.out).write_text(json.dumps({"summary":summary,"results":outcomes},indent=2)+"\n")
-    print(json.dumps({k:summary[k] for k in ("cases","evaluated","winner_20_count","false_winner_under_20_count","collection_errors")}))
+    print(json.dumps({k:summary[k] for k in ("cases","evaluated","winner_20_count","false_winner_under_20_count","collection_errors")},
+         "premarket":premarket_summary))
 if __name__=="__main__":main()
