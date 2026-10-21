@@ -21,6 +21,35 @@ def inspect_chart(symbol, payload, now):
     try:
         result=payload["chart"]["result"][0]
         meta=result["meta"]
+        # Prefer the newest COMPLETED one-minute bar when the chart supplies
+        # intraday timestamps. A website snapshot time is not a quote time.
+        timestamps=result.get("timestamp") or []
+        indicator=result.get("indicators",{}).get("quote",[])
+        closes=indicator[0].get("close",[]) if indicator else []
+        bars=[]
+        for raw_ts,raw_close in zip(timestamps,closes):
+            try:
+                if isinstance(raw_ts,bool) or isinstance(raw_close,bool):continue
+                bar_ts=int(raw_ts);bar_close=float(raw_close)
+                if bar_close>0 and bar_close<1e9 and bar_close==bar_close and 60<=(now.timestamp()-bar_ts):
+                    bars.append((bar_ts,bar_close))
+            except (ValueError,TypeError,OverflowError):continue
+        if bars:
+            epoch,price=max(bars,key=lambda item:item[0])
+            close=meta["chartPreviousClose"]
+            if isinstance(close,bool):return out
+            close=float(close)
+            if not (0<close<1e9):return out
+            source_dt=datetime.fromtimestamp(epoch,timezone.utc)
+            age=(now-source_dt).total_seconds()
+            out.update(observed_price=price,reference_close=close,
+                source_ts_utc=source_dt.isoformat(),retrieval_utc=now.isoformat(),
+                age_seconds=round(age,1),reported_pct_vs_yahoo_reference=round((price/close-1)*100,3),
+                source_regular_session_date=source_dt.astimezone(ZoneInfo("America/New_York")).date().isoformat(),
+                quote_kind="1MIN_BAR_CLOSE",bar_timestamp_semantics="BAR_START_UTC")
+            out["status"]="STALE_TIMESTAMP" if age>360 else "RECENT_VENDOR_TIMESTAMP_UNVERIFIED"
+            out["source_timestamp_verified_by_exchange"]=False
+            return out
         price=meta["regularMarketPrice"]
         close=meta["chartPreviousClose"]
         epoch=meta["regularMarketTime"]
