@@ -52,16 +52,22 @@ def query(symbol, opener=None):
     if len(data)>MAX_BYTES:raise ValueError("oversized chart")
     return json.loads(data)
 
-def run(discovery, now=None, fetch=None):
+def run(discovery, now=None, fetch=None, tracked=None):
     now=now or datetime.now(timezone.utc)
     fetch=fetch or query
     entries=discovery.get("candidates",[]) if isinstance(discovery,dict) else []
     res={"checked_at_utc":now.isoformat(),"mode":"SHADOW_TIMING_DIAGNOSTIC",
          "verified_live_signals":0,"orders_enabled":False,"requested":0,
          "results":[],"source_realtime_verified":False}
-    for c in entries[:MAX_CHECKS]:
+    tracked=tracked if isinstance(tracked,dict) else {}
+    entries=[{'symbol':sym} for sym in tracked.get('symbols',{})] + entries
+    checked=set()
+    for c in entries:
+        if res['requested']>=MAX_CHECKS:break
         symbol=str(c.get("symbol","")) if isinstance(c,dict) else ""
         if not re.fullmatch(r"[A-Z][A-Z0-9.\\-]{0,9}",symbol):continue
+        if symbol in checked:continue
+        checked.add(symbol)
         res["requested"]+=1
         try:record=inspect_chart(symbol,fetch(symbol),now)
         except (ValueError,TypeError,KeyError,urllib.error.HTTPError,urllib.error.URLError,TimeoutError,OSError):
@@ -73,10 +79,13 @@ def main():
     p=argparse.ArgumentParser()
     p.add_argument("--discovery",default="radar-discovery.json")
     p.add_argument("--out",default="cross-source-timing.json")
+    p.add_argument("--state",default="vendor-quote-state.json")
     a=p.parse_args()
     try:discovery=json.loads(Path(a.discovery).read_text())
     except (OSError,ValueError): discovery={}
-    report=run(discovery)
+    try:tracked=json.loads(Path(a.state).read_text())
+    except (OSError,ValueError):tracked={}
+    report=run(discovery,tracked=tracked)
     Path(a.out).write_text(json.dumps(report,indent=2)+"\n")
     print(json.dumps({"cross_source_checked":report["requested"],"statuses":[x["status"] for x in report["results"]],"verified_live_signals":0}))
 
