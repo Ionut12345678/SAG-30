@@ -52,7 +52,7 @@ def replay(symbol,bars,previous_close,*,horizon_minutes=390):
     next_bar=parsed[i+1]
     signal_end=signal[0]  # data vendor bar START, bar completion 5min later
     entry_time=next_bar[0]
-    if (entry_time-signal_end).total_seconds()<300:
+    if (entry_time-signal_end).total_seconds()!=300:
         return {"symbol":symbol,"status":"INVALID_BAR_CADENCE"}
     # Conservative: next bar OPEN (not the signal's already-closed bar).
     entry_price=next_bar[1]
@@ -63,6 +63,16 @@ def replay(symbol,bars,previous_close,*,horizon_minutes=390):
     if not observed:return {"symbol":symbol,"status":"NO_FOLLOWUP"}
     max_high=max(x[2] for x in observed)
     min_low=min(x[3] for x in observed)
+    # Unlike intrabar HIGH, these completed closes do not imply the target was
+    # fillable. They provide a more conservative observational cross-check.
+    max_close=max(x[4] for x in observed)
+    close_hit={}
+    for target in TARGETS:
+        threshold=entry_price*(1+target/100)
+        first_close=next((b for b in observed if b[4]>=threshold),None)
+        if first_close:
+            close_hit[str(target)]={"bar_start_utc":first_close[0].isoformat(),
+                 "minutes_since_entry":round((first_close[0]-entry_time).total_seconds()/60+5,1)}
     hit={}
     for target in TARGETS:
         threshold=entry_price*(1+target/100)
@@ -77,6 +87,10 @@ def replay(symbol,bars,previous_close,*,horizon_minutes=390):
         "signal_volume_ratio_vs_prior_6":round(volume_ratio,3) if volume_ratio is not None else None,
         "peak_future_high":max_high,"min_future_low":min_low,
         "max_gain_from_proxy_entry_pct":round(100*(max_high/entry_price-1),3),
+        "max_completed_close_gain_pct":round(100*(max_close/entry_price-1),3),
+        "thresholds_at_completed_closes":close_hit,
+        "winner_20_completed_close": "20" in close_hit,
+        "intrabar_high_is_optimistic_upper_bound":True,
         "max_drawdown_from_proxy_entry_pct":round(100*(min_low/entry_price-1),3),
         "hits_from_proxy_entry":hit,
         "outcome":"WINNER_20" if "20" in hit else "FALSE_WINNER_UNDER_20",
@@ -98,6 +112,7 @@ def summarize(records):
             "median_signal_volume_ratio_winner_20":median_volume_ratio(winners),
             "median_signal_volume_ratio_false_winner":median_volume_ratio(false_winners),
             "winner_20_count":sum(x["outcome"]=="WINNER_20" for x in valid),
+            "winner_20_completed_close_count":sum(x.get("winner_20_completed_close",False) for x in valid),
             "false_winner_under_20_count":sum(x["outcome"]=="FALSE_WINNER_UNDER_20" for x in valid),
             "threshold_counts":{str(n):sum(str(n) in x["hits_from_proxy_entry"] for x in valid) for n in TARGETS},
             "sample_selection_bias_warning":"Historical candidate sampling is not a representative backtest without prespecified universe",
