@@ -33,14 +33,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Recover previous screening state (main only)
-        if: github.event_name != 'pull_request'
+      - name: Recover previous screening state (isolated by PR or production)
         uses: actions/cache/restore@v4
         with:
           path: candidate-state.json
-          key: radar-nou-candidate-history-${{ github.run_id }}-${{ github.run_attempt }}
+          key: radar-nou-history-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'production' }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
-            radar-nou-candidate-history-
+            radar-nou-history-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'production' }}-
       - name: Record trigger and actual UTC runtime
         run: |
           echo "trigger=${{ github.event_name }} started_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
@@ -72,11 +71,11 @@ jobs:
       - name: Audit quality and follow-up coverage
         run: python radar_quality_audit.py --out radar-quality.json
       - name: Persist screening state for next scheduled run
-        if: github.event_name != 'pull_request' && hashFiles('candidate-state.json') != ''
+        if: hashFiles('candidate-state.json') != ''
         uses: actions/cache/save@v4
         with:
           path: candidate-state.json
-          key: radar-nou-candidate-history-${{ github.run_id }}-${{ github.run_attempt }}
+          key: radar-nou-history-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'production' }}-${{ github.run_id }}-${{ github.run_attempt }}
       - name: Upload evidence even if no data
         if: always()
         uses: actions/upload-artifact@v4
