@@ -12,7 +12,7 @@ class QualityTests(unittest.TestCase):
   result=audit(state,{"scan_status":"DISCOVERY_ONLY"},dict(follow,same_snapshot_as_discovery=True),T)
   self.assertEqual(result["tracked_candidates"],1)
   self.assertEqual(result["candidates_without_later_snapshot"],1)
-  self.assertEqual(result["reported_milestones_cumulative"]["50"],0)
+  self.assertEqual(result["unverified_reported_milestones_cumulative"]["50"],0)
   self.assertEqual(result["valid_buy_signals"],0)
  def test_mismatched_input_flags_gap(self):
   s,f=merge_scan({},payload(7),T)
