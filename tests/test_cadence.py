@@ -35,4 +35,33 @@ class CadenceAuditTests(unittest.TestCase):
         self.assertEqual(state["last_successful_scan_utc"],START.isoformat())
         state,result=merge_scan(state,feed(8),START+timedelta(minutes=10))
         self.assertEqual(result["seconds_since_previous_success"],600)
+class CrossSessionFollowupTests(unittest.TestCase):
+    def test_previous_session_remains_observed_without_unverified_alert(self):
+        start=datetime(2026,10,19,14,0,tzinfo=timezone.utc)
+        state,_=merge_scan({},feed(7),start)
+        following=start+timedelta(days=1)
+        state,report=merge_scan(state,feed(30),following)
+        old=state["sessions"]["2026-10-19"]["EXAMPLE"]
+        self.assertEqual(report["older_session_symbols_observed"],1)
+        self.assertEqual(old["last_observed_session"],"2026-10-20")
+        self.assertEqual(old["last_reported_daily_pct"],30)
+        self.assertIsNotNone(old["estimated_pct_vs_initial_prior_close"])
+        self.assertEqual(old["cross_session_thresholds_confirmed"],[])
+        self.assertEqual(report["older_session_thresholds_confirmed"],0)
+        self.assertEqual(old["milestones_reported"],[])
+        self.assertFalse(old["cross_session_quote_timestamp_verified"])
+    def test_absent_prior_symbol_is_not_fake_updated(self):
+        state,_=merge_scan({},feed(7),START)
+        payload={"data":{"rows":[{"symbol":"OTHER","pctchange":"9%","lastsale":"$12"}]}}
+        state,report=merge_scan(state,payload,START+timedelta(days=1))
+        self.assertEqual(report["older_session_symbols_observed"],0)
+        self.assertNotIn("last_seen_utc",state["sessions"]["2026-10-19"]["EXAMPLE"])
+    def test_missing_price_remains_unverified(self):
+        state,_=merge_scan({},feed(7),START)
+        payload={"data":{"rows":[{"symbol":"EXAMPLE","pctchange":"50%","lastsale":"N/A"}]}}
+        state,report=merge_scan(state,payload,START+timedelta(days=1))
+        old=state["sessions"]["2026-10-19"]["EXAMPLE"]
+        self.assertIsNone(old["estimated_pct_vs_initial_prior_close"])
+        self.assertEqual(report["older_session_thresholds_confirmed"],0)
+
 if __name__=="__main__":unittest.main()

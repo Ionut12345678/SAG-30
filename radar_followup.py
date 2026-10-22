@@ -83,6 +83,38 @@ def merge_scan(state, payload, at):
                 if change>=level and level not in levels:
                     levels.add(level);new_milestones+=1
             existing["milestones_reported"]=sorted(levels)
+        # Continue observing earlier sessions without comparing different days'
+        # daily pctchange values. These are untimestamped website snapshots:
+        # estimate change against the original prior close only for research,
+        # NEVER as a verified threshold or actionable signal.
+        older_tracked=0
+        older_observed=0
+        for old_session, old_map in state["sessions"].items():
+            if old_session==session or not isinstance(old_map,dict):continue
+            older_tracked+=len(old_map)
+            for sym, old in old_map.items():
+                if not isinstance(old,dict) or sym not in report_rows:continue
+                if not isinstance(old.get("first_seen_utc"),str) or old["first_seen_utc"]>=now:continue
+                obs=report_rows[sym]
+                old["last_seen_utc"]=now
+                old["last_observed_session"]=session
+                old["last_reported_daily_pct"]=obs["pct"]
+                old["last_last_sale"]=obs["price"]
+                old["cross_session_observation_count"]=int(old.get("cross_session_observation_count") or 0)+1
+                first_price=parse_price(old.get("first_last_sale"))
+                first_pct=old.get("first_reported_pct")
+                if first_price and isinstance(first_pct,(int,float)) and first_pct>-100 and obs["price"]:
+                    estimated_prior_close=first_price/(1+first_pct/100)
+                    old["estimated_pct_vs_initial_prior_close"]=round((obs["price"]/estimated_prior_close-1)*100,4)
+                else:
+                    old["estimated_pct_vs_initial_prior_close"]=None
+                old["cross_session_quote_timestamp_verified"]=False
+                old["cross_session_thresholds_confirmed"]=[]
+                older_observed+=1
+        result["older_session_symbols_tracked"]=older_tracked
+        result["older_session_symbols_observed"]=older_observed
+        result["older_session_thresholds_confirmed"]=0
+        result["cross_session_quality"]="UNVERIFIED_SOURCE_TIME_NO_CONFIRMED_MILESTONES"
         # Cap retained sessions and keep most recent by Eastern date.
         for old in sorted(state["sessions"])[:-MAX_SESSIONS]:state["sessions"].pop(old,None)
         previous_scan=state.get("last_successful_scan_utc")
