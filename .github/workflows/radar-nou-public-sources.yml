@@ -1,8 +1,10 @@
 name: Radar Nou automatic stock discovery (SHADOW)
 on:
   schedule:
-    # Off-peak slots: avoid :00 congestion. Best-effort UTC, not exact timing.
-    - cron: '17,47 13-21 * * 1-5'
+    # Four staggered attempts/hour improve recovery from skipped GitHub scheduled events.
+    # Best effort only: no execution SLA or guaranteed quote freshness.
+    # External pulse/heartbeat paths remain independent fallbacks; no trading is enabled.
+    - cron: '7,22,37,52 13-21 * * 1-5'
   pull_request:
   push:
     branches: [main]
