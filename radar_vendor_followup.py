@@ -26,11 +26,11 @@ def update(state,report):
             volume=int(obs["bar_volume"])
             if not symbol or not 0<price or not 0<reference or volume<0 or bar>now:continue
             pct=100*(price/reference-1)
-            if not 3<=pct<=10:continue
         except (KeyError,ValueError,TypeError):continue
         key=symbol+"|"+bar.astimezone(timezone.utc).date().isoformat()
         existing=ledger.get(key)
         if existing is None:
+            if not 3<=pct<=10:continue
             ledger[key]={"symbol":symbol,"first_seen_utc":now.isoformat(),
                          "source_timestamp_utc":bar.isoformat(),"first_price":price,
                          "reference_close":reference,"first_volume":volume,
