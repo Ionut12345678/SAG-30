@@ -64,7 +64,7 @@ jobs:
               print("RESTORED_SESSION_SYMBOL_COUNTS=" + json.dumps(counts, sort_keys=True))
           PY
       - name: Offline prospective SHADOW regression tests
-        run: python -m unittest discover -s tests -p 'test_prospective_shadow_guardrails.py'
+        run: python -m unittest discover -s tests -p 'test_*shadow*.py'
       - name: Diagnose feed quality
         run: python probe_public_sources.py --out source-evidence.json
       - name: Search listed stocks for early +3..+10 percent candidates
