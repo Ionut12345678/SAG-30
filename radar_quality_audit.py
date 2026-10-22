@@ -34,13 +34,14 @@ def audit(state, discovery, followup, at=None):
        "data_quality_status":"CONSISTENT_UNVERIFIED_SNAPSHOT" if ok else "DATA_GAP_OR_INCONSISTENT",
        "tracked_candidates":len(ledger),"candidates_with_later_snapshot":n_followed,
        "candidates_without_later_snapshot":len(ledger)-n_followed,
-       "reported_milestones_cumulative":milestones,
+       "unverified_reported_milestones_cumulative":milestones,
+       "prospectively_validated_milestones":{"15":0,"20":0,"30":0,"50":0},
        "seconds_since_previous_success":followup.get("seconds_since_previous_success"),
-       "five_minute_cadence_met":followup.get("five_minute_cadence_met",False),
-       "missed_five_minute_intervals":followup.get("missed_five_minute_intervals"),
+       "hourly_cadence_met":followup.get("hourly_cadence_met",False),
+       "missed_hourly_intervals":followup.get("missed_hourly_intervals"),
        "quote_source_time_verified":False,"full_market_coverage_verified":False,
        "source_quality_issues":gaps,
-       "note":"Reported changes are snapshots without verified exchange quote times. Milestones are NOT verified live opportunities."
+       "note":"Unverified milestone counts do not belong in the 30-day validated outcome. Reported changes are snapshots without verified exchange quote times. Milestones are NOT verified live opportunities."
     }
 
 def main():
