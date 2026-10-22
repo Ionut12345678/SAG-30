@@ -12,6 +12,7 @@ on:
       - 'radar_followup.py'
       - 'radar_quality_audit.py'
       - 'radar_cross_source.py'
+      - 'radar_finnhub_shadow.py'
       - 'radar-pulses/**'
   workflow_run:
     workflows: ["Radar Nou schedule heartbeat"]
@@ -69,6 +70,10 @@ jobs:
         run: python radar_discovery.py --output radar-discovery.json --snapshot nasdaq-snapshot.json
       - name: Check timestamp and price against independent public chart source
         run: python radar_cross_source.py --discovery radar-discovery.json --out cross-source-timing.json
+      - name: Optional timestamped quote diagnostic (no BUY)
+        env:
+          FINNHUB_API_KEY: ${{ secrets.FINNHUB_API_KEY }}
+        run: python radar_finnhub_shadow.py --discovery radar-discovery.json --out timestamped-quote-diagnostics.json
       - name: Track candidate outcomes vs later screen snapshots
         run: python radar_followup.py --state candidate-state.json --out candidate-followup.json --snapshot nasdaq-snapshot.json
       - name: Audit quality and follow-up coverage
@@ -91,5 +96,6 @@ jobs:
             candidate-followup.json
             radar-quality.json
             cross-source-timing.json
+            timestamped-quote-diagnostics.json
             candidate-state.json
           if-no-files-found: warn
