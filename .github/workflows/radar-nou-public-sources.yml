@@ -14,6 +14,7 @@ on:
       - 'radar_cross_source.py'
       - 'radar_finnhub_shadow.py'
       - 'radar_yahoo_1m_shadow.py'
+      - 'radar_vendor_followup.py'
       - 'radar-pulses/**'
   workflow_run:
     workflows: ["Radar Nou schedule heartbeat"]
@@ -79,6 +80,8 @@ jobs:
         run: python radar_finnhub_shadow.py --discovery radar-discovery.json --out timestamped-quote-diagnostics.json
       - name: Track candidate outcomes vs later screen snapshots
         run: python radar_followup.py --state candidate-state.json --out candidate-followup.json --snapshot nasdaq-snapshot.json
+      - name: Persist prospective vendor bar followups (SHADOW only)
+        run: python radar_vendor_followup.py --state candidate-state.json --observations yahoo-1m-shadow.json --out prospective-vendor-ledger.json
       - name: Audit quality and follow-up coverage
         run: python radar_quality_audit.py --out radar-quality.json
       - name: Persist screening state for next scheduled run
@@ -101,5 +104,6 @@ jobs:
             cross-source-timing.json
             timestamped-quote-diagnostics.json
             yahoo-1m-shadow.json
+            prospective-vendor-ledger.json
             candidate-state.json
           if-no-files-found: warn
