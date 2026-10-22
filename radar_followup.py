@@ -141,6 +141,6 @@ def main():
         state_path.write_text(json.dumps(state,indent=2,sort_keys=True)+"\n",encoding="utf-8")
     Path(args.out).write_text(json.dumps(report,indent=2,sort_keys=True)+"\n",encoding="utf-8")
     print(json.dumps({k:report.get(k) for k in ["status","error_type","new_candidates","tracked_symbols",
-        "new_reported_milestones","valid_first_watch_signals"]}))
+        "new_unverified_reported_milestones","valid_first_watch_signals"]}))
 
 if __name__=="__main__":main()
