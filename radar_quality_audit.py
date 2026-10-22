@@ -56,5 +56,5 @@ def main():
         except (ValueError,OSError):return {}
     res=audit(read(a.state),read(a.discovery),read(a.followup))
     Path(a.out).write_text(json.dumps(res,indent=2,sort_keys=True)+"\n",encoding="utf-8")
-    print(json.dumps({k:res[k] for k in ("data_quality_status","tracked_candidates","candidates_with_later_snapshot","reported_milestones_cumulative")}))
+    print(json.dumps({k:res[k] for k in ("data_quality_status","tracked_candidates","candidates_with_later_snapshot","unverified_reported_milestones_cumulative")}))
 if __name__=="__main__":main()
