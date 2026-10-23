@@ -44,6 +44,14 @@ def audit(root):
                     "database_sha256_verified":True,"checked_tables":len(counts),
                     "counts":counts,"count_mismatches":mismatches,
                     "experiment_21oct_to_20nov_included":False,"mode":"READ_ONLY_HISTORICAL_AUDIT"}
+            # Record only schema metadata, never raw quotes or private observations.
+            focus=("scout_history","scout_promotions","multi_engine_scores","observations","evaluations","candidate_v034_events","early_paper_follow_v12")
+            schema={}
+            for table in focus:
+                if table in names:
+                    schema[table]=[{"name":row[1],"type":row[2]} for row in con.execute('PRAGMA table_info("'+table+'")')]
+            report["research_schema"]=schema
+            report["research_note"]="Schema discovery only; no outcome-rate claim, no look-ahead or 30-day experiment mixing."
             if integrity!="ok" or mismatches:raise RuntimeError("SQL_INTEGRITY_OR_COUNT_MISMATCH: "+json.dumps(report))
             return report
         finally:con.close()
