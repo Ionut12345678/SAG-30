@@ -133,6 +133,61 @@ def audit(root):
                 "definition":"Observed subsequent change_pct against prior close, same UTC day; strictly later source AND retrieval times; deduplicate source timestamps",
                 "not_entry_return":True,"historical_only":True,
                 "limits":"Research diagnostic only. Source quality is reported, not independently validated. Sparse snapshots miss highs; session/date UTC approximation can exclude observations. No BUY and no prospective 21Oct-20Nov claims."}
+            # Entry-price research: first observed eligible quote AT/AFTER SCOUT first_seen.
+            # SCOUT table has no price column, so do NOT label the entry as the SCOUT price.
+            entry_groups={}
+            for label in ("selected_at_first","not_selected_at_first"):
+                entry_groups[label]={"total":0,"with_entry_quote":0,"with_later_quote":0,
+                    "positive_last":0,"negative_last":0,"flat_last":0,
+                    "entry_return_hits":{str(t):0 for t in (5,10,15,20,30,50)},
+                    "last_return_sum_pct":0.0,"best_return_sum_pct":0.0,
+                    "worst_return_sum_pct":0.0}
+            for (session,symbol),entry in early.items():
+                g=entry_groups["selected_at_first" if entry["selected_at_first"] else "not_selected_at_first"]
+                g["total"]+=1
+                valid=[]
+                seen=set()
+                for rt,st,price,pct,quality in con.execute(
+                    "SELECT retrieval_ts,source_ts,price,change_pct,quality FROM observations "
+                    "WHERE symbol=? AND retrieval_ts>=? AND source_ts>=? "
+                    "AND retrieval_ts IS NOT NULL AND source_ts IS NOT NULL AND price>0 "
+                    "ORDER BY retrieval_ts,source_ts",(symbol,entry["first_seen"],entry["first_seen"])):
+                    if rt[:10]!=entry["first_seen"][:10] or st[:10]!=entry["first_seen"][:10]:continue
+                    if st in seen:continue
+                    seen.add(st)
+                    valid.append((rt,st,float(price)))
+                if not valid:continue
+                g["with_entry_quote"]+=1
+                rt0,st0,p0=valid[0]
+                future=[p for rt,st,p in valid[1:] if rt>rt0 and st>st0]
+                if not future:continue
+                g["with_later_quote"]+=1
+                last=100*(future[-1]/p0-1)
+                best=100*(max(future)/p0-1)
+                worst=100*(min(future)/p0-1)
+                g["last_return_sum_pct"]+=last
+                g["best_return_sum_pct"]+=best
+                g["worst_return_sum_pct"]+=worst
+                g["positive_last"]+=int(last>0)
+                g["negative_last"]+=int(last<0)
+                g["flat_last"]+=int(last==0)
+                for t in (5,10,15,20,30,50):
+                    g["entry_return_hits"][str(t)]+=int(best>=t)
+            for g in entry_groups.values():
+                n=g["with_later_quote"]
+                if n:
+                    for raw,mean in (("last_return_sum_pct","mean_last_return_pct"),
+                                      ("best_return_sum_pct","mean_best_observed_return_pct"),
+                                      ("worst_return_sum_pct","mean_worst_observed_return_pct")):
+                        g[mean]=round(g.pop(raw)/n,4)
+                else:
+                    for raw in ("last_return_sum_pct","best_return_sum_pct","worst_return_sum_pct"):g.pop(raw)
+                    g.update(mean_last_return_pct=None,mean_best_observed_return_pct=None,mean_worst_observed_return_pct=None)
+            report["historical_entry_quote_returns"]={
+                "groups":entry_groups,
+                "entry_definition":"First unique-price observation with retrieval_ts and source_ts at/after SCOUT first_seen, same UTC day",
+                "returns_definition":"Later quote price / first eligible quote price - 1; not executable return or SCOUT entry price",
+                "limitations":"SCOUT has no quoted entry price; many absent quotes. Excludes same-timestamp repeats and outside-date. Price source quality not independently certified. No transaction cost, bid-ask, delisting adjustment, or intrabar maximum. Historical only."}
             if integrity!="ok" or mismatches:raise RuntimeError("SQL_INTEGRITY_OR_COUNT_MISMATCH: "+json.dumps(report))
             return report
         finally:con.close()
