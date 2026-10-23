@@ -52,6 +52,48 @@ def audit(root):
                     schema[table]=[{"name":row[1],"type":row[2]} for row in con.execute('PRAGMA table_info("'+table+'")')]
             report["research_schema"]=schema
             report["research_note"]="Schema discovery only; no outcome-rate claim, no look-ahead or 30-day experiment mixing."
+            # Historical funnel: earliest SCOUT observation inside +3..+10 for each
+            # symbol-session, with strictly later promotion evidence only.
+            # No future-price outcomes, no performance or BUY interpretation.
+            early={}
+            session_counts={}
+            for session,symbol,ts,pct,selected in con.execute(
+                "SELECT session,symbol,retrieval_ts,change_pct,selected "
+                "FROM scout_history WHERE session IS NOT NULL AND symbol IS NOT NULL "
+                "AND retrieval_ts IS NOT NULL AND change_pct BETWEEN 3 AND 10 "
+                "ORDER BY session,symbol,retrieval_ts"):
+                key=(session,symbol)
+                if key not in early:
+                    early[key]={"first_seen":ts,"pct":pct,"selected_at_first":bool(selected)}
+                    session_counts[session]=session_counts.get(session,0)+1
+            promotions={}
+            for symbol,ts in con.execute(
+                "SELECT symbol,scout_retrieval_ts FROM scout_promotions "
+                "WHERE symbol IS NOT NULL AND scout_retrieval_ts IS NOT NULL "
+                "ORDER BY scout_retrieval_ts"):
+                promotions.setdefault(symbol,[]).append(ts)
+            # Promotion table has no session: restrict to same UTC calendar date,
+            # and only after the first timestamp. Conservative, may undercount.
+            from bisect import bisect_right
+            promoted=0
+            initial_selected=0
+            for (session,symbol),record in early.items():
+                initial_selected+=int(record["selected_at_first"])
+                future=promotions.get(symbol,[])
+                idx=bisect_right(future,record["first_seen"])
+                if idx<len(future) and future[idx][:10]==record["first_seen"][:10]:
+                    promoted+=1
+            report["historical_scout_funnel"]={
+                "definition":"Earliest scout_history observation +3..+10 per symbol-session; strictly later scout_promotions timestamp, same UTC date",
+                "candidate_symbol_sessions":len(early),
+                "selected_at_first_seen":initial_selected,
+                "later_promoted_same_utc_day":promoted,
+                "sessions":dict(sorted(session_counts.items())),
+                "first_seen_min":min((x["first_seen"] for x in early.values()),default=None),
+                "first_seen_max":max((x["first_seen"] for x in early.values()),default=None),
+                "limits":"Promotion is not validated opportunity, not subsequent price gain; session mapped conservatively via UTC date; no benchmark or causality claim.",
+                "prospective_experiment_included":False}
+
             if integrity!="ok" or mismatches:raise RuntimeError("SQL_INTEGRITY_OR_COUNT_MISMATCH: "+json.dumps(report))
             return report
         finally:con.close()
