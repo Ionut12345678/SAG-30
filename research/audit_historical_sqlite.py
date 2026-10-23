@@ -188,6 +188,32 @@ def audit(root):
                 "entry_definition":"First unique-price observation with retrieval_ts and source_ts at/after SCOUT first_seen, same UTC day",
                 "returns_definition":"Later quote price / first eligible quote price - 1; not executable return or SCOUT entry price",
                 "limitations":"SCOUT has no quoted entry price; many absent quotes. Excludes same-timestamp repeats and outside-date. Price source quality not independently certified. No transaction cost, bid-ask, delisting adjustment, or intrabar maximum. Historical only."}
+            # Final historical verdict with transparent coverage, not a trading claim.
+            cohort=report["historical_entry_quote_returns"]["groups"]
+            verdict={}
+            for label,g in cohort.items():
+                n=g["with_later_quote"]
+                verdict[label]={
+                    "eligible":n,"initial":g["total"],
+                    "coverage_pct":round(100*n/g["total"],2) if g["total"] else None,
+                    "observed_hit20_pct":round(100*g["entry_return_hits"]["20"]/n,2) if n else None,
+                    "observed_hit30_pct":round(100*g["entry_return_hits"]["30"]/n,2) if n else None,
+                    "observed_hit50_pct":round(100*g["entry_return_hits"]["50"]/n,2) if n else None,
+                    "mean_last_return_pct":g["mean_last_return_pct"]}
+            a=verdict["selected_at_first"]
+            b=verdict["not_selected_at_first"]
+            report["historical_verdict"]={
+                "cohorts":verdict,
+                "mean_last_difference_percentage_points":
+                    round(a["mean_last_return_pct"]-b["mean_last_return_pct"],4)
+                    if a["mean_last_return_pct"] is not None and b["mean_last_return_pct"] is not None else None,
+                "critical_limitations":[
+                    "Selection groups have unequal observation coverage; missingness may bias comparison.",
+                    "Historical only: no independent out-of-sample evaluation or causal evidence.",
+                    "Prices are observed quote snapshots; not executable fills or realized PnL.",
+                    "Same-UTC-day restriction; not a full multiday hold strategy.",
+                    "No production/FROZEN changes; cannot infer results for 21 Oct–20 Nov experiment."],
+                "decision":"RESEARCH_ONLY_NOT_READY_FOR_LIVE_BUY"}
             if integrity!="ok" or mismatches:raise RuntimeError("SQL_INTEGRITY_OR_COUNT_MISMATCH: "+json.dumps(report))
             return report
         finally:con.close()
