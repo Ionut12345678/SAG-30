@@ -94,6 +94,45 @@ def audit(root):
                 "limits":"Promotion is not validated opportunity, not subsequent price gain; session mapped conservatively via UTC date; no benchmark or causality claim.",
                 "prospective_experiment_included":False}
 
+            # Snapshot-only follow-up from actual stored observations.
+            # Compare to preceding regular close via change_pct, NOT gain from entry.
+            # Require strictly later retrieval AND source timestamps, same UTC date,
+            # no duplicate source timestamps, and numeric non-null observed prices.
+            from collections import defaultdict
+            tracks=defaultdict(list)
+            for symbol,rt,st,price,pct,quality in con.execute(
+                "SELECT symbol,retrieval_ts,source_ts,price,change_pct,quality "
+                "FROM observations WHERE symbol IS NOT NULL AND retrieval_ts IS NOT NULL "
+                "AND source_ts IS NOT NULL AND price > 0 AND change_pct IS NOT NULL "
+                "ORDER BY symbol,retrieval_ts"):
+                tracks[symbol].append((rt,st,float(pct),str(quality or "")))
+            groups={"selected_at_first":{"count":0,"with_future_sample":0,"hits":{str(t):0 for t in (15,20,30,50)}},
+                    "not_selected_at_first":{"count":0,"with_future_sample":0,"hits":{str(t):0 for t in (15,20,30,50)}}}
+            quality_counts=defaultdict(int)
+            for (session,symbol),entry in early.items():
+                group=groups["selected_at_first" if entry["selected_at_first"] else "not_selected_at_first"]
+                group["count"]+=1
+                first=entry["first_seen"]
+                seen_source=set()
+                highs=[]
+                for rt,st,pct,quality in tracks.get(symbol,()):
+                    if rt<=first or st<=first or rt[:10]!=first[:10] or st[:10]!=first[:10]:
+                        continue
+                    if st in seen_source:
+                        continue
+                    seen_source.add(st)
+                    quality_counts[quality]+=1
+                    highs.append(pct)
+                if highs:
+                    group["with_future_sample"]+=1
+                    observed_max=max(highs)
+                    for threshold in (15,20,30,50):
+                        if observed_max>=threshold:group["hits"][str(threshold)]+=1
+            report["historical_observed_thresholds"]={
+                "groups":groups,"future_sample_quality_labels":dict(sorted(quality_counts.items())),
+                "definition":"Observed subsequent change_pct against prior close, same UTC day; strictly later source AND retrieval times; deduplicate source timestamps",
+                "not_entry_return":True,"historical_only":True,
+                "limits":"Research diagnostic only. Source quality is reported, not independently validated. Sparse snapshots miss highs; session/date UTC approximation can exclude observations. No BUY and no prospective 21Oct-20Nov claims."}
             if integrity!="ok" or mismatches:raise RuntimeError("SQL_INTEGRITY_OR_COUNT_MISMATCH: "+json.dumps(report))
             return report
         finally:con.close()
