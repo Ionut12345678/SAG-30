@@ -214,6 +214,62 @@ def audit(root):
                     "Same-UTC-day restriction; not a full multiday hold strategy.",
                     "No production/FROZEN changes; cannot infer results for 21 Oct–20 Nov experiment."],
                 "decision":"RESEARCH_ONLY_NOT_READY_FOR_LIVE_BUY"}
+            # Chronological fixed-rule validation. No hyperparameter optimization.
+            # Only two quotes strictly ordered in retrieval/source times count as evaluable.
+            by_day={}
+            for (session,symbol),entry in early.items():
+                date=str(session)
+                day=by_day.setdefault(date,{label:{"all":0,"evaluable":0,"last_sum":0.0,"positive":0,"hit20":0}
+                    for label in ("selected","not_selected")})
+                label="selected" if entry["selected_at_first"] else "not_selected"
+                group=day[label]
+                group["all"]+=1
+                quotes=[]
+                seen=set()
+                for rt,st,price in con.execute(
+                    "SELECT retrieval_ts,source_ts,price FROM observations "
+                    "WHERE symbol=? AND retrieval_ts>=? AND source_ts>=? AND price>0 "
+                    "ORDER BY retrieval_ts,source_ts",(symbol,entry["first_seen"],entry["first_seen"])):
+                    if rt[:10]!=entry["first_seen"][:10] or st[:10]!=entry["first_seen"][:10] or st in seen:
+                        continue
+                    seen.add(st)
+                    quotes.append((rt,st,float(price)))
+                if not quotes:continue
+                rt0,st0,p0=quotes[0]
+                subsequent=[p for rt,st,p in quotes[1:] if rt>rt0 and st>st0]
+                if not subsequent:continue
+                last_pct=(subsequent[-1]/p0-1)*100
+                best_pct=(max(subsequent)/p0-1)*100
+                group["evaluable"]+=1
+                group["last_sum"]+=last_pct
+                group["positive"]+=int(last_pct>0)
+                group["hit20"]+=int(best_pct>=20)
+            ordered=sorted(by_day)
+            cutoff=len(ordered)//2
+            train_days=ordered[:cutoff]
+            test_days=ordered[cutoff:]
+            def summarize(days):
+                out={}
+                for label in ("selected","not_selected"):
+                    totals={k:sum(by_day[d][label][k] for d in days) for k in ("all","evaluable","last_sum","positive","hit20")}
+                    n=totals["evaluable"]
+                    out[label]={
+                        "all":totals["all"],"evaluable":n,
+                        "coverage_pct":round(100*n/totals["all"],2) if totals["all"] else None,
+                        "mean_last_pct":round(totals["last_sum"]/n,4) if n else None,
+                        "positive_last_pct":round(100*totals["positive"]/n,2) if n else None,
+                        "hit20_observed_pct":round(100*totals["hit20"]/n,2) if n else None}
+                a,b=out["selected"],out["not_selected"]
+                out["mean_difference_pp"]=round(a["mean_last_pct"]-b["mean_last_pct"],4) if a["mean_last_pct"] is not None and b["mean_last_pct"] is not None else None
+                out["both_groups_coverage_ge_50pct"]=all((out[x]["coverage_pct"] or 0)>=50 for x in ("selected","not_selected"))
+                return out
+            train,test=summarize(train_days),summarize(test_days)
+            report["chronological_validation"]={
+                "rule":"Existing recorded selected_at_first vs not selected; no parameter fitting or modified strategy",
+                "train_days":train_days,"holdout_days":test_days,"train":train,"holdout":test,
+                "conclusion":"INSUFFICIENT_COVERAGE" if not test["both_groups_coverage_ge_50pct"] else
+                    ("DIRECTIONALLY_POSITIVE_NOT_PROVEN" if test["mean_difference_pp"] is not None and test["mean_difference_pp"]>0 else "NO_POSITIVE_HOLDOUT_DIFFERENCE"),
+                "limitations":"No trained challenger model or true out-of-sample forward run. Missing quotes not random; same-day snapshots only; cannot extrapolate to 30-day period."}
             if integrity!="ok" or mismatches:raise RuntimeError("SQL_INTEGRITY_OR_COUNT_MISMATCH: "+json.dumps(report))
             return report
         finally:con.close()
