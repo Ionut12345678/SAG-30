@@ -1,6 +1,8 @@
 """Prospective read-only vendor-bar ledger. Never promotes vendor bars to validated trades."""
 import argparse
 import json
+import math
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from datetime import datetime, timezone
 
@@ -21,20 +23,21 @@ def update(state,report):
         symbol=obs.get("symbol")
         try:
             bar=timestamp(obs["source_timestamp_utc"])
-            price=float(obs["price"])
-            reference=float(obs["reference_close"])
+            price=Decimal(str(obs["price"]))
+            reference=Decimal(str(obs["reference_close"]))
             volume=int(obs["bar_volume"])
-            if not symbol or not 0<price or not 0<reference or volume<0 or bar>now:continue
-            pct=100*(price/reference-1)
-        except (KeyError,ValueError,TypeError):continue
+            if not symbol or not price.is_finite() or not reference.is_finite() or not 0<price or not 0<reference or volume<0 or bar>now:continue
+            pct=Decimal(100)*(price/reference-1)
+        except (KeyError,ValueError,TypeError,InvalidOperation,OverflowError):continue
         key=symbol+"|"+bar.astimezone(timezone.utc).date().isoformat()
         existing=ledger.get(key)
         if existing is None:
-            if not 3<=pct<=10:continue
+            if not Decimal(3)<=pct<=Decimal(10):continue
             ledger[key]={"symbol":symbol,"first_seen_utc":now.isoformat(),
-                         "source_timestamp_utc":bar.isoformat(),"first_price":price,
-                         "reference_close":reference,"first_volume":volume,
+                         "source_timestamp_utc":bar.isoformat(),"first_price":float(price),
+                         "reference_close":float(reference),"first_volume":volume,
                          "last_source_timestamp_utc":bar.isoformat(),
+                         "max_later_price":None,"min_price_after_max":None,
                          "status":"VENDOR_UNVERIFIED","later_reported_milestones":[],
                          "later_observations":0}
             changes.append({"symbol":symbol,"event":"NEW_VENDOR_DISCOVERY","first_seen_utc":now.isoformat()})
@@ -42,13 +45,23 @@ def update(state,report):
             # A new bar is newer than the first bar and must not precede retrieval of first observation.
             if bar<=timestamp(existing["first_seen_utc"]):continue
             levels=set(existing["later_reported_milestones"])
+            baseline=Decimal(str(existing["first_price"]))
+            gain=Decimal(100)*(price/baseline-1)
             for level in LEVELS:
-                if pct>=level:levels.add(level)
+                if gain>=Decimal(level):levels.add(level)
+            high=existing.get("max_later_price")
+            if high is None or price>Decimal(str(high)):
+                existing["max_later_price"]=float(price)
+                existing["min_price_after_max"]=None
+            else:
+                low=existing.get("min_price_after_max")
+                if low is None or price<Decimal(str(low)):
+                    existing["min_price_after_max"]=float(price)
             existing["later_reported_milestones"]=sorted(levels)
             existing["last_source_timestamp_utc"]=bar.isoformat()
             existing["later_observations"]+=1
             changes.append({"symbol":symbol,"event":"FOLLOWUP_VENDOR_BAR","percent_vs_reference":round(pct,4),
-                            "unverified_milestones":sorted(levels)})
+                            "unverified_milestones":sorted(levels),"percent_vs_first_seen":round(float(gain),4)})
     return state,{"checked_at_utc":now.isoformat(),"status":"VENDOR_RESEARCH_ONLY",
                   "validated_signals":0,"events":changes,"tracked_vendor_candidates":len(ledger)}
 
