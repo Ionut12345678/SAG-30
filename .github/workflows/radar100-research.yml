@@ -1,0 +1,57 @@
+name: Radar100 research checks
+on:
+  push:
+    branches:
+      - experiment/radar100-paper-v1-20261024
+    paths:
+      - 'experiments/radar100/**'
+      - '.github/workflows/radar100-research.yml'
+  pull_request:
+    paths:
+      - 'experiments/radar100/**'
+      - '.github/workflows/radar100-research.yml'
+  workflow_dispatch:
+jobs:
+  offline-tests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Offline unit tests
+        working-directory: experiments/radar100
+        run: python -m unittest discover -v -p 'test_*.py'
+  real-data-smoke:
+    needs: offline-tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fetch keyless adjusted historical OHLC (Yahoo research endpoint)
+        run: |
+          python experiments/radar100/fetch_yahoo.py --symbols AAPL MSFT NVDA AMD TSLA AMZN GOOGL META AVGO JPM XOM COST UNH CAT KO WMT DIS BA INTC QCOM NFLX --range 5y --out /tmp/radar100_prices.csv
+          python experiments/radar100/backtest.py /tmp/radar100_prices.csv --symbol AAPL --out /tmp/radar100_aapl.json
+          python experiments/radar100/backtest.py /tmp/radar100_prices.csv --symbol AAPL --dca --out /tmp/radar100_aapl_dca.json
+          python experiments/radar100/compare_symbols.py /tmp/radar100_prices.csv --out /tmp/radar100_comparison.json
+          python experiments/radar100/portfolio.py /tmp/radar100_prices.csv --start 2024-01-01 --out /tmp/radar100_portfolio.json
+          python experiments/radar100/scenarios.py /tmp/radar100_prices.csv --out /tmp/radar100_scenarios.json
+          python experiments/radar100/forecast_v2.py /tmp/radar100_prices.csv --out /tmp/radar100_forecast_v2.json
+          python experiments/radar100/filters_v2.py /tmp/radar100_prices.csv --out /tmp/radar100_filters_v2.json
+          python experiments/radar100/filter_portfolio.py /tmp/radar100_prices.csv --out /tmp/radar100_filter_portfolio.json
+          python experiments/radar100/benchmark_check.py /tmp/radar100_prices.csv --out /tmp/radar100_benchmark_check.json
+          python experiments/radar100/robustness_v2.py /tmp/radar100_prices.csv --out /tmp/radar100_robustness_v2.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: radar100-real-data-smoke
+          path: /tmp/radar100_*.json
+          if-no-files-found: ignore

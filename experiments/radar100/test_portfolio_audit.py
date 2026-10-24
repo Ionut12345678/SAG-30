@@ -1,0 +1,71 @@
+import unittest
+from datetime import date,timedelta
+import portfolio
+
+def build(prices,lows=None):
+    first=date(2025,1,1)
+    return [{"date":first+timedelta(days=i),"open":p,"high":p*1.01,
+             "low":(lows[i] if lows is not None else p*.99),"close":p}
+             for i,p in enumerate(prices)]
+
+class PortfolioAudit(unittest.TestCase):
+    def test_entry_day_stop_executed(self):
+        prices=[100+i*.2 for i in range(64)]
+        lows=[p*.99 for p in prices]
+        lows[61]=prices[61]*.90
+        b=build(prices,lows)
+        old=portfolio.test_signal
+        try:
+            portfolio.test_signal=lambda bars,i:i==60
+            r=portfolio.simulate({"TEST":b},start="2025-01-01",stop=.05)
+        finally:
+            portfolio.test_signal=old
+        self.assertEqual(r["closed_trades"],1)
+        self.assertEqual(r["trades"][0]["reason"],"stop")
+        self.assertEqual(r["trades"][0]["entry_date"],r["trades"][0]["exit_date"])
+
+
+    def test_gap_stop_fills_at_open_not_stop_threshold(self):
+        prices=[100.]*75
+        bars=build(prices)
+        bars[62].update({"open":90.,"low":89.,"high":100.,"close":91.})
+        old=portfolio.test_signal
+        try:
+            portfolio.test_signal=lambda b,i:i==60
+            r=portfolio.simulate({"TEST":bars},stop=.05)
+        finally:
+            portfolio.test_signal=old
+        self.assertEqual(r["closed_trades"],1)
+        self.assertEqual(r["trades"][0]["reason"],"gap_stop")
+        self.assertLess(r["trades"][0]["pnl"],-1.5)
+
+    def test_holding_period_closes_position(self):
+        bars=build([100.]*75)
+        old=portfolio.test_signal
+        try:
+            portfolio.test_signal=lambda b,i:i==60
+            r=portfolio.simulate({"TEST":bars},hold_days=3)
+        finally:
+            portfolio.test_signal=old
+        self.assertEqual(r["closed_trades"],1)
+        self.assertEqual(r["trades"][0]["reason"],"horizon")
+
+    def test_no_exposure_without_entry(self):
+        r=portfolio.simulate({"FLAT":build([100.]*70)})
+        self.assertEqual(r["closed_trades"],0)
+        self.assertEqual(r["average_exposure_pct"],0)
+
+    def test_reject_empty_universe(self):
+        with self.assertRaises(ValueError):
+            portfolio.simulate({})
+
+    def test_stress_field_is_reported(self):
+        r=portfolio.simulate({"FLAT":build([100.]*70)})
+        self.assertIn("intraday_low_vs_initial_pct",r)
+        self.assertEqual(r["intraday_low_vs_initial_pct"],0)
+
+    def test_reject_bad_settings(self):
+        with self.assertRaises(ValueError):
+            portfolio.simulate({"X":build([100.]*70)},stop=0)
+
+if __name__=="__main__":unittest.main()
