@@ -9,10 +9,10 @@ def simulate(groups, initial=100., slots=2, allocation=20., fee_bps=10.,
     dates=sorted(set.intersection(*(set(b["date"] for b in bars) for bars in groups.values())))
     lookup={s:{b["date"]:b for b in bars} for s,bars in groups.items()}
     indices={s:{b["date"]:i for i,b in enumerate(bars)} for s,bars in groups.items()}
-    cash=initial
+    if not groups or not 0 < stop < 1 or hold_days < 1 or slots < 1 or allocation <= 0 or fee_bps < 0:\n        raise ValueError("Invalid portfolio settings")\n    cash=initial
     holdings={}
     trades=[]
-    equity=[]
+    equity=[]\n    exposure=[]
     prev=None
     for d in dates:
         if d.isoformat()<start: continue
@@ -23,7 +23,7 @@ def simulate(groups, initial=100., slots=2, allocation=20., fee_bps=10.,
                 bar=lookup[s][d]
                 if bar["open"] <= p["entry"]*(1-stop):
                     px=bar["open"]; reason="gap_stop"
-                elif p["age"] >= hold_days:
+                elif p["age"] >= hold_days - 1:
                     px=bar["open"]; reason="horizon"
                 else:
                     continue
@@ -48,10 +48,10 @@ def simulate(groups, initial=100., slots=2, allocation=20., fee_bps=10.,
                 qty=(stake-fee)/px
                 holdings[s]={"entry":px,"qty":qty,"spent":stake,"date":str(d),"age":0}
                 cash-=stake
-        # Intraday stop: pessimistic threshold fill, but not on same-day entry
+        # OHLC cannot resolve entry-open versus later intraday stop ordering.\n        # Since entry is at the opening auction, a subsequent low at/below stop\n        # is conservatively assumed to trigger even on entry day.
         for s,p in list(holdings.items()):
             bar=lookup[s][d]
-            if p["date"] != str(d) and bar["low"] <= p["entry"]*(1-stop):
+            if bar["low"] <= p["entry"]*(1-stop):
                 px=p["entry"]*(1-stop)
                 proceeds=p["qty"]*px*(1-fee_bps/10000)
                 cash+=proceeds
@@ -61,7 +61,7 @@ def simulate(groups, initial=100., slots=2, allocation=20., fee_bps=10.,
             elif p["date"] != str(d):
                 p["age"]+=1
         value=cash+sum(p["qty"]*lookup[s][d]["close"] for s,p in holdings.items())
-        equity.append({"date":str(d),"equity":round(value,5)})
+        equity.append({"date":str(d),"equity":round(value,5)})\n        exposure.append(sum(p["qty"]*lookup[s][d]["close"] for s,p in holdings.items())/value if value>0 else 0)
         prev=d
     if not equity:raise ValueError("No synchronized dates")
     last=equity[-1]["date"]
@@ -73,7 +73,7 @@ def simulate(groups, initial=100., slots=2, allocation=20., fee_bps=10.,
     return {"start":equity[0]["date"],"end":last,"initial":initial,
             "final_mark_to_market":final,"net_return_pct":round(100*(final/initial-1),4),
             "max_drawdown_pct":round(100*worst,4),"closed_trades":len(trades),
-            "open_positions":list(holdings),"monthly_return_pct":monthly(equity),
+            "open_positions":list(holdings),"average_exposure_pct":round(100*sum(exposure)/len(exposure),3),\n            "monthly_return_pct":monthly(equity),
             "trades":trades}
 
 def monthly(equity):
