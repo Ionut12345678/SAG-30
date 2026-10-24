@@ -15,9 +15,26 @@ MAX_CHECKS=20
 MAX_AGE=180
 ET=ZoneInfo("America/New_York")
 
+def regular_session_status(now):
+    """Weekend and regular-hours classification; does not infer exchange holidays."""
+    local=now.astimezone(ET)
+    if local.weekday()>=5:
+        return "MARKET_CLOSED_WEEKEND"
+    if local.time()<time(9,30):
+        return "PRE_MARKET"
+    if local.time()>=time(16,0):
+        return "AFTER_HOURS"
+    return "REGULAR_SESSION"
+
 def inspect(symbol,payload,now):
     result={"symbol":symbol,"source":"Yahoo chart 1m (unofficial)","status":"BAD_SCHEMA",
             "validated_signal":False,"buy_enabled":False}
+    session=regular_session_status(now)
+    if session=="MARKET_CLOSED_WEEKEND":
+        result["status"]="MARKET_CLOSED"
+        result["market_session"]=session
+        return result
+    result["market_session"]=session
     try:
         chart=payload["chart"]["result"][0]
         meta=chart["meta"]
@@ -72,6 +89,11 @@ def run(discovery,now=None,reader=fetch):
     now=now or datetime.now(timezone.utc)
     out={"checked_at_utc":now.isoformat(),"mode":"SHADOW","source":"Yahoo 1m",
          "orders_enabled":False,"validated_signals":0,"records":[]}
+    if regular_session_status(now)=="MARKET_CLOSED_WEEKEND":
+        out["market_session"]="MARKET_CLOSED_WEEKEND"
+        out["status"]="MARKET_CLOSED"
+        return out
+    out["market_session"]=regular_session_status(now)
     symbols=[]
     for x in discovery.get("candidates",[]):
         sym=x.get("symbol","") if isinstance(x,dict) else ""
