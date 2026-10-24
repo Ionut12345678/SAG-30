@@ -46,6 +46,7 @@ jobs:
           python experiments/radar100/scenarios.py /tmp/radar100_prices.csv --out /tmp/radar100_scenarios.json
           python experiments/radar100/forecast_v2.py /tmp/radar100_prices.csv --out /tmp/radar100_forecast_v2.json
           python experiments/radar100/filters_v2.py /tmp/radar100_prices.csv --out /tmp/radar100_filters_v2.json
+          python experiments/radar100/filter_portfolio.py /tmp/radar100_prices.csv --out /tmp/radar100_filter_portfolio.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
