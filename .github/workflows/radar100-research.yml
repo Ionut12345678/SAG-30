@@ -38,7 +38,7 @@ jobs:
           python-version: '3.12'
       - name: Fetch keyless adjusted historical OHLC (Yahoo research endpoint)
         run: |
-          python experiments/radar100/fetch_yahoo.py --symbols AAPL MSFT NVDA AMD TSLA --range 5y --out /tmp/radar100_prices.csv
+          python experiments/radar100/fetch_yahoo.py --symbols AAPL MSFT NVDA AMD TSLA AMZN GOOGL META AVGO JPM XOM COST UNH CAT KO WMT DIS BA INTC QCOM NFLX --range 5y --out /tmp/radar100_prices.csv
           python experiments/radar100/backtest.py /tmp/radar100_prices.csv --symbol AAPL --out /tmp/radar100_aapl.json
           python experiments/radar100/backtest.py /tmp/radar100_prices.csv --symbol AAPL --dca --out /tmp/radar100_aapl_dca.json
           python experiments/radar100/compare_symbols.py /tmp/radar100_prices.csv --out /tmp/radar100_comparison.json
