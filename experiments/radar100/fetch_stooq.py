@@ -2,8 +2,10 @@
 import argparse
 import csv
 import io
+import os
 import re
 import urllib.request
+import urllib.parse
 from datetime import date
 from pathlib import Path
 
@@ -17,7 +19,12 @@ def fetch(symbol: str, start: str, end: str) -> list[dict]:
     if a > b or b > date.today():
         raise ValueError("Invalid date window")
     ticker = symbol.lower() if symbol.lower().endswith(".us") else symbol.lower() + ".us"
-    url = (f"https://stooq.com/q/d/l/?s={ticker}&i=d&d1={a:%Y%m%d}&d2={b:%Y%m%d}")
+    params = {"s": ticker, "i": "d", "d1": a.strftime("%Y%m%d"), "d2": b.strftime("%Y%m%d")}
+    api_key = os.environ.get("STOOQ_API_KEY", "").strip()
+    if not api_key:
+        raise RuntimeError("STOOQ_API_KEY is required for historical downloads; no fallback data fabricated")
+    params["apikey"] = api_key
+    url = "https://stooq.com/q/d/l/?" + urllib.parse.urlencode(params)
     request = urllib.request.Request(url, headers={"User-Agent": "Radar100-research/1.0"})
     with urllib.request.urlopen(request, timeout=25) as response:
         raw = response.read(12_000_000).decode("utf-8-sig")
