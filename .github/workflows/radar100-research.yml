@@ -1,0 +1,35 @@
+name: Radar100 research checks
+on:
+  push:
+    branches:
+      - experiment/radar100-paper-v1-20261024
+    paths:
+      - 'experiments/radar100/**'
+      - '.github/workflows/radar100-research.yml'
+  workflow_dispatch:
+jobs:
+  unit-and-data-smoke:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Offline unit tests
+        working-directory: experiments/radar100
+        run: python -m unittest discover -v -p 'test_*.py'
+      - name: Fetch historical OHLC and run smoke backtests
+        run: |
+          python experiments/radar100/fetch_stooq.py --symbols AAPL MSFT NVDA AMD TSLA --start 2021-01-01 --end 2026-10-23 --out /tmp/radar100_prices.csv
+          python experiments/radar100/backtest.py /tmp/radar100_prices.csv --symbol AAPL --out /tmp/radar100_aapl.json
+          python experiments/radar100/backtest.py /tmp/radar100_prices.csv --symbol AAPL --dca --out /tmp/radar100_aapl_dca.json
+      - name: Upload diagnostic reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: radar100-smoke-reports
+          path: /tmp/radar100_*.json
+          if-no-files-found: ignore
