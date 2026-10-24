@@ -24,6 +24,32 @@ class PortfolioAudit(unittest.TestCase):
         self.assertEqual(r["trades"][0]["reason"],"stop")
         self.assertEqual(r["trades"][0]["entry_date"],r["trades"][0]["exit_date"])
 
+
+    def test_gap_stop_fills_at_open_not_stop_threshold(self):
+        prices=[100.]*75
+        bars=build(prices)
+        bars[62].update({"open":90.,"low":89.,"high":100.,"close":91.})
+        old=portfolio.test_signal
+        try:
+            portfolio.test_signal=lambda b,i:i==60
+            r=portfolio.simulate({"TEST":bars},stop=.05)
+        finally:
+            portfolio.test_signal=old
+        self.assertEqual(r["closed_trades"],1)
+        self.assertEqual(r["trades"][0]["reason"],"gap_stop")
+        self.assertLess(r["trades"][0]["pnl"],-1.5)
+
+    def test_holding_period_closes_position(self):
+        bars=build([100.]*75)
+        old=portfolio.test_signal
+        try:
+            portfolio.test_signal=lambda b,i:i==60
+            r=portfolio.simulate({"TEST":bars},hold_days=3)
+        finally:
+            portfolio.test_signal=old
+        self.assertEqual(r["closed_trades"],1)
+        self.assertEqual(r["trades"][0]["reason"],"horizon")
+
     def test_no_exposure_without_entry(self):
         r=portfolio.simulate({"FLAT":build([100.]*70)})
         self.assertEqual(r["closed_trades"],0)
