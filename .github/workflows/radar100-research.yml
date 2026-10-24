@@ -42,6 +42,7 @@ jobs:
           python experiments/radar100/backtest.py /tmp/radar100_prices.csv --symbol AAPL --out /tmp/radar100_aapl.json
           python experiments/radar100/backtest.py /tmp/radar100_prices.csv --symbol AAPL --dca --out /tmp/radar100_aapl_dca.json
           python experiments/radar100/compare_symbols.py /tmp/radar100_prices.csv --out /tmp/radar100_comparison.json
+          python experiments/radar100/portfolio.py /tmp/radar100_prices.csv --start 2024-01-01 --out /tmp/radar100_portfolio.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
