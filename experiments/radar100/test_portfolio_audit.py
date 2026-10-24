@@ -29,6 +29,15 @@ class PortfolioAudit(unittest.TestCase):
         self.assertEqual(r["closed_trades"],0)
         self.assertEqual(r["average_exposure_pct"],0)
 
+    def test_reject_empty_universe(self):
+        with self.assertRaises(ValueError):
+            portfolio.simulate({})
+
+    def test_stress_field_is_reported(self):
+        r=portfolio.simulate({"FLAT":build([100.]*70)})
+        self.assertIn("intraday_low_vs_initial_pct",r)
+        self.assertEqual(r["intraday_low_vs_initial_pct"],0)
+
     def test_reject_bad_settings(self):
         with self.assertRaises(ValueError):
             portfolio.simulate({"X":build([100.]*70)},stop=0)
