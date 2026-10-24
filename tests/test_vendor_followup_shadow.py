@@ -15,7 +15,7 @@ class VendorProspectiveTests(unittest.TestCase):
   state,follow=update(state,data(a+timedelta(minutes=4),a+timedelta(minutes=1),12.0))
   self.assertEqual(len(follow["events"]),1)
   record=next(iter(state["vendor_bar_ledger"].values()))
-  self.assertEqual(record["later_reported_milestones"],[15,20])
+  self.assertEqual(record["later_reported_milestones"],[])\n  self.assertEqual(record["max_later_price"],12.0)
   self.assertEqual(follow["validated_signals"],0)
  def test_prior_bar_never_backfills_win(self):
   a=datetime(2026,10,22,15,0,tzinfo=timezone.utc)
