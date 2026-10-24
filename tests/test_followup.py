@@ -7,6 +7,13 @@ def payload(*entries):
     return {"data":{"rows":[{"symbol":s,"pctchange":f"{v}%","lastsale":"$10.00"} for s,v in entries],"totalRecords":len(entries)}}
 
 class FollowupTests(unittest.TestCase):
+    def test_duplicate_snapshot_does_not_increment_followups(self):
+        state,_=merge_scan({},payload(("AAA",7)),A)
+        state,report=merge_scan(state,payload(("AAA",7)),A+timedelta(minutes=30))
+        self.assertEqual(report["status"],"DUPLICATE_SNAPSHOT")
+        self.assertEqual(state["sessions"]["2026-10-19"]["AAA"]["followup_count"],0)
+        state,report=merge_scan(state,payload(("AAA",18)),A+timedelta(minutes=60))
+        self.assertEqual(state["sessions"]["2026-10-19"]["AAA"]["followup_count"],1)
     def test_first_seen_immutable_and_real_later_followup(self):
         state,r=merge_scan({},payload(("AAA",7.0)),A)
         first=state["sessions"]["2026-10-19"]["AAA"]["first_seen_utc"]
