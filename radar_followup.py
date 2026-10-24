@@ -5,6 +5,7 @@ snapshots captured at retrieval time, not independently timed exchange prints.
 """
 import argparse
 import json
+import hashlib
 import math
 from datetime import datetime, timezone
 from pathlib import Path
@@ -53,6 +54,11 @@ def merge_scan(state, payload, at):
             # A symbol may occur twice: keep first occurrence; do not cherry-pick.
             if symbol not in report_rows:
                 report_rows[symbol]={"pct":change,"price":parse_price(row.get("lastsale"))}
+        digest=hashlib.sha256(json.dumps(report_rows,sort_keys=True).encode()).hexdigest()
+        if state.get("last_snapshot_digest")==digest:
+            result["status"]="DUPLICATE_SNAPSHOT"
+            result["snapshot_digest"]=digest
+            return state,result
         session_map=state["sessions"].setdefault(session,{})
         if not isinstance(session_map,dict):session_map={};state["sessions"][session]=session_map
         new_symbols=[]
@@ -83,6 +89,7 @@ def merge_scan(state, payload, at):
                 if change>=level and level not in levels:
                     levels.add(level);new_milestones+=1
             existing["milestones_reported"]=sorted(levels)
+        state["last_snapshot_digest"]=digest
         # Cap retained sessions and keep most recent by Eastern date.
         for old in sorted(state["sessions"])[:-MAX_SESSIONS]:state["sessions"].pop(old,None)
         previous_scan=state.get("last_successful_scan_utc")
@@ -137,7 +144,7 @@ def main():
           "quality":"UNVERIFIED_WEBSITE_SNAPSHOT","valid_first_watch_signals":0,
           "buy_enabled":False,"new_candidates":0}
     # Only write a state snapshot when fetch + schema processed successfully.
-    if report["status"]=="UNVERIFIED_SCREENING_OBSERVED":
+    if report["status"] in ("UNVERIFIED_SCREENING_OBSERVED","DUPLICATE_SNAPSHOT"):
         state_path.write_text(json.dumps(state,indent=2,sort_keys=True)+"\n",encoding="utf-8")
     Path(args.out).write_text(json.dumps(report,indent=2,sort_keys=True)+"\n",encoding="utf-8")
     print(json.dumps({k:report.get(k) for k in ["status","error_type","new_candidates","tracked_symbols",
