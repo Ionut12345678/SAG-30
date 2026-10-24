@@ -101,8 +101,7 @@ def main():
     a=p.parse_args()
     data=load(a.csv)
     result=simulate(data,start=a.start)
-    Path(a.out).write_text(json.dumps(result,indent=2)+"
-",encoding="utf-8")
+    Path(a.out).write_text(json.dumps(result,indent=2)+"\n",encoding="utf-8")
     print(json.dumps({k:v for k,v in result.items() if k!="trades"},indent=2))
 if __name__=="__main__":
     main()
