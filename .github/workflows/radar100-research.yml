@@ -27,25 +27,18 @@ jobs:
         run: python -m unittest discover -v -p 'test_*.py'
   real-data-smoke:
     needs: offline-tests
-    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
       contents: read
     timeout-minutes: 12
-    env:
-      STOOQ_API_KEY: ${{ secrets.STOOQ_API_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Fetch real historical OHLC
+      - name: Fetch keyless adjusted historical OHLC (Yahoo research endpoint)
         run: |
-          if [ -z "$STOOQ_API_KEY" ]; then
-            echo "::error::STOOQ_API_KEY not configured. Real data tests cannot run."
-            exit 1
-          fi
-          python experiments/radar100/fetch_stooq.py --symbols AAPL MSFT NVDA AMD TSLA --start 2021-01-01 --end 2026-10-23 --out /tmp/radar100_prices.csv
+          python experiments/radar100/fetch_yahoo.py --symbols AAPL MSFT NVDA AMD TSLA --range 5y --out /tmp/radar100_prices.csv
           python experiments/radar100/backtest.py /tmp/radar100_prices.csv --symbol AAPL --out /tmp/radar100_aapl.json
           python experiments/radar100/backtest.py /tmp/radar100_prices.csv --symbol AAPL --dca --out /tmp/radar100_aapl_dca.json
       - uses: actions/upload-artifact@v4
