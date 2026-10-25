@@ -1,0 +1,85 @@
+name: Radar100 hourly paper scheduler (no real orders)
+on:
+  schedule:
+    # GitHub schedules run from the default branch; actual ET window checked below.
+    - cron: '17 13-23 * * 1-5'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/radar100-hourly-scheduler.yml'
+permissions:
+  contents: write
+concurrency:
+  group: radar100-paper-state-write
+  cancel-in-progress: false
+jobs:
+  paper-cycle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check New York market session (DST aware)
+        id: session
+        shell: bash
+        run: |
+          python - <<'PY'
+          from datetime import datetime, time
+          from zoneinfo import ZoneInfo
+          import os
+          now = datetime.now(ZoneInfo("America/New_York"))
+          active = now.weekday() < 5 and time(9,30) <= now.time() <= time(16,30)
+          # Explicit manual runs and the one-time workflow installation smoke test
+          # can validate outside market hours.
+          selected = active or os.environ["GITHUB_EVENT_NAME"] in ("workflow_dispatch","push")
+          with open(os.environ["GITHUB_OUTPUT"],"a") as f:
+              f.write(f"run={str(selected).lower()}\n")
+          print(f"ET={now.isoformat()} market_window={active} run_cycle={selected}")
+          PY
+      - uses: actions/checkout@v4
+        if: steps.session.outputs.run == 'true'
+        with:
+          ref: experiment/radar100-paper-v1-20261024
+          persist-credentials: true
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        if: steps.session.outputs.run == 'true'
+        with:
+          python-version: '3.12'
+      - name: Validate paper-only ledger logic
+        if: steps.session.outputs.run == 'true'
+        working-directory: experiments/radar100
+        run: python -m unittest -v test_paper_cycle
+      - name: Retrieve persistent ledger
+        if: steps.session.outputs.run == 'true'
+        run: |
+          git fetch origin radar100-paper-state
+          git show origin/radar100-paper-state:experiments/radar100/state/state.json > /tmp/r100-state.json
+      - name: Fetch daily prices and execute paper scan
+        if: steps.session.outputs.run == 'true'
+        run: |
+          python experiments/radar100/fetch_yahoo.py --symbols AAPL MSFT NVDA AMD TSLA AMZN GOOGL META AVGO JPM XOM COST UNH CAT KO WMT DIS BA INTC QCOM NFLX --range 5y --out /tmp/r100-bars.csv
+          python experiments/radar100/paper_cycle.py /tmp/r100-bars.csv --state /tmp/r100-state.json --report /tmp/r100-daily.md --run-id "$GITHUB_RUN_ID"
+      - name: Persist ledger and daily report exclusively to paper state branch
+        if: steps.session.outputs.run == 'true'
+        run: |
+          git worktree add --detach /tmp/r100-checkpoint origin/radar100-paper-state
+          cp /tmp/r100-state.json /tmp/r100-checkpoint/experiments/radar100/state/state.json
+          mkdir -p /tmp/r100-checkpoint/experiments/radar100/state/reports
+          cp /tmp/r100-daily.md /tmp/r100-checkpoint/experiments/radar100/state/reports/$(date -u +%Y-%m-%d).md
+          cd /tmp/r100-checkpoint
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add experiments/radar100/state/state.json experiments/radar100/state/reports/
+          if ! git diff --cached --quiet; then
+            git commit -m "paper: hourly checkpoint ${GITHUB_RUN_ID}"
+            git push origin HEAD:radar100-paper-state
+          fi
+      - name: Upload auditable snapshot
+        if: always() && steps.session.outputs.run == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: radar100-paper-snapshot-${{ github.run_id }}
+          path: |
+            /tmp/r100-state.json
+            /tmp/r100-daily.md
+          if-no-files-found: warn
