@@ -46,10 +46,12 @@ jobs:
         run: |
           git worktree add --detach /tmp/r100-ledger origin/radar100-paper-state
           cp /tmp/r100-state.json /tmp/r100-ledger/experiments/radar100/state/state.json
+          mkdir -p /tmp/r100-ledger/experiments/radar100/state/reports
+          cp /tmp/r100-daily.md /tmp/r100-ledger/experiments/radar100/state/reports/$(date -u +%Y-%m-%d).md
           cd /tmp/r100-ledger
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add experiments/radar100/state/state.json
+          git add experiments/radar100/state/state.json experiments/radar100/state/reports/
           git commit -m "paper: checkpoint signal ledger run ${GITHUB_RUN_ID}"
           git push origin HEAD:radar100-paper-state
       - name: Upload paper report and audit snapshot
