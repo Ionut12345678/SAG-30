@@ -49,6 +49,7 @@ jobs:
           python experiments/radar100/filter_portfolio.py /tmp/radar100_prices.csv --out /tmp/radar100_filter_portfolio.json
           python experiments/radar100/benchmark_check.py /tmp/radar100_prices.csv --out /tmp/radar100_benchmark_check.json
           python experiments/radar100/robustness_v2.py /tmp/radar100_prices.csv --out /tmp/radar100_robustness_v2.json
+          python experiments/radar100/regime_patterns.py /tmp/radar100_prices.csv --out /tmp/radar100_regime_patterns.json
           python experiments/radar100/paper_cycle.py /tmp/radar100_prices.csv --state /tmp/radar100_paper_two_cycles.json --report /tmp/radar100_paper_daily.md --run-id audit-cycle-1
           python experiments/radar100/paper_cycle.py /tmp/radar100_prices.csv --state /tmp/radar100_paper_two_cycles.json --report /tmp/radar100_paper_daily.md --run-id audit-cycle-2
           python -c 'import json; s=json.load(open("/tmp/radar100_paper_two_cycles.json")); assert len(s["runs"])==2 and s["runs"][1]["new_signals"]==0; assert len({x["id"] for x in s["signals"]})==len(s["signals"]); print("Two paper cycles verified: persistent local ledger, no duplicate signals, run_count=2")'
