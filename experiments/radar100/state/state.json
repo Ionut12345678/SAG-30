@@ -7,6 +7,13 @@
       "scanned_at_utc": "2026-10-25T12:27:13.217263+00:00",
       "session": "2026-10-23",
       "total_signals": 6
+    },
+    {
+      "new_signals": 0,
+      "run_id": "40193226910",
+      "scanned_at_utc": "2026-10-25T12:28:20.423755+00:00",
+      "session": "2026-10-23",
+      "total_signals": 6
     }
   ],
   "signals": [
