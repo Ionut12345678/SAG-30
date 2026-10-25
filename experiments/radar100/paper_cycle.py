@@ -2,7 +2,8 @@
 No broker connectivity, no BUY calls, no prediction revision. Source daily bars.
 """
 import argparse,json,hashlib
-from datetime import datetime,timezone
+from datetime import datetime,timezone,time
+from zoneinfo import ZoneInfo
 from pathlib import Path
 from backtest import load
 from filter_portfolio import enrich,select_signal
@@ -81,6 +82,10 @@ def main():
     p.add_argument("csv");p.add_argument("--state",required=True)
     p.add_argument("--report",required=True);p.add_argument("--run-id",required=True)
     a=p.parse_args();groups=load(a.csv);enrich(a.csv,groups)
+    local=datetime.now(ZoneInfo('America/New_York'))
+    # Never treat a still-forming daily candle as a completed close.
+    if local.time()<time(16,15):
+        for s in groups:groups[s]=[b for b in groups[s] if b['date']<local.date()]
     state_path=Path(a.state)
     state=json.loads(state_path.read_text()) if state_path.exists() else {"version":1,"signals":[],"runs":[]}
     newer,report=cycle(groups,state,a.run_id,datetime.now(timezone.utc).isoformat())
