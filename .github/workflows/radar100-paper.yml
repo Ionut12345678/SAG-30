@@ -1,0 +1,65 @@
+name: Radar100 paper monitoring (isolated)
+on:
+  push:
+    branches:
+      - experiment/radar100-paper-v1-20261024
+    paths:
+      - 'experiments/radar100/paper_cycle.py'
+      - 'experiments/radar100/test_paper_cycle.py'
+      - '.github/workflows/radar100-paper.yml'
+  workflow_dispatch:
+  schedule:
+    # GitHub schedules only run after workflow exists on default branch.
+    # UTC hours bracket US market through both DST regimes.
+    - cron: '17 13-23 * * 1-5'
+permissions:
+  contents: write
+concurrency:
+  group: radar100-paper-ledger
+  cancel-in-progress: false
+jobs:
+  paper-cycle:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: experiment/radar100-paper-v1-20261024
+          persist-credentials: true
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Unit tests for paper ledger
+        working-directory: experiments/radar100
+        run: python -m unittest -v test_paper_cycle
+      - name: Load persistent ledger from separate state branch
+        run: |
+          git fetch origin radar100-paper-state
+          git show origin/radar100-paper-state:experiments/radar100/state/state.json > /tmp/r100-state.json
+      - name: Download prices and run paper-only cycle
+        run: |
+          python experiments/radar100/fetch_yahoo.py --symbols AAPL MSFT NVDA AMD TSLA AMZN GOOGL META AVGO JPM XOM COST UNH CAT KO WMT DIS BA INTC QCOM NFLX --range 5y --out /tmp/r100-bars.csv
+          python experiments/radar100/paper_cycle.py /tmp/r100-bars.csv --state /tmp/r100-state.json --report /tmp/r100-daily.md --run-id "$GITHUB_RUN_ID"
+      - name: Persist updated signal ledger on isolated branch
+        run: |
+          git worktree add --detach /tmp/r100-ledger origin/radar100-paper-state
+          cp /tmp/r100-state.json /tmp/r100-ledger/experiments/radar100/state/state.json
+          mkdir -p /tmp/r100-ledger/experiments/radar100/state/reports
+          cp /tmp/r100-daily.md /tmp/r100-ledger/experiments/radar100/state/reports/$(date -u +%Y-%m-%d).md
+          cd /tmp/r100-ledger
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add experiments/radar100/state/state.json experiments/radar100/state/reports/
+          git commit -m "paper: checkpoint signal ledger run ${GITHUB_RUN_ID}"
+          git push origin HEAD:radar100-paper-state
+      - name: Upload paper report and audit snapshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: radar100-paper-${{ github.run_id }}
+          path: |
+            /tmp/r100-daily.md
+            /tmp/r100-state.json
+          if-no-files-found: warn
