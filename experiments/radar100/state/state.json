@@ -1,6 +1,81 @@
 {
-  "version": 1,
-  "last_scanned_date": null,
-  "signals": [],
-  "runs": []
+  "last_scanned_date": "2026-10-23",
+  "runs": [
+    {
+      "new_signals": 6,
+      "run_id": "40193144655",
+      "scanned_at_utc": "2026-10-25T12:27:13.217263+00:00",
+      "session": "2026-10-23",
+      "total_signals": 6
+    }
+  ],
+  "signals": [
+    {
+      "entry_date": null,
+      "entry_open": null,
+      "id": "b4d9e3525ec1bcb39318",
+      "outcomes": {},
+      "signal_close": 1003.32000732,
+      "signal_date": "2026-10-23",
+      "status": "pending_next_open",
+      "strategy": "momentum",
+      "symbol": "COST"
+    },
+    {
+      "entry_date": null,
+      "entry_open": null,
+      "id": "8a1036ff5432c0d0f2c0",
+      "outcomes": {},
+      "signal_close": 112.51999664,
+      "signal_date": "2026-10-23",
+      "status": "pending_next_open",
+      "strategy": "momentum",
+      "symbol": "DIS"
+    },
+    {
+      "entry_date": null,
+      "entry_open": null,
+      "id": "ecc7472544f18f83ce20",
+      "outcomes": {},
+      "signal_close": 92.70999908,
+      "signal_date": "2026-10-23",
+      "status": "pending_next_open",
+      "strategy": "momentum",
+      "symbol": "KO"
+    },
+    {
+      "entry_date": null,
+      "entry_open": null,
+      "id": "a1670ebf8ef1a375091e",
+      "outcomes": {},
+      "signal_close": 418.08999634,
+      "signal_date": "2026-10-23",
+      "status": "pending_next_open",
+      "strategy": "momentum",
+      "symbol": "UNH"
+    },
+    {
+      "entry_date": null,
+      "entry_open": null,
+      "id": "c37d170ce73fa2655092",
+      "outcomes": {},
+      "signal_close": 119.88999939,
+      "signal_date": "2026-10-23",
+      "status": "pending_next_open",
+      "strategy": "momentum",
+      "symbol": "WMT"
+    },
+    {
+      "entry_date": null,
+      "entry_open": null,
+      "id": "85d267ae41f967b4db24",
+      "outcomes": {},
+      "signal_close": 183.21000671,
+      "signal_date": "2026-10-23",
+      "status": "pending_next_open",
+      "strategy": "momentum",
+      "symbol": "XOM"
+    }
+  ],
+  "version": 1
 }
