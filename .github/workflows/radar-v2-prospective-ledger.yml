@@ -24,9 +24,9 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: research/radar_v2/persistent
-          key: radar-v2-prospective-ledger-${{ github.run_id }}-${{ github.run_attempt }}
+          key: radar-v2-prospective-ledger-v2-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
-            radar-v2-prospective-ledger-
+            radar-v2-prospective-ledger-v2-
       - name: Verify state, fail closed on missing/corrupt history
         id: verify
         shell: bash
@@ -34,7 +34,7 @@ jobs:
           set -euo pipefail
           mkdir -p research/radar_v2/persistent
           if [ ! -f research/radar_v2/persistent/ledger.jsonl ]; then
-            echo "STATE_READBACK=NO_PREVIOUS_STATE"
+            echo "STATE_READBACK=NO_PREVIOUS_STATE; CACHE_GENERATION=v2; PREVIOUS_GENERATION_QUARANTINED"
             : > research/radar_v2/persistent/ledger.jsonl
             python research/radar_v2/state_integrity.py \
               --ledger research/radar_v2/persistent/ledger.jsonl \
@@ -61,7 +61,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: research/radar_v2/persistent
-          key: radar-v2-prospective-ledger-${{ github.run_id }}-${{ github.run_attempt }}
+          key: radar-v2-prospective-ledger-v2-${{ github.run_id }}-${{ github.run_attempt }}
       - name: Report state status
         if: always()
         run: echo "LEDGER_STATE=${{ steps.verify.outputs.state }}"
