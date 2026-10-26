@@ -1,7 +1,7 @@
 """Run with: python -m unittest discover -s research/radar_v2 -p 'test_*.py'"""
 import unittest
 from datetime import datetime, timedelta, timezone
-from causal_engine import CausalRadar, Quote
+from research.radar_v2.causal_engine import CausalRadar, Quote
 
 T = datetime(2026, 10, 26, 14, 0, tzinfo=timezone.utc)
 
