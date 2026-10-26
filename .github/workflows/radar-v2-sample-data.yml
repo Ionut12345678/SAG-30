@@ -26,6 +26,8 @@ jobs:
         run: python research/radar_v2/daily_outcome_audit.py --input-dir research/radar_v2/data --output research/radar_v2/data/outcome-audit.json
       - name: Run exploratory momentum baseline
         run: python research/radar_v2/daily_baseline.py --input-dir research/radar_v2/data --output research/radar_v2/data/momentum-baseline.json
+      - name: Evaluate chronological holdout
+        run: python research/radar_v2/holdout_test.py --input-dir research/radar_v2/data --output research/radar_v2/data/holdout.json
       - uses: actions/upload-artifact@v4
         with:
           name: radar-v2-public-sample
@@ -33,4 +35,5 @@ jobs:
             research/radar_v2/data/*_daily.jsonl
             research/radar_v2/data/outcome-audit.json
             research/radar_v2/data/momentum-baseline.json
+            research/radar_v2/data/holdout.json
           retention-days: 7
