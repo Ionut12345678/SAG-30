@@ -61,4 +61,5 @@ if __name__=="__main__":
           for line in f.read_text().splitlines() if line.strip()]
     report=evaluate(rows)
     Path(args.output).write_text(json.dumps(report,indent=2)+"\n")
-    print("HOLDOUT_SIGNALS",sum(v["holdout"]["count"] for v in report["symbols"].values()))
+    print("HOLDOUT_SIGNALS",report["totals"]["holdout"]["count"])
+    print("HOLDOUT_COMPARISON",json.dumps(report["totals"]["holdout"],sort_keys=True))
