@@ -51,6 +51,11 @@ jobs:
         run: |
           python research/radar_v2/prospective_scan.py \
             --ledger research/radar_v2/persistent/ledger.jsonl
+      - name: Reseal ledger after prospective scan
+        if: steps.verify.outputs.state == 'verified' || steps.verify.outputs.state == 'bootstrap'
+        run: |
+          python research/radar_v2/state_integrity.py --ledger research/radar_v2/persistent/ledger.jsonl --manifest research/radar_v2/persistent/manifest.json --seal
+          python research/radar_v2/state_integrity.py --ledger research/radar_v2/persistent/ledger.jsonl --manifest research/radar_v2/persistent/manifest.json
       - name: Save verified or explicitly empty bootstrap snapshot
         if: steps.verify.outputs.state == 'verified' || steps.verify.outputs.state == 'bootstrap'
         uses: actions/cache/save@v4
