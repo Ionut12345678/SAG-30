@@ -52,6 +52,9 @@ jobs:
         with:
           path: research/radar_v2/persistent
           key: radar-v2-prospective-ledger-${{ github.run_id }}-${{ github.run_attempt }}
+      - name: Report state status
+        if: always()
+        run: echo "LEDGER_STATE=${{ steps.verify.outputs.state }}"
       - name: Publish audit evidence
         if: always()
         uses: actions/upload-artifact@v4
