@@ -27,6 +27,7 @@ def scan(symbols,ledger,now=None):
             if not (local.weekday()<5 and (local.hour,local.minute)>=(9,30) and (local.hour,local.minute)<(16,0)):
                 raise ValueError("outside_regular_session")
             reference=previous_close(daily,local.date())
+            if now-src<timedelta(0):raise ValueError("future_source_timestamp")
             price=float(quote["close"])
             volume=quote.get("volume")
             change=100*(price/reference-1)
