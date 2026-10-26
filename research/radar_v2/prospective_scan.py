@@ -1,30 +1,48 @@
-"""Research-only prospective scan of timestamped public quotes.
-
-No screening history is imported. Never places orders.
-"""
+"""Read-only prospective US regular-session quote probe; no orders."""
 import argparse
 import json
 from datetime import datetime,timezone,timedelta
-from pathlib import Path
+from zoneinfo import ZoneInfo
 from public_data_adapter import fetch
 from prospective_ledger import append_event
 
-def scan(symbols,ledger,now=None,interval="1m"):
+NY=ZoneInfo("America/New_York")
+
+def previous_close(daily,local_day):
+    eligible=[r for r in daily if r.get("close") and datetime.fromisoformat(r["source_ts"]).astimezone(NY).date()<local_day]
+    if not eligible:raise ValueError("previous_regular_close_unavailable")
+    return float(eligible[-1]["close"])
+
+def scan(symbols,ledger,now=None):
     now=now or datetime.now(timezone.utc)
     report={"observed":0,"discovered":0,"validated":0,"rejected":0,"source_errors":[]}
     for symbol in symbols:
         try:
-            bars=fetch(symbol,interval=interval,range_="5d")
-            bars=sorted(bars,key=lambda x:x["source_ts"])
-            current=[x for x in bars if x.get("close") is not None and x.get("volume") is not None]
-            if len(current)<2:raise ValueError("insufficient timestamped bars")
-            last=current[-1]
-            stamp=datetime.fromisoformat(last["source_ts"])
-            prior=[x for x in current if datetime.fromisoformat(x["source_ts"]).date()<stamp.date()]
-            if not prior:raise ValueError("previous regular close unavailable")
-            # Intraday chart bars are NOT proof of the previous regular session close.
-            # Explicitly reject rather than guessing the reference from an intraday bar.
-            raise ValueError("previous_regular_close_unverified")
+            bars=fetch(symbol,interval="1m",range_="5d")
+            daily=fetch(symbol,interval="1d",range_="1mo")
+            if not bars or not daily:raise ValueError("empty_source")
+            quote=bars[-1]
+            src=datetime.fromisoformat(quote["source_ts"])
+            local=src.astimezone(NY)
+            if not (local.weekday()<5 and (local.hour,local.minute)>=(9,30) and (local.hour,local.minute)<(16,0)):
+                raise ValueError("outside_regular_session")
+            reference=previous_close(daily,local.date())
+            price=float(quote["close"])
+            volume=quote.get("volume")
+            change=100*(price/reference-1)
+            quality="validated" if timedelta(0)<=now-src<=timedelta(minutes=5) and volume is not None and volume>0 else "stale_or_missing_volume"
+            event={"symbol":symbol,"first_seen":now.isoformat(),"provider":quote["provider"],
+                "source_ts":src.isoformat(),"price":price,"previous_regular_close":reference,
+                "volume":volume,"data_quality":quality,"kind":"discovery"}
+            report["observed"]+=1
+            if not (3<=change<=10):
+                report["rejected"]+=1
+                continue
+            if append_event(ledger,event):report["discovered"]+=1
+            if quality=="validated":
+                valid={**event,"kind":"validated_signal"}
+                if append_event(ledger,valid):report["validated"]+=1
+            else:report["rejected"]+=1
         except Exception as exc:
             report["source_errors"].append({"symbol":symbol,"reason":str(exc)[:180]})
             report["rejected"]+=1
