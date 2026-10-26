@@ -10,7 +10,7 @@ NOW=datetime(2026,10,26,15,0,tzinfo=timezone.utc)
 def rows(symbol,interval="1m",range_="5d"):
     if interval=="1d":
         return [{"source_ts":"2026-10-23T13:30:00+00:00","close":100.0}]
-    return [{"source_ts":"2026-10-26T14:59:00+00:00","close":105.0,"volume":1200,"provider":"test"}]
+    return [{"source_ts":"2026-10-26T14:58:00+00:00","close":105.0,"volume":1200,"provider":"test"}]
 
 class ProspectiveScannerTests(unittest.TestCase):
     def test_first_seen_persists_across_scans(self):
