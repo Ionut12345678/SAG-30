@@ -1,6 +1,7 @@
 """Read-only prospective US regular-session quote probe; no orders."""
 import argparse
 import json
+from pathlib import Path
 from datetime import datetime,timezone,timedelta
 from zoneinfo import ZoneInfo
 from public_data_adapter import fetch
@@ -39,7 +40,9 @@ def scan(symbols,ledger,now=None):
             if not (3<=change<=10):
                 report["rejected"]+=1
                 continue
-            if append_event(ledger,event):report["discovered"]+=1
+            prior = [json.loads(s) for s in Path(ledger).read_text().splitlines() if s.strip()] if Path(ledger).exists() else []
+            if not any(x["symbol"] == symbol and x["kind"] == "discovery" for x in prior):
+                if append_event(ledger,event):report["discovered"]+=1
             if quality=="validated":
                 valid={**event,"kind":"validated_signal"}
                 if append_event(ledger,valid):report["validated"]+=1
