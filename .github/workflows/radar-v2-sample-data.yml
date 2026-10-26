@@ -1,0 +1,22 @@
+name: Radar v2 sample market data
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  fetch-sample:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Fetch public research sample
+        run: |
+          python research/radar_v2/public_data_adapter.py --symbol AAPL --interval 1d --range 1mo --output research/radar_v2/data/aapl_daily.jsonl
+      - uses: actions/upload-artifact@v4
+        with:
+          name: radar-v2-public-sample
+          path: research/radar_v2/data/aapl_daily.jsonl
+          retention-days: 7
