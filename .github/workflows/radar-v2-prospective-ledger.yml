@@ -1,0 +1,84 @@
+name: Radar v2 prospective ledger persistence (SHADOW)
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 13-21 * * 1-5'
+  pull_request:
+    paths:
+      - 'research/radar_v2/**'
+      - '.github/workflows/radar-v2-prospective-ledger.yml'
+permissions:
+  contents: read
+concurrency:
+  group: radar-v2-prospective-ledger
+  cancel-in-progress: false
+jobs:
+  state-readback:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Restore latest prior SHADOW ledger
+        id: restore
+        uses: actions/cache/restore@v4
+        with:
+          path: research/radar_v2/persistent
+          key: radar-v2-prospective-ledger-v2-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            radar-v2-prospective-ledger-v2-
+      - name: Verify state, fail closed on missing/corrupt history
+        id: verify
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p research/radar_v2/persistent
+          if [ ! -f research/radar_v2/persistent/ledger.jsonl ]; then
+            echo "STATE_READBACK=NO_PREVIOUS_STATE; CACHE_GENERATION=v2; PREVIOUS_GENERATION_QUARANTINED"
+            : > research/radar_v2/persistent/ledger.jsonl
+            python research/radar_v2/state_integrity.py \
+              --ledger research/radar_v2/persistent/ledger.jsonl \
+              --manifest research/radar_v2/persistent/manifest.json --seal
+            echo "state=bootstrap" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          python research/radar_v2/state_integrity.py \
+            --ledger research/radar_v2/persistent/ledger.jsonl \
+            --manifest research/radar_v2/persistent/manifest.json
+          echo "state=verified" >> "$GITHUB_OUTPUT"
+      - name: Read-only timestamped public source probe
+        if: steps.verify.outputs.state == 'verified' || steps.verify.outputs.state == 'bootstrap'
+        run: |
+          python research/radar_v2/prospective_scan.py \
+            --ledger research/radar_v2/persistent/ledger.jsonl \
+            --symbols AAPL MSFT NVDA AMD PLTR TSLA META AMZN GOOGL AVGO MU INTC SMCI ARM COIN HOOD SOFI RIVN RKLB IONQ
+      - name: Reseal ledger after prospective scan
+        if: steps.verify.outputs.state == 'verified' || steps.verify.outputs.state == 'bootstrap'
+        run: |
+          python research/radar_v2/state_integrity.py --ledger research/radar_v2/persistent/ledger.jsonl --manifest research/radar_v2/persistent/manifest.json --seal
+          python research/radar_v2/state_integrity.py --ledger research/radar_v2/persistent/ledger.jsonl --manifest research/radar_v2/persistent/manifest.json
+      - name: Write prospective evidence report
+        if: steps.verify.outputs.state == 'verified' || steps.verify.outputs.state == 'bootstrap'
+        run: |
+          python research/radar_v2/prospective_report.py --ledger research/radar_v2/persistent/ledger.jsonl --output research/radar_v2/persistent/report.json
+      - name: Save verified or explicitly empty bootstrap snapshot
+        if: steps.verify.outputs.state == 'verified' || steps.verify.outputs.state == 'bootstrap'
+        uses: actions/cache/save@v4
+        with:
+          path: research/radar_v2/persistent
+          key: radar-v2-prospective-ledger-v2-${{ github.run_id }}-${{ github.run_attempt }}
+      - name: Report state status
+        if: always()
+        run: |
+          echo "LEDGER_STATE=${{ steps.verify.outputs.state }}"
+          echo "LEDGER_RECORDS=$(wc -l < research/radar_v2/persistent/ledger.jsonl)"
+      - name: Publish audit evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: radar-v2-ledger-readback-${{ github.run_id }}
+          path: research/radar_v2/persistent/
+          if-no-files-found: ignore
+          retention-days: 30
