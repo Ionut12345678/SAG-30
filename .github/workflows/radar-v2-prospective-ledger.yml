@@ -1,6 +1,8 @@
 name: Radar v2 prospective ledger persistence (SHADOW)
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '17 13-21 * * 1-5'
   pull_request:
     paths:
       - 'research/radar_v2/**'
@@ -50,7 +52,8 @@ jobs:
         if: steps.verify.outputs.state == 'verified' || steps.verify.outputs.state == 'bootstrap'
         run: |
           python research/radar_v2/prospective_scan.py \
-            --ledger research/radar_v2/persistent/ledger.jsonl
+            --ledger research/radar_v2/persistent/ledger.jsonl \
+            --symbols AAPL MSFT NVDA AMD PLTR TSLA META AMZN GOOGL AVGO MU INTC SMCI ARM COIN HOOD SOFI RIVN RKLB IONQ
       - name: Reseal ledger after prospective scan
         if: steps.verify.outputs.state == 'verified' || steps.verify.outputs.state == 'bootstrap'
         run: |
