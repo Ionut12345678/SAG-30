@@ -69,7 +69,7 @@ class CausalRadar:
         # observation AND a later ingestion timestamp. A previously recorded
         # intrabar high can never become a post-discovery milestone.
         first = self.first_seen_by_symbol.get(quote.symbol)
-        if first and first is not obs and src > _utc(first.quote.source_ts) and ing > first.first_seen and reason not in ("future_source_timestamp", "stale_quote"):
+        if first and first is not obs and src > _utc(first.quote.source_ts) and ing > first.first_seen and src > first.first_seen and quote.volume is not None and quote.volume > 0 and reason not in ("future_source_timestamp", "stale_quote"):
             baseline = first.quote.previous_regular_close
             for threshold in self.thresholds:
                 if quote.price >= baseline * (1 + threshold / 100):
