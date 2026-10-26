@@ -24,6 +24,8 @@ def append_event(path, event):
     target=Path(path)
     target.parent.mkdir(parents=True,exist_ok=True)
     existing=[json.loads(x) for x in target.read_text().splitlines() if x.strip()] if target.exists() else []
+    if event["kind"] in ("validated_signal","followup") and not existing:
+        raise ValueError("no previous state; cannot validate or attribute followups")
     identity=(event["kind"],event["symbol"],event["provider"],event["source_ts"],event["price"])
     if any((x["kind"],x["symbol"],x["provider"],x["source_ts"],x["price"])==identity for x in existing):
         return False
@@ -31,6 +33,8 @@ def append_event(path, event):
     if event["kind"]=="discovery" and earliest and _instant(event["first_seen"])>min(_instant(x) for x in earliest):
         raise ValueError("duplicate discovery; preserve original first_seen")
     if event["kind"]=="validated_signal":
+        if event["data_quality"]!="validated":
+            raise ValueError("validated signal requires validated data quality")
         if not any(x["kind"]=="discovery" and x["symbol"]==event["symbol"] and _instant(x["first_seen"])<=_instant(event["first_seen"]) for x in existing):
             raise ValueError("validated signal requires prior recorded discovery")
     if event["kind"]=="followup":
