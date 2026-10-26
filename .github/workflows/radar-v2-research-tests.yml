@@ -1,0 +1,20 @@
+name: Radar v2 research tests
+on:
+  pull_request:
+    paths:
+      - 'research/radar_v2/**'
+      - '.github/workflows/radar-v2-research-tests.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  research-unit-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Research-only tests
+        run: python -m unittest discover -s research/radar_v2 -p 'test_*.py' -v
