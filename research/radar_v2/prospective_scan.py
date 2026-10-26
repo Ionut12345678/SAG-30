@@ -22,8 +22,10 @@ def scan(symbols,ledger,now=None):
             bars=fetch(symbol,interval="1m",range_="5d")
             daily=fetch(symbol,interval="1d",range_="1mo")
             if not bars or not daily:raise ValueError("empty_source")
-            quote=bars[-1]
-            src=datetime.fromisoformat(quote["source_ts"])
+            eligible=[r for r in bars if datetime.fromisoformat(r["source_ts"]) + timedelta(minutes=1) <= now]
+            if not eligible:raise ValueError("no_completed_intraday_bar")
+            quote=max(eligible,key=lambda r:r["source_ts"])
+            src=datetime.fromisoformat(quote["source_ts"]) + timedelta(minutes=1)
             local=src.astimezone(NY)
             if not (local.weekday()<5 and (local.hour,local.minute)>=(9,30) and (local.hour,local.minute)<(16,0)):
                 raise ValueError("outside_regular_session")
