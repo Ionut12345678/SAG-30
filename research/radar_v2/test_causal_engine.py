@@ -46,5 +46,23 @@ class TestCausality(unittest.TestCase):
         r = CausalRadar()
         self.assertEqual(r.ingest(q(102)).rejection_reason, "outside_discovery_band")
 
+    def test_zero_volume_cannot_confirm_milestone(self):
+        r = CausalRadar()
+        r.ingest(q(105))
+        r.ingest(q(120, T + timedelta(minutes=1), T + timedelta(minutes=1), volume=0))
+        self.assertEqual(r.milestones, {})
+
+    def test_late_arriving_prior_quote_cannot_confirm_milestone(self):
+        r = CausalRadar()
+        r.ingest(q(105))
+        r.ingest(q(120, T - timedelta(seconds=10), T + timedelta(seconds=1)))
+        self.assertEqual(r.milestones, {})
+
+    def test_missing_volume_cannot_confirm_milestone(self):
+        r = CausalRadar()
+        r.ingest(q(105))
+        r.ingest(q(120, T + timedelta(minutes=1), T + timedelta(minutes=1), volume=None))
+        self.assertEqual(r.milestones, {})
+
 if __name__ == "__main__":
     unittest.main()
