@@ -59,6 +59,10 @@ jobs:
         run: |
           python research/radar_v2/state_integrity.py --ledger research/radar_v2/persistent/ledger.jsonl --manifest research/radar_v2/persistent/manifest.json --seal
           python research/radar_v2/state_integrity.py --ledger research/radar_v2/persistent/ledger.jsonl --manifest research/radar_v2/persistent/manifest.json
+      - name: Write prospective evidence report
+        if: steps.verify.outputs.state == 'verified' || steps.verify.outputs.state == 'bootstrap'
+        run: |
+          python research/radar_v2/prospective_report.py --ledger research/radar_v2/persistent/ledger.jsonl --output research/radar_v2/persistent/report.json
       - name: Save verified or explicitly empty bootstrap snapshot
         if: steps.verify.outputs.state == 'verified' || steps.verify.outputs.state == 'bootstrap'
         uses: actions/cache/save@v4
