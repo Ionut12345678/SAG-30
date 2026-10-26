@@ -46,6 +46,11 @@ jobs:
             --ledger research/radar_v2/persistent/ledger.jsonl \
             --manifest research/radar_v2/persistent/manifest.json
           echo "state=verified" >> "$GITHUB_OUTPUT"
+      - name: Read-only timestamped public source probe
+        if: steps.verify.outputs.state == 'verified' || steps.verify.outputs.state == 'bootstrap'
+        run: |
+          python research/radar_v2/prospective_scan.py \
+            --ledger research/radar_v2/persistent/ledger.jsonl
       - name: Save verified or explicitly empty bootstrap snapshot
         if: steps.verify.outputs.state == 'verified' || steps.verify.outputs.state == 'bootstrap'
         uses: actions/cache/save@v4
