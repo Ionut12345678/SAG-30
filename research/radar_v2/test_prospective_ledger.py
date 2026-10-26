@@ -28,9 +28,13 @@ class ProspectiveLedgerTests(unittest.TestCase):
     def test_validation_requires_discovery(self):
         with self.assertRaises(ValueError):
             append_event(self.path,{**BASE,"kind":"validated_signal"})
+    def test_unverified_cannot_be_validated(self):
+        append_event(self.path,BASE)
+        with self.assertRaises(ValueError):
+            append_event(self.path,{**BASE,"kind":"validated_signal"})
     def test_followup_requires_later_observation(self):
         append_event(self.path,BASE)
-        append_event(self.path,{**BASE,"kind":"validated_signal"})
+        append_event(self.path,{**BASE,"kind":"validated_signal","data_quality":"validated"})
         with self.assertRaises(ValueError):
             append_event(self.path,{**BASE,"kind":"followup","price":12.0})
         self.assertTrue(append_event(self.path,{**BASE,"kind":"followup","first_seen":"2026-10-26T16:12:00+00:00","source_ts":"2026-10-26T16:11:00+00:00","price":12.0}))
