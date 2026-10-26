@@ -14,20 +14,23 @@ def evaluate(rows, lookback=20, horizon=20, threshold=0.05):
             raise ValueError("duplicate timestamps")
         split=int(len(bars)*0.7)
         stats={"train":[], "holdout":[]}
+        benchmark={"train":[], "holdout":[]}
         reference={"train":[], "holdout":[]}
         for i in range(lookback,len(bars)-horizon):
             group="train" if i+horizon<split else ("holdout" if i>=split else None)
             if group is None:continue
-            if bars[i]["close"]/bars[i-lookback]["close"]-1 < threshold:
-                continue
             entry=bars[i+1]["open"]
             if entry<=0:raise ValueError("invalid open")
+            benchmark[group].append(100*(bars[i+horizon]["close"]/entry-1))
+            if bars[i]["close"]/bars[i-lookback]["close"]-1 < threshold:
+                continue
             stats[group].append(100*(bars[i+horizon]["close"]/entry-1))
             reference[group].append(100*(bars[i+horizon]["close"]/bars[i]["close"]-1))
         summary[symbol]={key:{"count":len(vals),"positive":sum(v>0 for v in vals),
             "mean_pct":round(sum(vals)/len(vals),3) if vals else None}
             for key,vals in stats.items()}
-        summary[symbol]["note"]="reference is same selected dates at signal close, not buy-and-hold benchmark"
+        summary[symbol]["all_dates_reference"]={key:{"count":len(vals),"mean_pct":round(sum(vals)/len(vals),3) if vals else None} for key,vals in benchmark.items()}
+        summary[symbol]["note"]="all_dates_reference enters every eligible day at next open; overlapping windows, not buy-and-hold"
     totals={part:{"count":sum(summary[s][part]["count"] for s in summary),
         "positive":sum(summary[s][part]["positive"] for s in summary)} for part in ("train","holdout")}
     return {"totals":totals,"caveat":"overlapping signals, survivor sample, no trading costs", "symbols":summary}
