@@ -18,10 +18,12 @@ jobs:
           python-version: '3.11'
       - name: Fetch public research sample
         run: |
-          python research/radar_v2/public_data_adapter.py --symbol AAPL --interval 1d --range 1mo --output research/radar_v2/data/aapl_daily.jsonl
-          python -c "import json,pathlib; p=pathlib.Path('research/radar_v2/data/aapl_daily.jsonl'); rows=[json.loads(x) for x in p.read_text().splitlines()]; assert len(rows)>=5, 'Insufficient sample'; assert all(r['close']>0 and r['source_ts'] and r['volume'] is not None for r in rows); print('VALIDATED_ROWS',len(rows))"
+          for symbol in AAPL MSFT NVDA AMD PLTR; do
+            python research/radar_v2/public_data_adapter.py --symbol "$symbol" --interval 1d --range 1y --output "research/radar_v2/data/${symbol}_daily.jsonl"
+          done
+          python -c "import json,pathlib; paths=list(pathlib.Path('research/radar_v2/data').glob('*_daily.jsonl')); assert len(paths)==5; rows=[json.loads(x) for p in paths for x in p.read_text().splitlines()]; assert len(rows)>=500, 'Insufficient sample'; assert all(r['close']>0 and r['source_ts'] and r['volume'] is not None for r in rows); print('VALIDATED_ROWS',len(rows),'SYMBOLS',len(paths))"
       - uses: actions/upload-artifact@v4
         with:
           name: radar-v2-public-sample
-          path: research/radar_v2/data/aapl_daily.jsonl
+          path: research/radar_v2/data/*_daily.jsonl
           retention-days: 7
