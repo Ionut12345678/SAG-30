@@ -7,6 +7,35 @@ def payload(*entries):
     return {"data":{"rows":[{"symbol":s,"pctchange":f"{v}%","lastsale":"$10.00"} for s,v in entries],"totalRecords":len(entries)}}
 
 class FollowupTests(unittest.TestCase):
+    def test_identical_snapshots_do_not_create_followups(self):
+        state,first=merge_scan({},payload(("AAA",7)),A)
+        for minute in (5,30,60):
+            state,report=merge_scan(state,payload(("AAA",7)),A+timedelta(minutes=minute))
+            self.assertEqual(report["duplicates_skipped"],1)
+            self.assertEqual(report["changed_unverified_followups"],0)
+            self.assertEqual(state["sessions"]["2026-10-19"]["AAA"]["followup_count"],0)
+            self.assertEqual(report["independent_timestamped_followups_verified"],0)
+        state,changed=merge_scan(state,payload(("AAA",8)),A+timedelta(minutes=90))
+        self.assertEqual(changed["changed_unverified_followups"],1)
+        self.assertEqual(state["sessions"]["2026-10-19"]["AAA"]["followup_count"],1)
+
+    def test_partial_source_change_does_not_count_unchanged_symbols(self):
+        state,_=merge_scan({},payload(("AAA",7),("BBB",6)),A)
+        state,result=merge_scan(state,payload(("AAA",7),("BBB",8)),A+timedelta(minutes=10))
+        self.assertEqual(result["duplicates_skipped"],1)
+        self.assertEqual(result["changed_unverified_followups"],1)
+        self.assertEqual(state["sessions"]["2026-10-19"]["AAA"]["followup_count"],0)
+        self.assertEqual(state["sessions"]["2026-10-19"]["BBB"]["followup_count"],1)
+
+    def test_legacy_persisted_state_skips_unchanged_prices(self):
+        state,_=merge_scan({},payload(("AAA",7)),A)
+        entry=state["sessions"]["2026-10-19"]["AAA"]
+        entry.pop("last_snapshot_pct")
+        entry.pop("last_snapshot_price")
+        state,result=merge_scan(state,payload(("AAA",7)),A+timedelta(minutes=5))
+        self.assertEqual(result["duplicates_skipped"],1)
+        self.assertEqual(state["sessions"]["2026-10-19"]["AAA"]["followup_count"],0)
+
     def test_first_seen_immutable_and_real_later_followup(self):
         state,r=merge_scan({},payload(("AAA",7.0)),A)
         first=state["sessions"]["2026-10-19"]["AAA"]["first_seen_utc"]
