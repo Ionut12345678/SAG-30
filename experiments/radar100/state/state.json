@@ -1,5 +1,5 @@
 {
-  "last_scanned_date": "2026-10-23",
+  "last_scanned_date": "2026-10-26",
   "runs": [
     {
       "new_signals": 6,
@@ -28,16 +28,89 @@
       "scanned_at_utc": "2026-10-26T19:17:08.036646+00:00",
       "session": "2026-10-23",
       "total_signals": 6
+    },
+    {
+      "new_signals": 6,
+      "run_id": "40562236224",
+      "scanned_at_utc": "2026-10-27T18:41:23.055178+00:00",
+      "session": "2026-10-26",
+      "total_signals": 12
     }
   ],
   "signals": [
     {
-      "entry_date": null,
-      "entry_open": null,
+      "entry_date": "2026-10-26",
+      "entry_open": 1001.32000732,
       "id": "b4d9e3525ec1bcb39318",
       "outcomes": {},
       "signal_close": 1003.32000732,
       "signal_date": "2026-10-23",
+      "status": "tracking",
+      "strategy": "momentum",
+      "symbol": "COST"
+    },
+    {
+      "entry_date": "2026-10-26",
+      "entry_open": 112.08999634,
+      "id": "8a1036ff5432c0d0f2c0",
+      "outcomes": {},
+      "signal_close": 112.51999664,
+      "signal_date": "2026-10-23",
+      "status": "tracking",
+      "strategy": "momentum",
+      "symbol": "DIS"
+    },
+    {
+      "entry_date": "2026-10-26",
+      "entry_open": 92.69000244,
+      "id": "ecc7472544f18f83ce20",
+      "outcomes": {},
+      "signal_close": 92.70999908,
+      "signal_date": "2026-10-23",
+      "status": "tracking",
+      "strategy": "momentum",
+      "symbol": "KO"
+    },
+    {
+      "entry_date": "2026-10-26",
+      "entry_open": 418.98999023,
+      "id": "a1670ebf8ef1a375091e",
+      "outcomes": {},
+      "signal_close": 418.08999634,
+      "signal_date": "2026-10-23",
+      "status": "tracking",
+      "strategy": "momentum",
+      "symbol": "UNH"
+    },
+    {
+      "entry_date": "2026-10-26",
+      "entry_open": 119.65000153,
+      "id": "c37d170ce73fa2655092",
+      "outcomes": {},
+      "signal_close": 119.88999939,
+      "signal_date": "2026-10-23",
+      "status": "tracking",
+      "strategy": "momentum",
+      "symbol": "WMT"
+    },
+    {
+      "entry_date": "2026-10-26",
+      "entry_open": 181.86000061,
+      "id": "85d267ae41f967b4db24",
+      "outcomes": {},
+      "signal_close": 183.21000671,
+      "signal_date": "2026-10-23",
+      "status": "tracking",
+      "strategy": "momentum",
+      "symbol": "XOM"
+    },
+    {
+      "entry_date": null,
+      "entry_open": null,
+      "id": "a10678c6215a77b1988d",
+      "outcomes": {},
+      "signal_close": 1005.15997314,
+      "signal_date": "2026-10-26",
       "status": "pending_next_open",
       "strategy": "momentum",
       "symbol": "COST"
@@ -45,21 +118,10 @@
     {
       "entry_date": null,
       "entry_open": null,
-      "id": "8a1036ff5432c0d0f2c0",
+      "id": "8600006cd167717025d1",
       "outcomes": {},
-      "signal_close": 112.51999664,
-      "signal_date": "2026-10-23",
-      "status": "pending_next_open",
-      "strategy": "momentum",
-      "symbol": "DIS"
-    },
-    {
-      "entry_date": null,
-      "entry_open": null,
-      "id": "ecc7472544f18f83ce20",
-      "outcomes": {},
-      "signal_close": 92.70999908,
-      "signal_date": "2026-10-23",
+      "signal_close": 92.69999695,
+      "signal_date": "2026-10-26",
       "status": "pending_next_open",
       "strategy": "momentum",
       "symbol": "KO"
@@ -67,10 +129,21 @@
     {
       "entry_date": null,
       "entry_open": null,
-      "id": "a1670ebf8ef1a375091e",
+      "id": "c567c074446ce6c0c9f1",
       "outcomes": {},
-      "signal_close": 418.08999634,
-      "signal_date": "2026-10-23",
+      "signal_close": 391.61999512,
+      "signal_date": "2026-10-26",
+      "status": "pending_next_open",
+      "strategy": "momentum",
+      "symbol": "TSLA"
+    },
+    {
+      "entry_date": null,
+      "entry_open": null,
+      "id": "08eba7ce529130576087",
+      "outcomes": {},
+      "signal_close": 410.70001221,
+      "signal_date": "2026-10-26",
       "status": "pending_next_open",
       "strategy": "momentum",
       "symbol": "UNH"
@@ -78,10 +151,10 @@
     {
       "entry_date": null,
       "entry_open": null,
-      "id": "c37d170ce73fa2655092",
+      "id": "693ef61cda547394fd1f",
       "outcomes": {},
-      "signal_close": 119.88999939,
-      "signal_date": "2026-10-23",
+      "signal_close": 120.29000092,
+      "signal_date": "2026-10-26",
       "status": "pending_next_open",
       "strategy": "momentum",
       "symbol": "WMT"
@@ -89,10 +162,10 @@
     {
       "entry_date": null,
       "entry_open": null,
-      "id": "85d267ae41f967b4db24",
+      "id": "f5fe01acbbe3f0f0cbee",
       "outcomes": {},
-      "signal_close": 183.21000671,
-      "signal_date": "2026-10-23",
+      "signal_close": 184.53999329,
+      "signal_date": "2026-10-26",
       "status": "pending_next_open",
       "strategy": "momentum",
       "symbol": "XOM"
