@@ -57,6 +57,8 @@ def merge_scan(state, payload, at):
         if not isinstance(session_map,dict):session_map={};state["sessions"][session]=session_map
         new_symbols=[]
         new_milestones=0
+        duplicates_skipped=0
+        changed_followups=0
         for sym,obs in sorted(report_rows.items()):
             change=obs["pct"]
             existing=session_map.get(sym)
@@ -66,12 +68,23 @@ def merge_scan(state, payload, at):
                 existing={"first_seen_utc":now,"first_reported_pct":change,
                   "first_last_sale":obs["price"],"highest_later_reported_pct":None,
                   "first_source_quote_time":None,"first_classification":"UNVERIFIED_DISCOVERY_ONLY",
-                  "milestones_reported":[],"followup_count":0}
+                  "milestones_reported":[],"followup_count":0,
+                  "last_snapshot_pct":change,"last_snapshot_price":obs["price"]}
                 session_map[sym]=existing
                 new_symbols.append(sym)
                 continue
             first=existing.get("first_seen_utc")
             if not isinstance(first,str) or first>=now:continue
+            # An unchanged screener value is not a new market observation.
+            # For pre-fix state, fall back to the most recent legacy values.
+            previous_pct=existing.get("last_snapshot_pct",existing.get("last_reported_pct",existing.get("first_reported_pct")))
+            previous_price=existing.get("last_snapshot_price",existing.get("last_last_sale",existing.get("first_last_sale")))
+            if change==previous_pct and obs["price"]==previous_price:
+                duplicates_skipped+=1
+                continue
+            existing["last_snapshot_pct"]=change
+            existing["last_snapshot_price"]=obs["price"]
+            changed_followups+=1
             existing["followup_count"]=int(existing.get("followup_count") or 0)+1
             previous=existing.get("highest_later_reported_pct")
             existing["highest_later_reported_pct"]=max(change,previous) if isinstance(previous,(float,int)) else change
@@ -107,6 +120,9 @@ def merge_scan(state, payload, at):
           received_rows=len(rows),parsed_rows=len(report_rows),reported_universe_size=total,
           partial_universe=bool(isinstance(total,int) and total>len(rows)),
           new_candidates=len(new_symbols),tracked_symbols=len(session_map),
+          duplicates_skipped=duplicates_skipped,changed_unverified_followups=changed_followups,
+          independent_timestamped_followups_verified=0,
+          data_gap_reason="NASDAQ_QUOTES_HAVE_NO_SOURCE_TIMESTAMP",
           new_reported_milestones=new_milestones,
           sample=[{"symbol":s,"first_reported_pct":session_map[s]["first_reported_pct"],
              "first_seen_utc":session_map[s]["first_seen_utc"]} for s in new_symbols[:40]])
