@@ -1,0 +1,36 @@
+name: SAG-30 historical SQLite audit (SHADOW)
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/historical-sqlite-audit.yml'
+      - 'research/audit_historical_sqlite.py'
+permissions:
+  contents: read
+jobs:
+  integrity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download historical checkpoint from radar-state branch
+        uses: actions/checkout@v4
+        with:
+          ref: radar-state
+          path: historical-state
+          sparse-checkout: |
+            checkpoint.json
+            radar.sqlite3.gz.part-00000
+            radar.sqlite3.gz.part-00001
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify hashes, decompress, SQLite integrity and counts
+        run: python research/audit_historical_sqlite.py --root historical-state --output historical-sqlite-integrity.json
+      - name: Publish evidence even if failed
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: historical-sqlite-integrity-readonly
+          path: historical-sqlite-integrity.json
+          if-no-files-found: warn
