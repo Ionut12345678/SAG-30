@@ -1,5 +1,5 @@
 {
-  "last_scanned_date": "2026-11-04",
+  "last_scanned_date": "2026-11-05",
   "runs": [
     {
       "new_signals": 6,
@@ -77,6 +77,13 @@
       "scanned_at_utc": "2026-11-05T20:39:08.912901+00:00",
       "session": "2026-11-04",
       "total_signals": 56
+    },
+    {
+      "new_signals": 10,
+      "run_id": "42284040246",
+      "scanned_at_utc": "2026-11-06T19:56:55.403442+00:00",
+      "session": "2026-11-05",
+      "total_signals": 66
     }
   ],
   "signals": [
@@ -485,6 +492,11 @@
           "date": "2026-10-30",
           "gross_pct": 1.9436,
           "net_10bps_each_side_pct": 1.74
+        },
+        "5": {
+          "date": "2026-11-05",
+          "gross_pct": 7.3123,
+          "net_10bps_each_side_pct": 7.0979
         }
       },
       "signal_close": 982.72998047,
@@ -502,6 +514,11 @@
           "date": "2026-10-30",
           "gross_pct": 1.3793,
           "net_10bps_each_side_pct": 1.1768
+        },
+        "5": {
+          "date": "2026-11-05",
+          "gross_pct": 3.1573,
+          "net_10bps_each_side_pct": 2.9512
         }
       },
       "signal_close": 91.73000336,
@@ -519,6 +536,11 @@
           "date": "2026-10-30",
           "gross_pct": -1.4348,
           "net_10bps_each_side_pct": -1.6317
+        },
+        "5": {
+          "date": "2026-11-05",
+          "gross_pct": -15.2701,
+          "net_10bps_each_side_pct": -15.4394
         }
       },
       "signal_close": 404.22000122,
@@ -536,6 +558,11 @@
           "date": "2026-10-30",
           "gross_pct": -1.6292,
           "net_10bps_each_side_pct": -1.8257
+        },
+        "5": {
+          "date": "2026-11-05",
+          "gross_pct": -4.3485,
+          "net_10bps_each_side_pct": -4.5396
         }
       },
       "signal_close": 407.1000061,
@@ -553,6 +580,11 @@
           "date": "2026-10-30",
           "gross_pct": 2.2942,
           "net_10bps_each_side_pct": 2.0898
+        },
+        "5": {
+          "date": "2026-11-05",
+          "gross_pct": 5.781,
+          "net_10bps_each_side_pct": 5.5697
         }
       },
       "signal_close": 118.76999664,
@@ -570,6 +602,11 @@
           "date": "2026-10-30",
           "gross_pct": 1.8937,
           "net_10bps_each_side_pct": 1.6901
+        },
+        "5": {
+          "date": "2026-11-05",
+          "gross_pct": -10.0506,
+          "net_10bps_each_side_pct": -10.2303
         }
       },
       "signal_close": 182.02000427,
@@ -837,7 +874,13 @@
       "entry_date": "2026-11-04",
       "entry_open": 1036.82995605,
       "id": "41846d0d7b323833ece4",
-      "outcomes": {},
+      "outcomes": {
+        "1": {
+          "date": "2026-11-05",
+          "gross_pct": 2.7738,
+          "net_10bps_each_side_pct": 2.5685
+        }
+      },
       "signal_close": 1019.26000977,
       "signal_date": "2026-11-03",
       "status": "tracking",
@@ -848,7 +891,13 @@
       "entry_date": "2026-11-04",
       "entry_open": 116.30000305,
       "id": "b3bcd21b670cff1faeca",
-      "outcomes": {},
+      "outcomes": {
+        "1": {
+          "date": "2026-11-05",
+          "gross_pct": 0.7911,
+          "net_10bps_each_side_pct": 0.5897
+        }
+      },
       "signal_close": 114.18000031,
       "signal_date": "2026-11-03",
       "status": "tracking",
@@ -859,7 +908,13 @@
       "entry_date": "2026-11-04",
       "entry_open": 96.30000305,
       "id": "c2fbb1db8af6f9a14e6b",
-      "outcomes": {},
+      "outcomes": {
+        "1": {
+          "date": "2026-11-05",
+          "gross_pct": -0.5919,
+          "net_10bps_each_side_pct": -0.7905
+        }
+      },
       "signal_close": 94.80000305,
       "signal_date": "2026-11-03",
       "status": "tracking",
@@ -870,7 +925,13 @@
       "entry_date": "2026-11-04",
       "entry_open": 396.6000061,
       "id": "8d180599fb355d721329",
-      "outcomes": {},
+      "outcomes": {
+        "1": {
+          "date": "2026-11-05",
+          "gross_pct": -0.2219,
+          "net_10bps_each_side_pct": -0.4212
+        }
+      },
       "signal_close": 404.44000244,
       "signal_date": "2026-11-03",
       "status": "tracking",
@@ -881,7 +942,13 @@
       "entry_date": "2026-11-04",
       "entry_open": 127.0,
       "id": "c48860fc7d5d75a3f889",
-      "outcomes": {},
+      "outcomes": {
+        "1": {
+          "date": "2026-11-05",
+          "gross_pct": 0.5669,
+          "net_10bps_each_side_pct": 0.366
+        }
+      },
       "signal_close": 124.86000061,
       "signal_date": "2026-11-03",
       "status": "tracking",
@@ -892,7 +959,13 @@
       "entry_date": "2026-11-04",
       "entry_open": 174.25999451,
       "id": "9b895ebbab9c353d0dec",
-      "outcomes": {},
+      "outcomes": {
+        "1": {
+          "date": "2026-11-05",
+          "gross_pct": -5.1417,
+          "net_10bps_each_side_pct": -5.3313
+        }
+      },
       "signal_close": 177.46000671,
       "signal_date": "2026-11-03",
       "status": "tracking",
@@ -900,12 +973,133 @@
       "symbol": "XOM"
     },
     {
-      "entry_date": null,
-      "entry_open": null,
+      "entry_date": "2026-11-05",
+      "entry_open": 353.89001465,
       "id": "2c91b2fc8092923ff4f6",
       "outcomes": {},
       "signal_close": 349.51000977,
       "signal_date": "2026-11-04",
+      "status": "tracking",
+      "strategy": "trend_volume",
+      "symbol": "AAPL"
+    },
+    {
+      "entry_date": "2026-11-05",
+      "entry_open": 1070.98999023,
+      "id": "2d3d37a98db04f81e0af",
+      "outcomes": {},
+      "signal_close": 1046.4699707,
+      "signal_date": "2026-11-04",
+      "status": "tracking",
+      "strategy": "momentum",
+      "symbol": "COST"
+    },
+    {
+      "entry_date": "2026-11-05",
+      "entry_open": 119.87000275,
+      "id": "1abe807a2771aa4ff1e8",
+      "outcomes": {},
+      "signal_close": 118.94999695,
+      "signal_date": "2026-11-04",
+      "status": "tracking",
+      "strategy": "momentum",
+      "symbol": "DIS"
+    },
+    {
+      "entry_date": "2026-11-05",
+      "entry_open": 119.87000275,
+      "id": "9f2d4a16510331cc96b3",
+      "outcomes": {},
+      "signal_close": 118.94999695,
+      "signal_date": "2026-11-04",
+      "status": "tracking",
+      "strategy": "trend_volume",
+      "symbol": "DIS"
+    },
+    {
+      "entry_date": "2026-11-05",
+      "entry_open": 358.64001465,
+      "id": "c547a561cd245921b82e",
+      "outcomes": {},
+      "signal_close": 352.10998535,
+      "signal_date": "2026-11-04",
+      "status": "tracking",
+      "strategy": "momentum",
+      "symbol": "JPM"
+    },
+    {
+      "entry_date": "2026-11-05",
+      "entry_open": 96.94000244,
+      "id": "97c5c62cd48daf7f63d5",
+      "outcomes": {},
+      "signal_close": 95.80000305,
+      "signal_date": "2026-11-04",
+      "status": "tracking",
+      "strategy": "momentum",
+      "symbol": "KO"
+    },
+    {
+      "entry_date": "2026-11-05",
+      "entry_open": 96.94000244,
+      "id": "fcf7bc1a46162316fb52",
+      "outcomes": {},
+      "signal_close": 95.80000305,
+      "signal_date": "2026-11-04",
+      "status": "tracking",
+      "strategy": "trend_volume",
+      "symbol": "KO"
+    },
+    {
+      "entry_date": "2026-11-05",
+      "entry_open": 554.94000244,
+      "id": "96906a8c60de6d40e281",
+      "outcomes": {},
+      "signal_close": 555.79998779,
+      "signal_date": "2026-11-04",
+      "status": "tracking",
+      "strategy": "trend_volume",
+      "symbol": "MSFT"
+    },
+    {
+      "entry_date": "2026-11-05",
+      "entry_open": 412.3999939,
+      "id": "a83e62ee3aead85a5b11",
+      "outcomes": {},
+      "signal_close": 409.38000488,
+      "signal_date": "2026-11-04",
+      "status": "tracking",
+      "strategy": "momentum",
+      "symbol": "UNH"
+    },
+    {
+      "entry_date": "2026-11-05",
+      "entry_open": 412.3999939,
+      "id": "5ac3173c649349616fe3",
+      "outcomes": {},
+      "signal_close": 409.38000488,
+      "signal_date": "2026-11-04",
+      "status": "tracking",
+      "strategy": "trend_volume",
+      "symbol": "UNH"
+    },
+    {
+      "entry_date": "2026-11-05",
+      "entry_open": 130.8999939,
+      "id": "430faa7f3158b7653341",
+      "outcomes": {},
+      "signal_close": 129.16999817,
+      "signal_date": "2026-11-04",
+      "status": "tracking",
+      "strategy": "momentum",
+      "symbol": "WMT"
+    },
+    {
+      "entry_date": null,
+      "entry_open": null,
+      "id": "c14d388eca8403e3ee4b",
+      "outcomes": {},
+      "signal_close": 344.17001343,
+      "signal_date": "2026-11-05",
       "status": "pending_next_open",
       "strategy": "trend_volume",
       "symbol": "AAPL"
@@ -913,10 +1107,10 @@
     {
       "entry_date": null,
       "entry_open": null,
-      "id": "2d3d37a98db04f81e0af",
+      "id": "e462a9fa1e6468c38aa9",
       "outcomes": {},
-      "signal_close": 1046.4699707,
-      "signal_date": "2026-11-04",
+      "signal_close": 1065.58996582,
+      "signal_date": "2026-11-05",
       "status": "pending_next_open",
       "strategy": "momentum",
       "symbol": "COST"
@@ -924,10 +1118,21 @@
     {
       "entry_date": null,
       "entry_open": null,
-      "id": "1abe807a2771aa4ff1e8",
+      "id": "8429f625a5047b283c4e",
       "outcomes": {},
-      "signal_close": 118.94999695,
-      "signal_date": "2026-11-04",
+      "signal_close": 1065.58996582,
+      "signal_date": "2026-11-05",
+      "status": "pending_next_open",
+      "strategy": "trend_volume",
+      "symbol": "COST"
+    },
+    {
+      "entry_date": null,
+      "entry_open": null,
+      "id": "dcddb468f8a5831fa31d",
+      "outcomes": {},
+      "signal_close": 117.22000122,
+      "signal_date": "2026-11-05",
       "status": "pending_next_open",
       "strategy": "momentum",
       "symbol": "DIS"
@@ -935,32 +1140,10 @@
     {
       "entry_date": null,
       "entry_open": null,
-      "id": "9f2d4a16510331cc96b3",
+      "id": "a8085244d4c44f8d6e4e",
       "outcomes": {},
-      "signal_close": 118.94999695,
-      "signal_date": "2026-11-04",
-      "status": "pending_next_open",
-      "strategy": "trend_volume",
-      "symbol": "DIS"
-    },
-    {
-      "entry_date": null,
-      "entry_open": null,
-      "id": "c547a561cd245921b82e",
-      "outcomes": {},
-      "signal_close": 352.10998535,
-      "signal_date": "2026-11-04",
-      "status": "pending_next_open",
-      "strategy": "momentum",
-      "symbol": "JPM"
-    },
-    {
-      "entry_date": null,
-      "entry_open": null,
-      "id": "97c5c62cd48daf7f63d5",
-      "outcomes": {},
-      "signal_close": 95.80000305,
-      "signal_date": "2026-11-04",
+      "signal_close": 95.73000336,
+      "signal_date": "2026-11-05",
       "status": "pending_next_open",
       "strategy": "momentum",
       "symbol": "KO"
@@ -968,10 +1151,10 @@
     {
       "entry_date": null,
       "entry_open": null,
-      "id": "fcf7bc1a46162316fb52",
+      "id": "8f66b80a3ab3a595f275",
       "outcomes": {},
-      "signal_close": 95.80000305,
-      "signal_date": "2026-11-04",
+      "signal_close": 95.73000336,
+      "signal_date": "2026-11-05",
       "status": "pending_next_open",
       "strategy": "trend_volume",
       "symbol": "KO"
@@ -979,10 +1162,10 @@
     {
       "entry_date": null,
       "entry_open": null,
-      "id": "96906a8c60de6d40e281",
+      "id": "4f6c0c9a98d410be343d",
       "outcomes": {},
-      "signal_close": 555.79998779,
-      "signal_date": "2026-11-04",
+      "signal_close": 535.92999268,
+      "signal_date": "2026-11-05",
       "status": "pending_next_open",
       "strategy": "trend_volume",
       "symbol": "MSFT"
@@ -990,10 +1173,10 @@
     {
       "entry_date": null,
       "entry_open": null,
-      "id": "a83e62ee3aead85a5b11",
+      "id": "320c99f7fd19eefc47ff",
       "outcomes": {},
-      "signal_close": 409.38000488,
-      "signal_date": "2026-11-04",
+      "signal_close": 395.72000122,
+      "signal_date": "2026-11-05",
       "status": "pending_next_open",
       "strategy": "momentum",
       "symbol": "UNH"
@@ -1001,23 +1184,23 @@
     {
       "entry_date": null,
       "entry_open": null,
-      "id": "5ac3173c649349616fe3",
+      "id": "70639536b169a79825c1",
       "outcomes": {},
-      "signal_close": 409.38000488,
-      "signal_date": "2026-11-04",
+      "signal_close": 127.72000122,
+      "signal_date": "2026-11-05",
+      "status": "pending_next_open",
+      "strategy": "momentum",
+      "symbol": "WMT"
+    },
+    {
+      "entry_date": null,
+      "entry_open": null,
+      "id": "2bc0864c7494f47cb2cb",
+      "outcomes": {},
+      "signal_close": 127.72000122,
+      "signal_date": "2026-11-05",
       "status": "pending_next_open",
       "strategy": "trend_volume",
-      "symbol": "UNH"
-    },
-    {
-      "entry_date": null,
-      "entry_open": null,
-      "id": "430faa7f3158b7653341",
-      "outcomes": {},
-      "signal_close": 129.16999817,
-      "signal_date": "2026-11-04",
-      "status": "pending_next_open",
-      "strategy": "momentum",
       "symbol": "WMT"
     }
   ],
