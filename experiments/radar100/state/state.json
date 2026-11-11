@@ -1,5 +1,5 @@
 {
-  "last_scanned_date": "2026-11-09",
+  "last_scanned_date": "2026-11-10",
   "runs": [
     {
       "new_signals": 6,
@@ -91,6 +91,13 @@
       "scanned_at_utc": "2026-11-10T20:28:09.443991+00:00",
       "session": "2026-11-09",
       "total_signals": 71
+    },
+    {
+      "new_signals": 5,
+      "run_id": "43094067817",
+      "scanned_at_utc": "2026-11-11T20:11:07.273744+00:00",
+      "session": "2026-11-10",
+      "total_signals": 76
     }
   ],
   "signals": [
@@ -266,6 +273,11 @@
           "gross_pct": -1.9329,
           "net_10bps_each_side_pct": -2.1289
         },
+        "10": {
+          "date": "2026-11-10",
+          "gross_pct": 6.3906,
+          "net_10bps_each_side_pct": 6.178
+        },
         "5": {
           "date": "2026-11-03",
           "gross_pct": 1.7124,
@@ -287,6 +299,11 @@
           "date": "2026-10-28",
           "gross_pct": 1.002,
           "net_10bps_each_side_pct": 0.8002
+        },
+        "10": {
+          "date": "2026-11-10",
+          "gross_pct": 6.7056,
+          "net_10bps_each_side_pct": 6.4924
         },
         "5": {
           "date": "2026-11-03",
@@ -310,6 +327,11 @@
           "gross_pct": 1.6241,
           "net_10bps_each_side_pct": 1.421
         },
+        "10": {
+          "date": "2026-11-10",
+          "gross_pct": -4.5203,
+          "net_10bps_each_side_pct": -4.7111
+        },
         "5": {
           "date": "2026-11-03",
           "gross_pct": 0.186,
@@ -331,6 +353,11 @@
           "date": "2026-10-28",
           "gross_pct": -1.3617,
           "net_10bps_each_side_pct": -1.5588
+        },
+        "10": {
+          "date": "2026-11-10",
+          "gross_pct": -1.8414,
+          "net_10bps_each_side_pct": -2.0376
         },
         "5": {
           "date": "2026-11-03",
@@ -354,6 +381,11 @@
           "gross_pct": -0.7438,
           "net_10bps_each_side_pct": -0.9421
         },
+        "10": {
+          "date": "2026-11-10",
+          "gross_pct": 4.9223,
+          "net_10bps_each_side_pct": 4.7126
+        },
         "5": {
           "date": "2026-11-03",
           "gross_pct": 4.3456,
@@ -375,6 +407,11 @@
           "date": "2026-10-28",
           "gross_pct": -0.8768,
           "net_10bps_each_side_pct": -1.0748
+        },
+        "10": {
+          "date": "2026-11-10",
+          "gross_pct": -10.434,
+          "net_10bps_each_side_pct": -10.613
         },
         "5": {
           "date": "2026-11-03",
@@ -837,6 +874,11 @@
           "date": "2026-11-04",
           "gross_pct": 1.4828,
           "net_10bps_each_side_pct": 1.28
+        },
+        "5": {
+          "date": "2026-11-10",
+          "gross_pct": 3.3903,
+          "net_10bps_each_side_pct": 3.1837
         }
       },
       "signal_close": 1040.55004883,
@@ -854,6 +896,11 @@
           "date": "2026-11-04",
           "gross_pct": 5.2841,
           "net_10bps_each_side_pct": 5.0738
+        },
+        "5": {
+          "date": "2026-11-10",
+          "gross_pct": 5.5142,
+          "net_10bps_each_side_pct": 5.3034
         }
       },
       "signal_close": 113.11000061,
@@ -871,6 +918,11 @@
           "date": "2026-11-04",
           "gross_pct": 0.9697,
           "net_10bps_each_side_pct": 0.7679
+        },
+        "5": {
+          "date": "2026-11-10",
+          "gross_pct": 2.1396,
+          "net_10bps_each_side_pct": 1.9355
         }
       },
       "signal_close": 95.83000183,
@@ -888,6 +940,11 @@
           "date": "2026-11-04",
           "gross_pct": -5.184,
           "net_10bps_each_side_pct": -5.3734
+        },
+        "5": {
+          "date": "2026-11-10",
+          "gross_pct": -6.5157,
+          "net_10bps_each_side_pct": -6.7025
         }
       },
       "signal_close": 403.82000732,
@@ -905,6 +962,11 @@
           "date": "2026-11-04",
           "gross_pct": 2.5578,
           "net_10bps_each_side_pct": 2.3529
+        },
+        "5": {
+          "date": "2026-11-10",
+          "gross_pct": 1.4906,
+          "net_10bps_each_side_pct": 1.2878
         }
       },
       "signal_close": 400.44000244,
@@ -922,6 +984,11 @@
           "date": "2026-11-04",
           "gross_pct": 1.9575,
           "net_10bps_each_side_pct": 1.7538
+        },
+        "5": {
+          "date": "2026-11-10",
+          "gross_pct": -0.8998,
+          "net_10bps_each_side_pct": -1.0978
         }
       },
       "signal_close": 127.69000244,
@@ -939,6 +1006,11 @@
           "date": "2026-11-04",
           "gross_pct": -4.9045,
           "net_10bps_each_side_pct": -5.0945
+        },
+        "5": {
+          "date": "2026-11-10",
+          "gross_pct": -7.6011,
+          "net_10bps_each_side_pct": -7.7857
         }
       },
       "signal_close": 179.66999817,
@@ -1407,12 +1479,67 @@
       "symbol": "WMT"
     },
     {
-      "entry_date": null,
-      "entry_open": null,
+      "entry_date": "2026-11-10",
+      "entry_open": 1063.91003418,
       "id": "00b1886dcd939c78b5c1",
       "outcomes": {},
       "signal_close": 1066.18005371,
       "signal_date": "2026-11-09",
+      "status": "tracking",
+      "strategy": "momentum",
+      "symbol": "COST"
+    },
+    {
+      "entry_date": "2026-11-10",
+      "entry_open": 118.69000244,
+      "id": "a5445fb6b0a462da8a8d",
+      "outcomes": {},
+      "signal_close": 119.12000275,
+      "signal_date": "2026-11-09",
+      "status": "tracking",
+      "strategy": "momentum",
+      "symbol": "DIS"
+    },
+    {
+      "entry_date": "2026-11-10",
+      "entry_open": 96.65000153,
+      "id": "8b32110beed7262754c0",
+      "outcomes": {},
+      "signal_close": 96.02999878,
+      "signal_date": "2026-11-09",
+      "status": "tracking",
+      "strategy": "momentum",
+      "symbol": "KO"
+    },
+    {
+      "entry_date": "2026-11-10",
+      "entry_open": 398.73999023,
+      "id": "32deeb2df55e06eb62c2",
+      "outcomes": {},
+      "signal_close": 397.61999512,
+      "signal_date": "2026-11-09",
+      "status": "tracking",
+      "strategy": "momentum",
+      "symbol": "UNH"
+    },
+    {
+      "entry_date": "2026-11-10",
+      "entry_open": 125.66000366,
+      "id": "5d33c40db72a52ecc9df",
+      "outcomes": {},
+      "signal_close": 125.66000366,
+      "signal_date": "2026-11-09",
+      "status": "tracking",
+      "strategy": "momentum",
+      "symbol": "WMT"
+    },
+    {
+      "entry_date": null,
+      "entry_open": null,
+      "id": "eaad66f38e873be8c303",
+      "outcomes": {},
+      "signal_close": 1066.14001465,
+      "signal_date": "2026-11-10",
       "status": "pending_next_open",
       "strategy": "momentum",
       "symbol": "COST"
@@ -1420,10 +1547,10 @@
     {
       "entry_date": null,
       "entry_open": null,
-      "id": "a5445fb6b0a462da8a8d",
+      "id": "3b79fa883513999d7139",
       "outcomes": {},
-      "signal_close": 119.12000275,
-      "signal_date": "2026-11-09",
+      "signal_close": 119.20999908,
+      "signal_date": "2026-11-10",
       "status": "pending_next_open",
       "strategy": "momentum",
       "symbol": "DIS"
@@ -1431,10 +1558,10 @@
     {
       "entry_date": null,
       "entry_open": null,
-      "id": "8b32110beed7262754c0",
+      "id": "0e3465e4b2e0aedadb79",
       "outcomes": {},
-      "signal_close": 96.02999878,
-      "signal_date": "2026-11-09",
+      "signal_close": 96.91000366,
+      "signal_date": "2026-11-10",
       "status": "pending_next_open",
       "strategy": "momentum",
       "symbol": "KO"
@@ -1442,10 +1569,10 @@
     {
       "entry_date": null,
       "entry_open": null,
-      "id": "32deeb2df55e06eb62c2",
+      "id": "242a3a7df07d9aede5ae",
       "outcomes": {},
-      "signal_close": 397.61999512,
-      "signal_date": "2026-11-09",
+      "signal_close": 405.11999512,
+      "signal_date": "2026-11-10",
       "status": "pending_next_open",
       "strategy": "momentum",
       "symbol": "UNH"
@@ -1453,10 +1580,10 @@
     {
       "entry_date": null,
       "entry_open": null,
-      "id": "5d33c40db72a52ecc9df",
+      "id": "7b9de388234c126fe86b",
       "outcomes": {},
-      "signal_close": 125.66000366,
-      "signal_date": "2026-11-09",
+      "signal_close": 125.55000305,
+      "signal_date": "2026-11-10",
       "status": "pending_next_open",
       "strategy": "momentum",
       "symbol": "WMT"
