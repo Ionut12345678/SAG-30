@@ -37,7 +37,7 @@ def merge_scan(state, payload, at):
       "source":"Nasdaq public screener","quality":"UNVERIFIED_WEBSITE_SNAPSHOT",
       "quote_timestamp_verified":False,"real_time_verified":False,"buy_enabled":False,
       "valid_first_watch_signals":0,"new_candidates":0,"tracked_symbols":0,
-      "new_reported_milestones":0,"sample":[],"previous_state_loaded":bool(state["sessions"])}
+      "new_unverified_reported_milestones":0,"sample":[],"previous_state_loaded":bool(state["sessions"])}
     try:
         rows,total=get_rows(payload)
         if not rows:
@@ -61,7 +61,7 @@ def merge_scan(state, payload, at):
             change=obs["pct"]
             existing=session_map.get(sym)
             if existing is None:
-                if not (5<=change<=10): continue
+                if not (3<=change<=10): continue
                 if len(session_map)>=MAX_SYMBOLS: continue
                 existing={"first_seen_utc":now,"first_reported_pct":change,
                   "first_last_sale":obs["price"],"highest_later_reported_pct":None,
@@ -91,23 +91,23 @@ def merge_scan(state, payload, at):
                 previous_dt=datetime.fromisoformat(previous_scan.replace("Z","+00:00"))
                 lag=(at.astimezone(timezone.utc)-previous_dt.astimezone(timezone.utc)).total_seconds()
                 result["seconds_since_previous_success"]=round(lag,1) if lag>0 else None
-                result["five_minute_cadence_met"]=bool(0<lag<=300)
-                result["missed_five_minute_intervals"]=max(0,int((lag-1)//300)) if lag>0 else None
+                result["hourly_cadence_met"]=bool(0<lag<=3600)
+                result["missed_hourly_intervals"]=max(0,int((lag-1)//3600)) if lag>0 else None
             except (ValueError,TypeError,AttributeError):
                 result["seconds_since_previous_success"]=None
-                result["five_minute_cadence_met"]=False
-                result["missed_five_minute_intervals"]=None
+                result["hourly_cadence_met"]=False
+                result["missed_hourly_intervals"]=None
         else:
             result["seconds_since_previous_success"]=None
-            result["five_minute_cadence_met"]=False
-            result["missed_five_minute_intervals"]=None
+            result["hourly_cadence_met"]=False
+            result["missed_hourly_intervals"]=None
         if not previous_scan or result["seconds_since_previous_success"] is None or result["seconds_since_previous_success"]>0:
             state["last_successful_scan_utc"]=now
         result.update(status="UNVERIFIED_SCREENING_OBSERVED",
           received_rows=len(rows),parsed_rows=len(report_rows),reported_universe_size=total,
           partial_universe=bool(isinstance(total,int) and total>len(rows)),
           new_candidates=len(new_symbols),tracked_symbols=len(session_map),
-          new_reported_milestones=new_milestones,
+          new_unverified_reported_milestones=new_milestones,
           sample=[{"symbol":s,"first_reported_pct":session_map[s]["first_reported_pct"],
              "first_seen_utc":session_map[s]["first_seen_utc"]} for s in new_symbols[:40]])
     except (TypeError,ValueError,KeyError,AttributeError):
@@ -141,6 +141,6 @@ def main():
         state_path.write_text(json.dumps(state,indent=2,sort_keys=True)+"\n",encoding="utf-8")
     Path(args.out).write_text(json.dumps(report,indent=2,sort_keys=True)+"\n",encoding="utf-8")
     print(json.dumps({k:report.get(k) for k in ["status","error_type","new_candidates","tracked_symbols",
-        "new_reported_milestones","valid_first_watch_signals"]}))
+        "new_unverified_reported_milestones","valid_first_watch_signals"]}))
 
 if __name__=="__main__":main()

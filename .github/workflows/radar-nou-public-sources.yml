@@ -12,6 +12,9 @@ on:
       - 'radar_followup.py'
       - 'radar_quality_audit.py'
       - 'radar_cross_source.py'
+      - 'radar_finnhub_shadow.py'
+      - 'radar_yahoo_1m_shadow.py'
+      - 'radar_vendor_followup.py'
       - 'radar-pulses/**'
   workflow_run:
     workflows: ["Radar Nou schedule heartbeat"]
@@ -61,14 +64,24 @@ jobs:
               print("STATE_READBACK=RESTORED")
               print("RESTORED_SESSION_SYMBOL_COUNTS=" + json.dumps(counts, sort_keys=True))
           PY
+      - name: Offline prospective SHADOW regression tests
+        run: python -m unittest discover -s tests -p 'test_*shadow*.py'
       - name: Diagnose feed quality
         run: python probe_public_sources.py --out source-evidence.json
-      - name: Search listed stocks for early +5..+10 percent candidates
+      - name: Search listed stocks for early +3..+10 percent candidates
         run: python radar_discovery.py --output radar-discovery.json --snapshot nasdaq-snapshot.json
       - name: Check timestamp and price against independent public chart source
         run: python radar_cross_source.py --discovery radar-discovery.json --out cross-source-timing.json
+      - name: No-key completed 1-minute bar diagnostics (SHADOW)
+        run: python radar_yahoo_1m_shadow.py --discovery radar-discovery.json --out yahoo-1m-shadow.json
+      - name: Optional timestamped quote diagnostic (no BUY)
+        env:
+          FINNHUB_API_KEY: ${{ secrets.FINNHUB_API_KEY }}
+        run: python radar_finnhub_shadow.py --discovery radar-discovery.json --out timestamped-quote-diagnostics.json
       - name: Track candidate outcomes vs later screen snapshots
         run: python radar_followup.py --state candidate-state.json --out candidate-followup.json --snapshot nasdaq-snapshot.json
+      - name: Persist prospective vendor bar followups (SHADOW only)
+        run: python radar_vendor_followup.py --state candidate-state.json --observations yahoo-1m-shadow.json --out prospective-vendor-ledger.json
       - name: Audit quality and follow-up coverage
         run: python radar_quality_audit.py --out radar-quality.json
       - name: Persist screening state for next scheduled run
@@ -89,5 +102,8 @@ jobs:
             candidate-followup.json
             radar-quality.json
             cross-source-timing.json
+            timestamped-quote-diagnostics.json
+            yahoo-1m-shadow.json
+            prospective-vendor-ledger.json
             candidate-state.json
           if-no-files-found: warn

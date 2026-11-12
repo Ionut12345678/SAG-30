@@ -21,14 +21,14 @@ class FollowupTests(unittest.TestCase):
     def test_multiple_later_thresholds_without_hindsight(self):
         s,_=merge_scan({},payload(("AAA",6)),A)
         s,r=merge_scan(s,payload(("AAA",52)),A+timedelta(minutes=30))
-        self.assertEqual(r["new_reported_milestones"],4)
+        self.assertEqual(r["new_unverified_reported_milestones"],4)
         s,r=merge_scan(s,payload(("AAA",45)),A+timedelta(minutes=60))
-        self.assertEqual(r["new_reported_milestones"],0)
+        self.assertEqual(r["new_unverified_reported_milestones"],0)
     def test_no_same_timestamp_followup(self):
         s,_=merge_scan({},payload(("AAA",7)),A)
         s,r=merge_scan(s,payload(("AAA",52)),A)
         self.assertEqual(s["sessions"]["2026-10-19"]["AAA"]["followup_count"],0)
-        self.assertEqual(r["new_reported_milestones"],0)
+        self.assertEqual(r["new_unverified_reported_milestones"],0)
     def test_missing_feed_preserves_state(self):
         s,_=merge_scan({},payload(("AAA",7)),A)
         old=s.copy()

@@ -1,4 +1,4 @@
-"""Automatic READ-ONLY discovery of US stocks up 5–10% from public Nasdaq screener.
+"""Automatic READ-ONLY discovery of US stocks up +3–10% from public Nasdaq screener.
 
 Nasdaq listings offer screening, NOT timestamp-verified live quotes. This process
 NEVER calls radar.ingest, FIRST_WATCH, or buy. Artifacts are discovery candidates.
@@ -55,7 +55,7 @@ def find_candidates(rows):
             malformed+=1
             continue
         eligible+=1
-        if 5<=change<=10:
+        if 3<=change<=10:
             found.append({
                 "symbol":symbol,
                 "reported_change_pct":round(change,4),
