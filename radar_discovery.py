@@ -41,6 +41,13 @@ def get_rows(payload):
         raise ValueError("No listing rows; fail closed")
     return rows, block.get("totalRecords")
 
+def is_common_stock(name):
+    """Conservative discovery filter; ambiguous security types are excluded."""
+    name = str(name or "").lower()
+    blocked = ("warrant", "rights", "units", "depositary", "preferred", "preference",
+               "etf", "exchange traded fund", "closed end fund")
+    return not any(term in name for term in blocked)
+
 def find_candidates(rows):
     found=[]
     eligible=0
@@ -55,7 +62,7 @@ def find_candidates(rows):
             malformed+=1
             continue
         eligible+=1
-        if 5<=change<=10:
+        if 5<=change<=10 and is_common_stock(row.get("name")):
             found.append({
                 "symbol":symbol,
                 "reported_change_pct":round(change,4),
@@ -63,6 +70,7 @@ def find_candidates(rows):
                 "name":str(row.get("name") or "")[:120],
                 "classification":"UNVERIFIED_DISCOVERY_ONLY",
                 "quote_source_timestamp":None,
+                "quote_freshness_status":"UNVERIFIABLE_NO_SOURCE_TIMESTAMP",
                 "eligible_for_first_watch":False
             })
     found.sort(key=lambda x:(-x["reported_change_pct"],x["symbol"]))
@@ -100,6 +108,7 @@ def run(payload=None,at=None):
         "trading_enabled":False,
         "valid_first_watch_signals":0,
         "source_timestamp_verified":False,
+        "quote_freshness_status":"UNVERIFIABLE_NO_SOURCE_TIMESTAMP",
         "source_latency_verified":False,
         "run_retrieval_timestamp_is_not_a_quote_timestamp":True,
         "scan_status":"NO_DATA",
