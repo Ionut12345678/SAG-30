@@ -1,0 +1,35 @@
+name: SHADOW Lite T-plus read-only audit
+on:
+  schedule:
+    - cron: '35 7 * * 2-6'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  followup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Read persistent SHADOW state
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p tplus-out
+          gh api "repos/$GITHUB_REPOSITORY/contents/shadow_lite/state.json?ref=shadow-lite-state" --jq .content | base64 -d > tplus-out/state.json
+      - name: Collect read-only session highs
+        env:
+          ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+        run: python -m radar.shadow_tplus --state tplus-out/state.json --out tplus-out/outcomes.json
+      - name: Upload evidence even on failure
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: sag30-shadow-tplus-evidence
+          path: tplus-out/outcomes.json
+          if-no-files-found: warn
+          retention-days: 30
