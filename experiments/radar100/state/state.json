@@ -1,5 +1,5 @@
 {
-  "last_scanned_date": "2026-11-18",
+  "last_scanned_date": "2026-11-19",
   "runs": [
     {
       "new_signals": 6,
@@ -112,6 +112,13 @@
       "scanned_at_utc": "2026-11-18T21:25:04.915448+00:00",
       "session": "2026-11-18",
       "total_signals": 86
+    },
+    {
+      "new_signals": 4,
+      "run_id": "44619235044",
+      "scanned_at_utc": "2026-11-19T21:29:32.168009+00:00",
+      "session": "2026-11-19",
+      "total_signals": 90
     }
   ],
   "signals": [
@@ -1340,6 +1347,11 @@
           "gross_pct": -3.2553,
           "net_10bps_each_side_pct": -3.4486
         },
+        "10": {
+          "date": "2026-11-19",
+          "gross_pct": -1.3225,
+          "net_10bps_each_side_pct": -1.5196
+        },
         "5": {
           "date": "2026-11-12",
           "gross_pct": 0.2797,
@@ -1361,6 +1373,11 @@
           "date": "2026-11-06",
           "gross_pct": -1.6275,
           "net_10bps_each_side_pct": -1.824
+        },
+        "10": {
+          "date": "2026-11-19",
+          "gross_pct": 2.1326,
+          "net_10bps_each_side_pct": 1.9285
         },
         "5": {
           "date": "2026-11-12",
@@ -1384,6 +1401,11 @@
           "gross_pct": -2.6028,
           "net_10bps_each_side_pct": -2.7974
         },
+        "10": {
+          "date": "2026-11-19",
+          "gross_pct": 0.317,
+          "net_10bps_each_side_pct": 0.1166
+        },
         "5": {
           "date": "2026-11-12",
           "gross_pct": -1.3681,
@@ -1405,6 +1427,11 @@
           "date": "2026-11-06",
           "gross_pct": -2.6028,
           "net_10bps_each_side_pct": -2.7974
+        },
+        "10": {
+          "date": "2026-11-19",
+          "gross_pct": 0.317,
+          "net_10bps_each_side_pct": 0.1166
         },
         "5": {
           "date": "2026-11-12",
@@ -1428,6 +1455,11 @@
           "gross_pct": -6.7338,
           "net_10bps_each_side_pct": -6.9201
         },
+        "10": {
+          "date": "2026-11-19",
+          "gross_pct": -10.7127,
+          "net_10bps_each_side_pct": -10.8911
+        },
         "5": {
           "date": "2026-11-12",
           "gross_pct": -4.4111,
@@ -1449,6 +1481,11 @@
           "date": "2026-11-06",
           "gross_pct": -1.3101,
           "net_10bps_each_side_pct": -1.5073
+        },
+        "10": {
+          "date": "2026-11-19",
+          "gross_pct": -0.8768,
+          "net_10bps_each_side_pct": -1.0749
         },
         "5": {
           "date": "2026-11-12",
@@ -1472,6 +1509,11 @@
           "gross_pct": -1.3101,
           "net_10bps_each_side_pct": -1.5073
         },
+        "10": {
+          "date": "2026-11-19",
+          "gross_pct": -0.8768,
+          "net_10bps_each_side_pct": -1.0749
+        },
         "5": {
           "date": "2026-11-12",
           "gross_pct": 0.5158,
@@ -1493,6 +1535,11 @@
           "date": "2026-11-06",
           "gross_pct": -4.3843,
           "net_10bps_each_side_pct": -4.5753
+        },
+        "10": {
+          "date": "2026-11-19",
+          "gross_pct": -10.2065,
+          "net_10bps_each_side_pct": -10.3859
         },
         "5": {
           "date": "2026-11-12",
@@ -1516,6 +1563,11 @@
           "gross_pct": -4.4253,
           "net_10bps_each_side_pct": -4.6163
         },
+        "10": {
+          "date": "2026-11-19",
+          "gross_pct": -19.8642,
+          "net_10bps_each_side_pct": -20.0243
+        },
         "5": {
           "date": "2026-11-12",
           "gross_pct": -1.7628,
@@ -1538,6 +1590,11 @@
           "gross_pct": -4.4253,
           "net_10bps_each_side_pct": -4.6163
         },
+        "10": {
+          "date": "2026-11-19",
+          "gross_pct": -19.8642,
+          "net_10bps_each_side_pct": -20.0243
+        },
         "5": {
           "date": "2026-11-12",
           "gross_pct": -1.7628,
@@ -1559,6 +1616,11 @@
           "date": "2026-11-06",
           "gross_pct": -4.11,
           "net_10bps_each_side_pct": -4.3016
+        },
+        "10": {
+          "date": "2026-11-19",
+          "gross_pct": -3.7128,
+          "net_10bps_each_side_pct": -3.9051
         },
         "5": {
           "date": "2026-11-12",
@@ -2021,6 +2083,11 @@
           "date": "2026-11-13",
           "gross_pct": 0.9067,
           "net_10bps_each_side_pct": 0.7051
+        },
+        "5": {
+          "date": "2026-11-19",
+          "gross_pct": -0.2226,
+          "net_10bps_each_side_pct": -0.4219
         }
       },
       "signal_close": 1087.60998535,
@@ -2038,6 +2105,11 @@
           "date": "2026-11-13",
           "gross_pct": -0.4685,
           "net_10bps_each_side_pct": -0.6674
+        },
+        "5": {
+          "date": "2026-11-19",
+          "gross_pct": 0.6024,
+          "net_10bps_each_side_pct": 0.4014
         }
       },
       "signal_close": 119.65000153,
@@ -2055,6 +2127,11 @@
           "date": "2026-11-13",
           "gross_pct": 1.0178,
           "net_10bps_each_side_pct": 0.816
+        },
+        "5": {
+          "date": "2026-11-19",
+          "gross_pct": -2.1985,
+          "net_10bps_each_side_pct": -2.3939
         }
       },
       "signal_close": 97.56999969,
@@ -2072,6 +2149,11 @@
           "date": "2026-11-13",
           "gross_pct": 0.9991,
           "net_10bps_each_side_pct": 0.7973
+        },
+        "5": {
+          "date": "2026-11-19",
+          "gross_pct": -3.093,
+          "net_10bps_each_side_pct": -3.2866
         }
       },
       "signal_close": 390.83999634,
@@ -2089,6 +2171,11 @@
           "date": "2026-11-13",
           "gross_pct": 1.0173,
           "net_10bps_each_side_pct": 0.8155
+        },
+        "5": {
+          "date": "2026-11-19",
+          "gross_pct": -0.5994,
+          "net_10bps_each_side_pct": -0.798
         }
       },
       "signal_close": 125.66999817,
@@ -2098,12 +2185,78 @@
       "symbol": "WMT"
     },
     {
-      "entry_date": null,
-      "entry_open": null,
+      "entry_date": "2026-11-19",
+      "entry_open": 1089.0,
       "id": "f4f2ea0e05118638b6c9",
       "outcomes": {},
       "signal_close": 1096.61999512,
       "signal_date": "2026-11-18",
+      "status": "tracking",
+      "strategy": "momentum",
+      "symbol": "COST"
+    },
+    {
+      "entry_date": "2026-11-19",
+      "entry_open": 121.96499634,
+      "id": "181ca1a61571c8664780",
+      "outcomes": {},
+      "signal_close": 122.36000061,
+      "signal_date": "2026-11-18",
+      "status": "tracking",
+      "strategy": "momentum",
+      "symbol": "DIS"
+    },
+    {
+      "entry_date": "2026-11-19",
+      "entry_open": 121.96499634,
+      "id": "91cd946b9b44a2ee95a1",
+      "outcomes": {},
+      "signal_close": 122.36000061,
+      "signal_date": "2026-11-18",
+      "status": "tracking",
+      "strategy": "trend_volume",
+      "symbol": "DIS"
+    },
+    {
+      "entry_date": "2026-11-19",
+      "entry_open": 96.20999908,
+      "id": "f8c62c0c1f8cf140fbd5",
+      "outcomes": {},
+      "signal_close": 98.08999634,
+      "signal_date": "2026-11-18",
+      "status": "tracking",
+      "strategy": "momentum",
+      "symbol": "KO"
+    },
+    {
+      "entry_date": "2026-11-19",
+      "entry_open": 123.66000366,
+      "id": "c217383d8738ad033476",
+      "outcomes": {},
+      "signal_close": 127.36000061,
+      "signal_date": "2026-11-18",
+      "status": "tracking",
+      "strategy": "momentum",
+      "symbol": "WMT"
+    },
+    {
+      "entry_date": null,
+      "entry_open": null,
+      "id": "c1b734417453b2e5de75",
+      "outcomes": {},
+      "signal_close": 346.6499939,
+      "signal_date": "2026-11-19",
+      "status": "pending_next_open",
+      "strategy": "momentum",
+      "symbol": "AVGO"
+    },
+    {
+      "entry_date": null,
+      "entry_open": null,
+      "id": "fcdde586b75b02ae53bf",
+      "outcomes": {},
+      "signal_close": 1093.82995605,
+      "signal_date": "2026-11-19",
       "status": "pending_next_open",
       "strategy": "momentum",
       "symbol": "COST"
@@ -2111,10 +2264,10 @@
     {
       "entry_date": null,
       "entry_open": null,
-      "id": "181ca1a61571c8664780",
+      "id": "e6b0ba00310883187a22",
       "outcomes": {},
-      "signal_close": 122.36000061,
-      "signal_date": "2026-11-18",
+      "signal_close": 120.25,
+      "signal_date": "2026-11-19",
       "status": "pending_next_open",
       "strategy": "momentum",
       "symbol": "DIS"
@@ -2122,35 +2275,13 @@
     {
       "entry_date": null,
       "entry_open": null,
-      "id": "91cd946b9b44a2ee95a1",
+      "id": "dbee31c6f13347d627a3",
       "outcomes": {},
-      "signal_close": 122.36000061,
-      "signal_date": "2026-11-18",
+      "signal_close": 120.25,
+      "signal_date": "2026-11-19",
       "status": "pending_next_open",
       "strategy": "trend_volume",
       "symbol": "DIS"
-    },
-    {
-      "entry_date": null,
-      "entry_open": null,
-      "id": "f8c62c0c1f8cf140fbd5",
-      "outcomes": {},
-      "signal_close": 98.08999634,
-      "signal_date": "2026-11-18",
-      "status": "pending_next_open",
-      "strategy": "momentum",
-      "symbol": "KO"
-    },
-    {
-      "entry_date": null,
-      "entry_open": null,
-      "id": "c217383d8738ad033476",
-      "outcomes": {},
-      "signal_close": 127.36000061,
-      "signal_date": "2026-11-18",
-      "status": "pending_next_open",
-      "strategy": "momentum",
-      "symbol": "WMT"
     }
   ],
   "version": 1
